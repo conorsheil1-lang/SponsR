@@ -1,0 +1,70 @@
+﻿@if (isLoginPage()) {
+  <router-outlet></router-outlet>
+} @else {
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-wrap">
+        <div class="brand-mark">S</div>
+        <div>
+          <p class="brand-label">Marketplace</p>
+          <h1>{{ title() }}</h1>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Overview</a>
+        <a routerLink="/portals" routerLinkActive="active">Portals</a>
+        <a routerLink="/creator" routerLinkActive="active">Creator Portal</a>
+        <a routerLink="/company" routerLinkActive="active">Company Portal</a>
+        <a routerLink="/discovery" routerLinkActive="active">Discovery</a>
+        <a routerLink="/media-kit" routerLinkActive="active">Media Kit</a>
+        <a routerLink="/campaigns" routerLinkActive="active">Campaigns</a>
+        <a routerLink="/messaging" routerLinkActive="active">Messaging</a>
+        <a routerLink="/payments" routerLinkActive="active">Payments</a>
+      </nav>
+
+      <div class="user-card">
+        <div class="user-avatar">N</div>
+        <div>
+          <strong>Nora Webb</strong>
+          <span>Brand partner</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Overview</p>
+          <h2>Creator & sponsor marketplace</h2>
+        </div>
+        <button class="header-action" type="button">New campaign</button>
+      </header>
+
+      <section class="overview-grid">
+        <article class="tile highlight">
+          <span>Total pipeline</span>
+          <strong>$482K</strong>
+          <small>Across 32 active deals</small>
+        </article>
+        <article class="tile">
+          <span>Content creators</span>
+          <strong>4,280</strong>
+          <small>Verified + live</small>
+        </article>
+        <article class="tile">
+          <span>Brand requests</span>
+          <strong>192</strong>
+          <small>Open briefs</small>
+        </article>
+        <article class="tile">
+          <span>Escrow health</span>
+          <strong>98.4%</strong>
+          <small>Settlement success</small>
+        </article>
+      </section>
+
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+}
