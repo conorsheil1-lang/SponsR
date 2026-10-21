@@ -11,10 +11,12 @@ import { PortalSelectionComponent } from './features/portal-selection/portal-sel
 import { LoginComponent } from './features/login/login';
 import { LandingComponent } from './features/landing/landing';
 import { requireAccountType, requireSession } from './core/session.guard';
+import { SignupComponent } from './features/signup/signup';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent, pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
+  { path: 'signup', component: SignupComponent },
   { path: 'overview', component: OverviewComponent, canActivate: [requireSession] },
   { path: 'portals', component: PortalSelectionComponent, canActivate: [requireSession] },
   { path: 'creator', component: CreatorPortalComponent, canActivate: [requireAccountType('creator')] },

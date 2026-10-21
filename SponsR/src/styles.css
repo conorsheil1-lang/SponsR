@@ -274,48 +274,63 @@ app-root .app-shell .main-panel app-media-kit .status {
   color: #527638;
 }
 
-.site-header ~ app-login .auth-screen {
+.site-header ~ :is(app-login, app-signup) .auth-screen {
   background: radial-gradient(circle at top, rgba(201, 225, 167, 0.42), transparent 42%), #f5f6f1;
 }
 
-.site-header ~ app-login .auth-card {
+.site-header ~ :is(app-login, app-signup) .auth-card {
   border-color: #e6e9e1;
   background: #fff;
   box-shadow: 0 20px 60px rgba(48, 65, 43, 0.1);
   color: #25372a;
 }
 
-.site-header ~ app-login :is(.brand-row, h1, label) {
+.site-header ~ :is(app-login, app-signup) :is(.brand-row, h1, label) {
   color: #25372a;
 }
 
-.site-header ~ app-login .brand-mark {
+.site-header ~ :is(app-login, app-signup) .brand-mark {
   background: #c8f169;
   color: #1f3b28;
 }
 
-.site-header ~ app-login .eyebrow {
+.site-header ~ :is(app-login, app-signup) .eyebrow {
   color: #6b8e45;
 }
 
-.site-header ~ app-login :is(.account-picker button, input, .demo-box) {
+.site-header ~ :is(app-login, app-signup) :is(.account-picker button, input, .demo-box) {
   border-color: #e6e9e1;
   background: #f8f9f6;
   color: #39483b;
 }
 
-.site-header ~ app-login .account-picker .active {
-  border-color: #a6c77d;
-  background: #edf3e4;
-  color: #35522f;
+.site-header ~ :is(app-login, app-signup) .account-picker button {
+  border-color: #dce4d6;
+  background: #f2f5ee;
+  color: #39483b;
 }
 
-.site-header ~ app-login .submit-button {
+.site-header ~ :is(app-login, app-signup) .account-picker button.active {
+  border-color: #193b2a;
+  background: #193b2a;
+  color: #fff;
+}
+
+.site-header ~ :is(app-login, app-signup) .account-picker button:focus-visible {
+  outline: 3px solid rgba(104, 143, 70, 0.35);
+  outline-offset: 2px;
+}
+
+.site-header ~ :is(app-login, app-signup) .submit-button {
   background: #193b2a;
 }
 
-.site-header ~ app-login :is(.helper-text, .demo-box span) {
+.site-header ~ :is(app-login, app-signup) :is(.helper-text, .demo-box span, .prototype-note, .switch-auth) {
   color: #748078;
+}
+
+.site-header ~ :is(app-login, app-signup) .switch-auth a {
+  color: #426836;
 }
 
 @media (max-width: 560px) {

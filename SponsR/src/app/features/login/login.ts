@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AccountType, SessionService } from '../../core/session.service';
 
 type MockUser = {
@@ -18,7 +18,7 @@ const MOCK_USERS: MockUser[] = [
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   template: `
     <main class="auth-screen">
       <section class="auth-card">
@@ -78,6 +78,7 @@ const MOCK_USERS: MockUser[] = [
         <p class="helper-text">
           {{ selectedType() === 'creator' ? 'Creators can browse campaigns, register interest, and manage their media kit.' : 'Companies can discover sponsorship candidates and start new campaigns.' }}
         </p>
+        <p class="switch-auth">New to SponsR? <a routerLink="/signup">Create an account</a></p>
       </section>
     </main>
   `,
@@ -148,8 +149,8 @@ const MOCK_USERS: MockUser[] = [
 
       .account-picker button {
         border: 1px solid rgba(148, 163, 184, 0.18);
-        background: rgba(148, 163, 184, 0.06);
-        color: #dfe7ff;
+        background: #f2f5ee;
+        color: #44523f;
         border-radius: 12px;
         padding: 0.8rem 0.9rem;
         cursor: pointer;
@@ -157,8 +158,21 @@ const MOCK_USERS: MockUser[] = [
       }
 
       .account-picker .active {
-        background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(34, 211, 238, 0.2));
-        border-color: rgba(124, 58, 237, 0.65);
+        background: #193b2a;
+        border-color: #193b2a;
+        color: #fff;
+      }
+
+      .switch-auth {
+        margin: 1rem 0 0;
+        color: #748078;
+        font-size: 0.85rem;
+        text-align: center;
+      }
+
+      .switch-auth a {
+        color: #426836;
+        font-weight: 650;
       }
 
       .login-form {

@@ -72,4 +72,17 @@ describe('App', () => {
     expect(compiled.querySelector('.nav')?.textContent).toContain('Company Portal');
     expect(compiled.querySelector('.nav')?.textContent).not.toContain('Media Kit');
   });
+
+  it('keeps sign-up public and links it from the shared header', async () => {
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/signup');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('app-signup')).toBeTruthy();
+    expect(compiled.querySelector('.sidebar')).toBeNull();
+    expect(compiled.querySelector('.site-actions a[routerlink="/signup"]')?.textContent).toContain('Sign up');
+  });
 });
