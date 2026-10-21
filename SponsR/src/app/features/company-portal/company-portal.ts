@@ -28,20 +28,26 @@ import { DialogService } from '../../core/dialog.service';
 
       <div class="content-grid">
         <article class="panel-card">
-          <h3>Potential sponsorship matches</h3>
+          <div class="panel-heading">
+            <h3>Potential sponsorship matches</h3>
+            <button type="button" class="show-more-button" (click)="viewCreatorMatches()">View all</button>
+          </div>
           <ul>
-            <li><strong>Nova Frame</strong><span>Tech creator • 240K reach</span></li>
-            <li><strong>Rift Rush</strong><span>Gaming creator • 420K reach</span></li>
-            <li><strong>Cora Content</strong><span>Finance creator • 180K reach</span></li>
+            @for (creator of creatorMatches().slice(0, 3); track creator.name) {
+              <li><strong>{{ creator.name }}</strong><span>{{ creator.meta }}</span></li>
+            }
           </ul>
         </article>
 
         <article class="panel-card">
-          <h3>Active campaigns</h3>
+          <div class="panel-heading">
+            <h3>Active campaigns</h3>
+            <button type="button" class="show-more-button" (click)="viewActiveCampaigns()">View all</button>
+          </div>
           <ul>
-            <li><strong>Northstar Labs</strong><span>Escrow funded</span></li>
-            <li><strong>Velora Health</strong><span>Draft in review</span></li>
-            <li><strong>SparkPilot</strong><span>Waiting for brief approval</span></li>
+            @for (campaign of activeCampaigns().slice(0, 3); track campaign.name) {
+              <li><strong>{{ campaign.name }}</strong><span>{{ campaign.status }}</span></li>
+            }
           </ul>
         </article>
 
@@ -72,8 +78,8 @@ import { DialogService } from '../../core/dialog.service';
       .portal-banner {
         grid-template-columns: 1fr auto;
         align-items: center;
-        background: rgba(15, 23, 42, 0.72);
-        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: #e9eedf;
+        border: 1px solid #e0e7d6;
         border-radius: 22px;
         padding: 1.2rem 1.3rem;
       }
@@ -113,10 +119,11 @@ import { DialogService } from '../../core/dialog.service';
       }
       .stat-card,
       .panel-card {
-        background: rgba(15, 23, 42, 0.7);
-        border: 1px solid rgba(148, 163, 184, 0.18);
-        border-radius: 20px;
+        background: #fff;
+        border: 1px solid #e6e9e1;
+        border-radius: 18px;
         padding: 1rem 1.1rem;
+        box-shadow: 0 8px 24px rgba(48, 65, 43, 0.035);
       }
       .stat-card {
         display: flex;
@@ -126,10 +133,22 @@ import { DialogService } from '../../core/dialog.service';
       .stat-card span,
       .panel-card li span,
       .panel-card li {
-        color: #9fb0d4;
+        color: #748078;
       }
       .stat-card strong {
+        color: #26382b;
         font-size: 2rem;
+      }
+      .panel-card h3 {
+        color: #26382b;
+        font-size: 1rem;
+      }
+      .panel-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.9rem;
       }
       .content-grid {
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -149,18 +168,48 @@ import { DialogService } from '../../core/dialog.service';
         display: flex;
         justify-content: space-between;
         gap: 1rem;
-        background: rgba(15, 23, 42, 0.55);
-        border-radius: 14px;
+        border: 1px solid #e9ede4;
+        background: #f8f9f6;
+        border-radius: 12px;
         padding: 0.8rem 0.9rem;
       }
       .panel-card li strong {
-        color: #e2ecff;
+        color: #26382b;
+      }
+      .show-more-button {
+        margin-top: 0.8rem;
+        padding: 0.35rem 0;
+        border: 0;
+        background: transparent;
+        color: #557842;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.76rem;
+        font-weight: 700;
+      }
+      .show-more-button:hover {
+        color: #294432;
+        text-decoration: underline;
       }
     `
   ]
 })
 export class CompanyPortalComponent {
   private readonly dialogs = inject(DialogService);
+  readonly creatorMatches = signal([
+    { name: 'Nova Frame', meta: 'Tech creator · 240K reach' },
+    { name: 'Rift Rush', meta: 'Gaming creator · 420K reach' },
+    { name: 'Cora Content', meta: 'Finance creator · 180K reach' },
+    { name: 'Maya Patel', meta: 'Interiors creator · 327K reach' },
+    { name: 'Amara Jones', meta: 'Fitness creator · 183K reach' }
+  ]);
+  readonly activeCampaigns = signal([
+    { name: 'Northstar Labs', status: 'Escrow funded' },
+    { name: 'Velora Health', status: 'Draft in review' },
+    { name: 'SparkPilot', status: 'Waiting for brief approval' },
+    { name: 'Morrow', status: 'Creator applications open' },
+    { name: 'Trailhead Supply', status: 'Shortlist ready to review' }
+  ]);
   readonly stats = signal([
     { label: 'Campaigns', value: '14' },
     { label: 'Creators shortlisted', value: '27' },
@@ -174,5 +223,23 @@ export class CompanyPortalComponent {
 
   createCampaign(): void {
     this.dialogs.openCreateCampaign();
+  }
+
+  viewCreatorMatches(): void {
+    this.dialogs.openList(
+      'Potential sponsorship matches',
+      'Creators whose audience and content may fit your upcoming campaigns.',
+      this.creatorMatches().map((creator) => ({ title: creator.name, subtitle: creator.meta })),
+      'CREATOR DISCOVERY'
+    );
+  }
+
+  viewActiveCampaigns(): void {
+    this.dialogs.openList(
+      'Active campaigns',
+      'Review your current campaign activity and status.',
+      this.activeCampaigns().map((campaign) => ({ title: campaign.name, subtitle: campaign.status })),
+      'COMPANY WORKSPACE'
+    );
   }
 }

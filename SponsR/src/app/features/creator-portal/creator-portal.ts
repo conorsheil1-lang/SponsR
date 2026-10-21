@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DialogService } from '../../core/dialog.service';
 import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
 
 @Component({
@@ -27,20 +28,26 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
 
       <div class="content-grid">
         <article class="panel-card">
-          <h3>Campaigns matching your profile</h3>
+          <div class="panel-heading">
+            <h3>Campaigns matching your profile</h3>
+            <button type="button" class="show-more-button" (click)="viewCampaignMatches()">View all</button>
+          </div>
           <ul>
-            <li><strong>Northstar Labs</strong><span>Beauty creator • $12.5K</span></li>
-            <li><strong>Velora Health</strong><span>Wellness brand • $7.9K</span></li>
-            <li><strong>SparkPilot</strong><span>UGC product launch • $9.2K</span></li>
+            @for (match of matchingCampaigns().slice(0, 3); track match.name) {
+              <li><strong>{{ match.name }}</strong><span>{{ match.meta }}</span></li>
+            }
           </ul>
         </article>
 
         <article class="panel-card">
-          <h3>Profile & social links</h3>
+          <div class="panel-heading">
+            <h3>Profile & social links</h3>
+            <button type="button" class="show-more-button" (click)="viewSocialLinks()">View all</button>
+          </div>
           <ul>
-            <li><strong>Instagram</strong><span>@maria.content</span></li>
-            <li><strong>YouTube</strong><span>220K subscribers</span></li>
-            <li><strong>TikTok</strong><span>93K followers</span></li>
+            @for (link of socialLinks().slice(0, 3); track link.platform) {
+              <li><strong>{{ link.platform }}</strong><span>{{ link.handle }}</span></li>
+            }
           </ul>
         </article>
 
@@ -64,7 +71,7 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
           @if (selectedInterestType() === 'campaigns') {
             @if (registeredCampaigns().length) {
               <ul>
-                @for (campaign of registeredCampaigns(); track campaign.id) {
+                @for (campaign of registeredCampaigns().slice(0, 3); track campaign.id) {
                   <li>
                     <div class="registered-item">
                       <strong>{{ campaign.title }}</strong>
@@ -74,13 +81,14 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
                   </li>
                 }
               </ul>
+              <button type="button" class="show-more-button" (click)="viewRegisteredCampaigns()">View all campaigns</button>
             } @else {
               <p class="interest-empty">No campaign registrations yet. Explore open campaigns to find a good fit.</p>
             }
           } @else {
             @if (registeredJobs().length) {
               <ul>
-                @for (job of registeredJobs(); track job.id) {
+                @for (job of registeredJobs().slice(0, 3); track job.id) {
                   <li>
                     <div class="registered-item">
                       <strong>{{ job.title }}</strong>
@@ -90,6 +98,7 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
                   </li>
                 }
               </ul>
+              <button type="button" class="show-more-button" (click)="viewRegisteredJobs()">View all jobs</button>
             } @else {
               <p class="interest-empty">No job registrations yet. Explore open jobs to find your next opportunity.</p>
             }
@@ -106,7 +115,7 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
           </div>
           @if (registeredBrands().length) {
             <ul>
-              @for (brand of registeredBrands(); track brand.id) {
+              @for (brand of registeredBrands().slice(0, 3); track brand.id) {
                 <li>
                   <div class="registered-item">
                     <strong>{{ brand.name }}</strong>
@@ -116,6 +125,7 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
                 </li>
               }
             </ul>
+            <button type="button" class="show-more-button" (click)="viewRegisteredBrands()">View all brands</button>
           } @else {
             <p class="interest-empty">No brands saved yet. Explore popular brands to let them know you’re interested.</p>
           }
@@ -139,8 +149,8 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
       .portal-banner {
         grid-template-columns: 1fr auto;
         align-items: center;
-        background: rgba(15, 23, 42, 0.72);
-        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: #e9eedf;
+        border: 1px solid #e0e7d6;
         border-radius: 22px;
         padding: 1.2rem 1.3rem;
       }
@@ -167,10 +177,11 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
       }
       .stat-card,
       .panel-card {
-        background: rgba(15, 23, 42, 0.7);
-        border: 1px solid rgba(148, 163, 184, 0.18);
-        border-radius: 20px;
+        background: #fff;
+        border: 1px solid #e6e9e1;
+        border-radius: 18px;
         padding: 1rem 1.1rem;
+        box-shadow: 0 8px 24px rgba(48, 65, 43, 0.035);
       }
       .stat-card {
         display: flex;
@@ -180,10 +191,22 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
       .stat-card span,
       .panel-card li span,
       .panel-card li {
-        color: #9fb0d4;
+        color: #748078;
       }
       .stat-card strong {
+        color: #26382b;
         font-size: 2rem;
+      }
+      .panel-card h3 {
+        color: #26382b;
+        font-size: 1rem;
+      }
+      .panel-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.9rem;
       }
       .content-grid {
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -203,12 +226,28 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
         display: flex;
         justify-content: space-between;
         gap: 1rem;
-        background: rgba(15, 23, 42, 0.55);
-        border-radius: 14px;
+        border: 1px solid #e9ede4;
+        background: #f8f9f6;
+        border-radius: 12px;
         padding: 0.8rem 0.9rem;
       }
       .panel-card li strong {
-        color: #e2ecff;
+        color: #26382b;
+      }
+      .show-more-button {
+        margin-top: 0.8rem;
+        padding: 0.35rem 0;
+        border: 0;
+        background: transparent;
+        color: #557842;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.76rem;
+        font-weight: 700;
+      }
+      .show-more-button:hover {
+        color: #294432;
+        text-decoration: underline;
       }
       .registered-heading,
       .interest-toggle,
@@ -224,15 +263,16 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
       .registered-heading p,
       .interest-empty {
         margin: 0.4rem 0 0;
-        color: #9fb0d4;
+        color: #748078;
         font-size: 0.8rem;
       }
       .interest-toggle {
         flex: 0 0 auto;
         gap: 0.25rem;
         padding: 0.25rem;
-        border: 1px solid rgba(148, 163, 184, 0.2);
+        border: 1px solid #e6e9e1;
         border-radius: 999px;
+        background: #f8f9f6;
       }
       .interest-toggle button,
       .withdraw-button {
@@ -246,7 +286,7 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
         font-size: 0.72rem;
       }
       .interest-toggle button.active {
-        background: rgba(124, 58, 237, 0.24);
+        background: #193b2a;
         color: #fff;
       }
       .interest-toggle button span {
@@ -257,8 +297,8 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
         flex: 0 0 auto;
         padding: 0.45rem 0.7rem;
         border-radius: 999px;
-        background: rgba(124, 58, 237, 0.16);
-        color: #c4b5fd;
+        background: #edf3e4;
+        color: #486a36;
         font-size: 0.72rem;
         font-weight: 650;
       }
@@ -275,16 +315,17 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
         gap: 0.25rem;
       }
       .registered-item span {
-        color: #9fb0d4;
+        color: #748078;
         font-size: 0.76rem;
       }
       .withdraw-button {
         flex: 0 0 auto;
-        border: 1px solid rgba(148, 163, 184, 0.2);
+        border: 1px solid #e6e9e1;
+        color: #557842;
       }
       .withdraw-button:hover {
-        border-color: rgba(248, 113, 113, 0.6);
-        color: #fecaca;
+        border-color: #d7aaa3;
+        color: #9c493c;
       }
       @media (max-width: 620px) {
         .registered-heading {
@@ -296,8 +337,23 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
   ]
 })
 export class CreatorPortalComponent {
+  private readonly dialogs = inject(DialogService);
   private readonly workspace = inject(MarketplaceWorkspaceService);
   readonly selectedInterestType = signal<'campaigns' | 'jobs'>('campaigns');
+  readonly matchingCampaigns = signal([
+    { name: 'Northstar Labs', meta: 'Beauty creator · $12.5K' },
+    { name: 'Velora Health', meta: 'Wellness brand · $7.9K' },
+    { name: 'SparkPilot', meta: 'UGC product launch · $9.2K' },
+    { name: 'Morrow', meta: 'Wellness stories · $4.2K' },
+    { name: 'Trailhead Supply', meta: 'Outdoor creator series · $6.8K' }
+  ]);
+  readonly socialLinks = signal([
+    { platform: 'Instagram', handle: '@maria.content' },
+    { platform: 'YouTube', handle: '220K subscribers' },
+    { platform: 'TikTok', handle: '93K followers' },
+    { platform: 'Pinterest', handle: '18K monthly viewers' },
+    { platform: 'Newsletter', handle: '12K subscribers' }
+  ]);
   readonly registeredCampaigns = computed(() => this.workspace.getRegisteredCampaigns());
   readonly registeredJobs = computed(() => this.workspace.getRegisteredJobs());
   readonly registeredBrands = computed(() => this.workspace.getRegisteredBrands());
@@ -319,5 +375,61 @@ export class CreatorPortalComponent {
 
   withdrawBrandInterest(brandId: string): void {
     this.workspace.toggleBrandInterest(brandId);
+  }
+
+  viewCampaignMatches(): void {
+    this.dialogs.openList(
+      'Campaigns matching your profile',
+      'Explore these partnership opportunities matched to your creator profile.',
+      this.matchingCampaigns().map((match) => ({ title: match.name, subtitle: match.meta })),
+      'RECOMMENDED CAMPAIGNS'
+    );
+  }
+
+  viewSocialLinks(): void {
+    this.dialogs.openList(
+      'Profile & social links',
+      'Your connected channels and audience reach.',
+      this.socialLinks().map((link) => ({ title: link.platform, subtitle: link.handle })),
+      'CREATOR PROFILE'
+    );
+  }
+
+  viewRegisteredCampaigns(): void {
+    this.dialogs.openList(
+      'Registered campaign interest',
+      'Campaigns you have registered interest in.',
+      this.registeredCampaigns().map((campaign) => ({
+        title: campaign.title,
+        subtitle: `${campaign.companyName} · ${campaign.category}`
+      })),
+      'YOUR INTEREST'
+    );
+  }
+
+  viewRegisteredJobs(): void {
+    this.dialogs.openList(
+      'Registered job interest',
+      'Jobs you have registered interest in.',
+      this.registeredJobs().map((job) => ({
+        title: job.title,
+        subtitle: `${job.companyName} · ${job.category}`,
+        meta: `Interest deadline ${job.interestDeadline}`
+      })),
+      'YOUR INTEREST'
+    );
+  }
+
+  viewRegisteredBrands(): void {
+    this.dialogs.openList(
+      'Brands you’re interested in',
+      'Brands you would like to work with.',
+      this.registeredBrands().map((brand) => ({
+        title: brand.name,
+        subtitle: brand.category,
+        meta: `${brand.activeCampaigns} open campaigns`
+      })),
+      'YOUR INTEREST'
+    );
   }
 }

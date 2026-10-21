@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { DialogService } from '../../core/dialog.service';
 import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
 import { CreatorPortalComponent } from './creator-portal';
 
@@ -53,5 +54,33 @@ describe('CreatorPortalComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No brands saved yet');
     expect(workspace.isInterestedInBrand('brand-morrow')).toBe(false);
+  });
+
+  it('opens full profile and campaign matching lists in dialogs without expanding the cards', () => {
+    const fixture = TestBed.createComponent(CreatorPortalComponent);
+    const dialogs = TestBed.inject(DialogService);
+    fixture.detectChanges();
+    const cards = fixture.nativeElement.querySelectorAll('.content-grid > .panel-card');
+    const matchesCard = cards[0] as HTMLElement;
+    const linksCard = cards[1] as HTMLElement;
+
+    expect(matchesCard.querySelectorAll('li')).toHaveLength(3);
+    (matchesCard.querySelector('.show-more-button') as HTMLButtonElement).click();
+    const campaignDialog = dialogs.activeDialog();
+    expect(campaignDialog?.kind).toBe('list');
+    if (campaignDialog?.kind !== 'list') {
+      throw new Error('Expected campaign matches list dialog.');
+    }
+    expect(campaignDialog.items).toHaveLength(5);
+    expect(matchesCard.querySelectorAll('li')).toHaveLength(3);
+
+    expect(linksCard.querySelectorAll('li')).toHaveLength(3);
+    (linksCard.querySelector('.show-more-button') as HTMLButtonElement).click();
+    const linksDialog = dialogs.activeDialog();
+    if (linksDialog?.kind !== 'list') {
+      throw new Error('Expected social links list dialog.');
+    }
+    expect(linksDialog.items).toHaveLength(5);
+    expect(linksCard.querySelectorAll('li')).toHaveLength(3);
   });
 });
