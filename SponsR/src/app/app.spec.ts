@@ -41,15 +41,19 @@ describe('App', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
+    const discoverSection = compiled.querySelector('#discover');
     const creatorFeatures = compiled.querySelector('#creators');
     const brandFeatures = compiled.querySelector('#brands');
+    expect(discoverSection).toBeTruthy();
+    expect(creatorFeatures?.querySelector('.product-preview')).toBeTruthy();
+    expect(brandFeatures?.querySelector('.product-preview')).toBeTruthy();
     expect(creatorFeatures?.textContent).toContain('Media kit');
-    expect(creatorFeatures?.textContent).toContain('Partnership pipeline');
-    expect(creatorFeatures?.textContent).toContain('register interest in campaigns or individual jobs');
-    expect(brandFeatures?.textContent).toContain('Campaigns set the direction');
-    expect(brandFeatures?.textContent).toContain('Jobs define the work');
-    expect(brandFeatures?.textContent).toContain('Shortlist, then propose');
-    expect(brandFeatures?.textContent).toContain('One simple workflow');
+    expect(creatorFeatures?.textContent).toContain('engagement rate');
+    expect(creatorFeatures?.textContent).toContain('Follow proposals from review to acceptance');
+    expect(brandFeatures?.textContent).toContain('Campaigns keep your strategy organized');
+    expect(brandFeatures?.textContent).toContain('Jobs make each creator assignment clear');
+    expect(brandFeatures?.textContent).toContain('Review & shortlist');
+    expect(brandFeatures?.textContent).toContain('Send a proposal');
   });
 
   it('navigates the signed-out creator and brand links to their landing sections', async () => {
