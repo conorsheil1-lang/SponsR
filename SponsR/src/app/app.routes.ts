@@ -10,18 +10,19 @@ import { OverviewComponent } from './features/overview/overview';
 import { PortalSelectionComponent } from './features/portal-selection/portal-selection';
 import { LoginComponent } from './features/login/login';
 import { LandingComponent } from './features/landing/landing';
+import { requireAccountType, requireSession } from './core/session.guard';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent, pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
-  { path: 'overview', component: OverviewComponent },
-  { path: 'portals', component: PortalSelectionComponent },
-  { path: 'creator', component: CreatorPortalComponent },
-  { path: 'company', component: CompanyPortalComponent },
+  { path: 'overview', component: OverviewComponent, canActivate: [requireSession] },
+  { path: 'portals', component: PortalSelectionComponent, canActivate: [requireSession] },
+  { path: 'creator', component: CreatorPortalComponent, canActivate: [requireAccountType('creator')] },
+  { path: 'company', component: CompanyPortalComponent, canActivate: [requireAccountType('company')] },
   { path: 'discovery', component: DiscoveryComponent },
-  { path: 'media-kit', component: MediaKitComponent },
-  { path: 'campaigns', component: CampaignsComponent },
-  { path: 'messaging', component: MessagingComponent },
-  { path: 'payments', component: PaymentsComponent },
+  { path: 'media-kit', component: MediaKitComponent, canActivate: [requireAccountType('creator')] },
+  { path: 'campaigns', component: CampaignsComponent, canActivate: [requireSession] },
+  { path: 'messaging', component: MessagingComponent, canActivate: [requireSession] },
+  { path: 'payments', component: PaymentsComponent, canActivate: [requireSession] },
   { path: '**', redirectTo: '' }
 ];

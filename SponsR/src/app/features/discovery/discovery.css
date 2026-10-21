@@ -1,0 +1,475 @@
+.discover-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2.6rem;
+}
+
+.discover-heading,
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.discover-heading {
+  align-items: center;
+  padding: 0.6rem 0 0.2rem;
+}
+
+.discover-heading h2 {
+  margin: 0.55rem 0 0;
+  color: #1b2a20;
+  font-size: clamp(2rem, 3vw, 2.9rem);
+  font-weight: 550;
+  letter-spacing: -0.065em;
+}
+
+.discover-heading h2 span {
+  color: #77964f;
+}
+
+.eyebrow {
+  margin: 0 0 0.4rem;
+  color: #748274;
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+}
+
+.intro-copy,
+.section-description {
+  margin: 0.55rem 0 0;
+  color: #768078;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.search-box {
+  width: min(310px, 100%);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #e3e8dd;
+  border-radius: 12px;
+  background: #fff;
+  color: #7d897b;
+}
+
+.search-box > span {
+  font-size: 1.15rem;
+}
+
+.search-box input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #29372d;
+  font: inherit;
+  font-size: 0.74rem;
+}
+
+.search-box input::placeholder {
+  color: #9ba398;
+}
+
+.discovery-section {
+  min-width: 0;
+}
+
+.section-heading {
+  margin-bottom: 1rem;
+}
+
+.section-heading h3 {
+  margin: 0;
+  color: #243328;
+  font-size: 1.45rem;
+  font-weight: 570;
+  letter-spacing: -0.05em;
+}
+
+.hot-mark {
+  color: #8ba960;
+  font-size: 1.05rem;
+  vertical-align: 0.12em;
+}
+
+.section-description {
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+}
+
+.carousel-controls {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.45rem;
+}
+
+.carousel-controls button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e1e6dc;
+  border-radius: 50%;
+  background: #fff;
+  color: #48613e;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.carousel-controls button:hover {
+  border-color: #c4d6ad;
+  background: #edf3e4;
+}
+
+.carousel {
+  display: grid;
+  grid-auto-columns: minmax(260px, calc((100% - 32px) / 3));
+  grid-auto-flow: column;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 2px 2px 0.7rem;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: #d4ddc9 transparent;
+  scrollbar-width: thin;
+}
+
+.discovery-card {
+  min-width: 0;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid #e6e9e1;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(48, 65, 43, 0.035);
+  scroll-snap-align: start;
+}
+
+.card-topline,
+.profile-row,
+.brand-card-top,
+.campaign-footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.niche-tag,
+.trend-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: #f0f3eb;
+  color: #667a56;
+  font-size: 0.57rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.trend-tag {
+  background: #f4f7ef;
+  color: #75944f;
+  font-size: 0.55rem;
+}
+
+.profile-row {
+  justify-content: flex-start;
+  margin-top: 1rem;
+}
+
+.profile-avatar,
+.brand-avatar {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  flex: 0 0 43px;
+  place-items: center;
+  border-radius: 14px;
+  color: #354636;
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.profile-avatar { border-radius: 50%; }
+.sage { background: #e4edcf; }
+.sky { background: #deebee; }
+.peach { background: #f4e5da; color: #8b654a; }
+.lilac { background: #ebe4f1; color: #69567c; }
+.rose { background: #f2e1e2; color: #855b63; }
+
+.profile-name {
+  min-width: 0;
+}
+
+.profile-name h4,
+.discovery-card > h4 {
+  margin: 0;
+  color: #29382d;
+  font-size: 0.87rem;
+  font-weight: 680;
+  letter-spacing: -0.025em;
+}
+
+.profile-name > span,
+.brand-handle {
+  display: block;
+  margin-top: 0.2rem;
+  color: #90998e;
+  font-size: 0.63rem;
+}
+
+.verified {
+  display: inline-grid;
+  width: 14px;
+  height: 14px;
+  place-items: center;
+  border-radius: 50%;
+  background: #e8f1df;
+  color: #648a43;
+  font-size: 0.55rem;
+  vertical-align: 0.1em;
+}
+
+.card-description {
+  margin: 0.8rem 0 0;
+  color: #778177;
+  font-size: 0.67rem;
+  line-height: 1.55;
+}
+
+.channel-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+}
+
+.channel-tags span {
+  padding: 0.25rem 0.45rem;
+  border: 1px solid #edf0e9;
+  border-radius: 6px;
+  color: #758075;
+  font-size: 0.53rem;
+}
+
+.card-stats,
+.brand-stats {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.85rem;
+}
+
+.card-stats > div,
+.brand-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.card-stats strong,
+.brand-stats strong {
+  color: #344535;
+  font-size: 0.77rem;
+  font-weight: 700;
+}
+
+.card-stats span,
+.brand-stats span {
+  color: #929b90;
+  font-size: 0.52rem;
+}
+
+.campaign-card {
+  min-height: 300px;
+}
+
+.campaign-art {
+  position: relative;
+  width: 100%;
+  min-height: 87px;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  overflow: hidden;
+  margin-bottom: 0.8rem;
+  padding: 0.75rem;
+  border-radius: 11px;
+  background: #e4edcf;
+}
+
+.campaign-art > span,
+.campaign-art > strong {
+  position: relative;
+  z-index: 1;
+  color: #40513a;
+}
+
+.campaign-art > span {
+  font-size: 0.54rem;
+}
+
+.campaign-art > strong {
+  margin-top: 0.12rem;
+  font-family: Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.campaign-art > i {
+  position: absolute;
+  top: -22px;
+  right: 12px;
+  color: rgba(82, 112, 62, 0.17);
+  font-size: 7rem;
+  font-style: normal;
+  line-height: 1;
+}
+
+.campaign-card > h4 {
+  margin-top: 0.7rem;
+}
+
+.brand-byline {
+  margin: 0.25rem 0 0;
+  color: #90998e;
+  font-size: 0.59rem;
+}
+
+.brand-byline strong {
+  color: #667a56;
+  font-weight: 650;
+}
+
+.campaign-card .card-description {
+  margin-top: 0.55rem;
+}
+
+.campaign-footer {
+  align-items: end;
+  margin-top: auto;
+  padding-top: 0.7rem;
+}
+
+.campaign-footer > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.campaign-footer > div > span {
+  color: #90998e;
+  font-size: 0.49rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.campaign-footer > div > strong {
+  color: #3e5c36;
+  font-size: 0.79rem;
+}
+
+.applicant-count {
+  color: #8b9588;
+  font-size: 0.56rem;
+}
+
+.brand-card {
+  min-height: 252px;
+}
+
+.brand-card-top {
+  margin-bottom: 0.9rem;
+}
+
+.brand-avatar {
+  border-radius: 12px;
+  font-family: Georgia, serif;
+  font-size: 1rem;
+}
+
+.brand-card > h4 {
+  margin-top: 0.65rem;
+}
+
+.brand-handle {
+  margin-top: 0.2rem;
+}
+
+.brand-card .card-description {
+  margin-top: 0.55rem;
+}
+
+.brand-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: auto;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 1.25rem;
+  border: 1px dashed #dfe5d8;
+  border-radius: 12px;
+  color: #778177;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  .carousel {
+    grid-auto-columns: minmax(260px, calc((100% - 16px) / 2));
+  }
+}
+
+@media (max-width: 620px) {
+  .discover-page {
+    gap: 2rem;
+  }
+
+  .discover-heading,
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .discover-heading {
+    gap: 1rem;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .section-heading {
+    position: relative;
+    padding-right: 5rem;
+  }
+
+  .carousel-controls {
+    position: absolute;
+    top: 0.1rem;
+    right: 0;
+  }
+
+  .carousel {
+    grid-auto-columns: minmax(250px, 86%);
+    gap: 12px;
+  }
+}

@@ -12,12 +12,17 @@
   </nav>
 
   <div class="site-actions">
-    <a class="sign-in-link" routerLink="/login">Sign in</a>
-    <a class="sign-up-link" routerLink="/login">Sign up <span aria-hidden="true">↗</span></a>
+    @if (session.currentUser(); as user) {
+      <span class="signed-in-name">{{ user.name }}</span>
+      <button class="sign-up-link sign-out-button" type="button" (click)="signOut()">Sign out</button>
+    } @else {
+      <a class="sign-in-link" routerLink="/login">Sign in</a>
+      <a class="sign-up-link" routerLink="/login">Sign up <span aria-hidden="true">↗</span></a>
+    }
   </div>
 </header>
 
-@if (isPublicPage()) {
+@if (isPublicPage() || !session.currentUser()) {
   <router-outlet></router-outlet>
 } @else {
   <div class="app-shell">
@@ -25,64 +30,35 @@
       <div class="brand-wrap">
         <div class="brand-mark">S</div>
         <div>
-          <p class="brand-label">Marketplace</p>
-          <h1>{{ title() }}</h1>
+          <p class="brand-label">{{ session.currentUser()?.type === 'creator' ? 'Creator workspace' : 'Company workspace' }}</p>
+          <h1>SponsR</h1>
         </div>
       </div>
 
       <nav class="nav">
         <a routerLink="/overview" routerLinkActive="active">Overview</a>
-        <a routerLink="/portals" routerLinkActive="active">Portals</a>
-        <a routerLink="/creator" routerLinkActive="active">Creator Portal</a>
-        <a routerLink="/company" routerLinkActive="active">Company Portal</a>
-        <a routerLink="/discovery" routerLinkActive="active">Discovery</a>
-        <a routerLink="/media-kit" routerLinkActive="active">Media Kit</a>
+        @if (session.currentUser()?.type === 'creator') {
+          <a routerLink="/creator" routerLinkActive="active">Creator Portal</a>
+          <a routerLink="/media-kit" routerLinkActive="active">Media Kit</a>
+        } @else {
+          <a routerLink="/company" routerLinkActive="active">Company Portal</a>
+        }
+        <a routerLink="/discovery">Discover</a>
         <a routerLink="/campaigns" routerLinkActive="active">Campaigns</a>
         <a routerLink="/messaging" routerLinkActive="active">Messaging</a>
         <a routerLink="/payments" routerLinkActive="active">Payments</a>
       </nav>
 
       <div class="user-card">
-        <div class="user-avatar">N</div>
+        <div class="user-avatar">{{ getUserInitials(session.currentUser()?.name ?? '') }}</div>
         <div>
-          <strong>Nora Webb</strong>
-          <span>Brand partner</span>
+          <strong>{{ session.currentUser()?.name }}</strong>
+          <span>{{ session.currentUser()?.type === 'creator' ? 'Creator account' : 'Company account' }}</span>
         </div>
       </div>
     </aside>
 
     <main class="main-panel">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">Overview</p>
-          <h2>Creator & sponsor marketplace</h2>
-        </div>
-        <button class="header-action" type="button">New campaign</button>
-      </header>
-
-      <section class="overview-grid">
-        <article class="tile highlight">
-          <span>Total pipeline</span>
-          <strong>$482K</strong>
-          <small>Across 32 active deals</small>
-        </article>
-        <article class="tile">
-          <span>Content creators</span>
-          <strong>4,280</strong>
-          <small>Verified + live</small>
-        </article>
-        <article class="tile">
-          <span>Brand requests</span>
-          <strong>192</strong>
-          <small>Open briefs</small>
-        </article>
-        <article class="tile">
-          <span>Escrow health</span>
-          <strong>98.4%</strong>
-          <small>Settlement success</small>
-        </article>
-      </section>
-
       <router-outlet></router-outlet>
     </main>
   </div>

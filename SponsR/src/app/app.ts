@@ -1,6 +1,7 @@
-﻿import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
+import { SessionService } from './core/session.service';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,7 @@ import { filter } from 'rxjs';
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('SponsR');
+  protected readonly session = inject(SessionService);
   protected readonly isPublicPage = signal(false);
 
   constructor(private readonly router: Router) {
@@ -23,6 +24,18 @@ export class App {
   }
 
   private isPublicRoute(url: string): boolean {
-    return url === '/' || url.startsWith('/login');
+    return url === '/' || url.startsWith('/login') || url.startsWith('/discovery');
+  }
+
+  protected signOut(): void {
+    this.session.signOut();
+    void this.router.navigateByUrl('/');
+  }
+
+  protected getUserInitials(name: string): string {
+    return name
+      .split(' ')
+      .map((part) => part.charAt(0))
+      .join('');
   }
 }

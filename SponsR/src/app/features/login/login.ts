@@ -1,8 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
-type AccountType = 'creator' | 'company';
+import { AccountType, SessionService } from '../../core/session.service';
 
 type MockUser = {
   email: string;
@@ -234,7 +233,7 @@ export class LoginComponent {
   readonly passwordInput = signal('');
   readonly errorMessage = signal('');
 
-  constructor(private readonly router: Router) {}
+  constructor(private readonly router: Router, private readonly session: SessionService) {}
 
   continueToPortal(): void {
     const matchedUser = MOCK_USERS.find(
@@ -250,6 +249,11 @@ export class LoginComponent {
     }
 
     this.errorMessage.set('');
+    this.session.signIn({
+      type: matchedUser.type,
+      name: matchedUser.name,
+      email: matchedUser.email
+    });
     this.router.navigateByUrl(this.selectedType() === 'creator' ? '/creator' : '/company');
   }
 }

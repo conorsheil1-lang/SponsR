@@ -1,0 +1,140 @@
+<section class="discover-page">
+  <header class="discover-heading">
+    <div>
+      <p class="eyebrow">THE SPONSR MARKETPLACE</p>
+      <h2>Find your next <span>great match.</span></h2>
+      <p class="intro-copy">Fresh creators, exciting briefs, and brands building something good.</p>
+    </div>
+    <label class="search-box">
+      <span aria-hidden="true">⌕</span>
+      <input
+        type="search"
+        aria-label="Search creators, campaigns, and brands"
+        placeholder="Search the marketplace"
+        [value]="searchQuery()"
+        (input)="updateQuery($event)"
+      />
+    </label>
+  </header>
+
+  <section class="discovery-section" aria-labelledby="hot-creators-heading">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">PEOPLE TO KNOW</p>
+        <h3 id="hot-creators-heading">Hot creators <span class="hot-mark" aria-hidden="true">✳</span></h3>
+        <p class="section-description">Creators gathering momentum and making things worth following.</p>
+      </div>
+      <div class="carousel-controls">
+        <button type="button" aria-label="Scroll hot creators left" (click)="scrollCarousel(creatorsCarousel, -1)">←</button>
+        <button type="button" aria-label="Scroll hot creators right" (click)="scrollCarousel(creatorsCarousel, 1)">→</button>
+      </div>
+    </div>
+
+    <div class="carousel" #creatorsCarousel>
+      @for (creator of hotCreators(); track creator.id) {
+        <article class="discovery-card creator-card">
+          <div class="card-topline">
+            <span class="niche-tag">{{ creator.niche }}</span>
+            <span class="trend-tag">↗ {{ creator.trendingScore }} trending</span>
+          </div>
+          <div class="profile-row">
+            <div [class]="'profile-avatar ' + creator.avatarTone" aria-hidden="true">
+              {{ getInitials(creator.name) }}
+            </div>
+            <div class="profile-name">
+              <h4>{{ creator.name }} @if (creator.verified) { <span class="verified" aria-label="Verified">✓</span> }</h4>
+              <span>{{ creator.handle }}</span>
+            </div>
+          </div>
+          <p class="card-description">{{ creator.bio }}</p>
+          <div class="channel-tags">
+            @for (channel of creator.channels; track channel) {
+              <span>{{ channel }}</span>
+            }
+          </div>
+          <div class="card-stats">
+            <div><strong>{{ formatAudience(creator.audienceSize) }}</strong><span>audience</span></div>
+            <div><strong>{{ creator.engagementRate }}%</strong><span>engagement</span></div>
+            <div><strong>{{ formatRate(creator.typicalRate) }}</strong><span>typical rate</span></div>
+          </div>
+        </article>
+      } @empty {
+        <p class="empty-state">No creators match that search. Try a different name, niche, or channel.</p>
+      }
+    </div>
+  </section>
+
+  <section class="discovery-section" aria-labelledby="hot-campaigns-heading">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">GOOD BRIEFS, OPEN NOW</p>
+        <h3 id="hot-campaigns-heading">Hot campaigns <span class="hot-mark" aria-hidden="true">✳</span></h3>
+        <p class="section-description">New collaborations with room for the right creator to make them their own.</p>
+      </div>
+      <div class="carousel-controls">
+        <button type="button" aria-label="Scroll hot campaigns left" (click)="scrollCarousel(campaignsCarousel, -1)">←</button>
+        <button type="button" aria-label="Scroll hot campaigns right" (click)="scrollCarousel(campaignsCarousel, 1)">→</button>
+      </div>
+    </div>
+
+    <div class="carousel" #campaignsCarousel>
+      @for (campaign of hotCampaigns(); track campaign.id) {
+        <article class="discovery-card campaign-card">
+          <div [class]="'campaign-art ' + campaign.avatarTone">
+            <span>{{ campaign.brandName }}</span>
+            <strong>{{ campaign.category }}</strong>
+            <i aria-hidden="true">✳</i>
+          </div>
+          <div class="card-topline">
+            <span class="niche-tag">{{ campaign.status }}</span>
+            <span class="trend-tag">↗ {{ campaign.trendingScore }} trending</span>
+          </div>
+          <h4>{{ campaign.title }}</h4>
+          <p class="brand-byline">A brief from <strong>{{ campaign.brandName }}</strong></p>
+          <p class="card-description">{{ campaign.description }}</p>
+          <div class="campaign-footer">
+            <div><span>CREATOR BUDGET</span><strong>{{ formatBudget(campaign.budgetMin, campaign.budgetMax) }}</strong></div>
+            <span class="applicant-count">{{ campaign.applicants }} interested</span>
+          </div>
+        </article>
+      } @empty {
+        <p class="empty-state">No campaigns match that search. Try another brand or category.</p>
+      }
+    </div>
+  </section>
+
+  <section class="discovery-section" aria-labelledby="popular-brands-heading">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">BRANDS ON THE RISE</p>
+        <h3 id="popular-brands-heading">Popular brands <span class="hot-mark" aria-hidden="true">✳</span></h3>
+        <p class="section-description">Find out who’s building community through thoughtful creator partnerships.</p>
+      </div>
+      <div class="carousel-controls">
+        <button type="button" aria-label="Scroll popular brands left" (click)="scrollCarousel(brandsCarousel, -1)">←</button>
+        <button type="button" aria-label="Scroll popular brands right" (click)="scrollCarousel(brandsCarousel, 1)">→</button>
+      </div>
+    </div>
+
+    <div class="carousel" #brandsCarousel>
+      @for (brand of popularCompanies(); track brand.id) {
+        <article class="discovery-card brand-card">
+          <div class="brand-card-top">
+            <div [class]="'brand-avatar ' + brand.avatarTone">{{ brand.logoMark }}</div>
+            <span class="trend-tag">↗ {{ brand.popularityScore }} popular</span>
+          </div>
+          <span class="niche-tag">{{ brand.category }}</span>
+          <h4>{{ brand.name }} @if (brand.verified) { <span class="verified" aria-label="Verified">✓</span> }</h4>
+          <p class="brand-handle">{{ brand.handle }}</p>
+          <p class="card-description">{{ brand.description }}</p>
+          <div class="brand-stats">
+            <div><strong>{{ brand.activeCampaigns }}</strong><span>open campaigns</span></div>
+            <div><strong>{{ brand.creatorPartners }}</strong><span>creator partners</span></div>
+          </div>
+        </article>
+      } @empty {
+        <p class="empty-state">No brands match that search. Try a different name or category.</p>
+      }
+    </div>
+  </section>
+</section>

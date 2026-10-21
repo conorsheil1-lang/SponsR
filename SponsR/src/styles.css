@@ -1,9 +1,10 @@
 @import './app/features/landing/landing.css';
+@import './app/features/discovery/discovery.css';
 
 html, body {
   margin: 0;
   min-height: 100%;
-  background: #07111f;
+  background: #f5f6f1;
 }
 
 body {
@@ -13,4 +14,316 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+app-root .app-shell .main-panel :is(
+  app-overview,
+  app-creator-portal,
+  app-company-portal,
+  app-discovery,
+  app-campaigns,
+  app-messaging,
+  app-payments,
+  app-media-kit,
+  app-portal-selection
+) .eyebrow,
+app-root .app-shell .main-panel :is(app-campaigns) .small-label {
+  color: #748274;
+}
+
+app-root .app-shell .main-panel :is(
+  app-overview,
+  app-creator-portal,
+  app-company-portal,
+  app-discovery,
+  app-campaigns,
+  app-messaging,
+  app-payments,
+  app-media-kit,
+  app-portal-selection
+) h2,
+app-root .app-shell .main-panel :is(
+  app-overview,
+  app-creator-portal,
+  app-company-portal,
+  app-discovery,
+  app-campaigns,
+  app-messaging,
+  app-payments,
+  app-media-kit,
+  app-portal-selection
+) h3 {
+  color: #1b2a20;
+  letter-spacing: -0.04em;
+}
+
+app-root .app-shell .main-panel :is(
+  app-overview,
+  app-creator-portal,
+  app-company-portal,
+  app-discovery,
+  app-campaigns,
+  app-messaging,
+  app-payments,
+  app-media-kit,
+  app-portal-selection
+) :is(
+  .hero-card,
+  .mini-card,
+  .metric-pill,
+  .creator-card,
+  .campaign-card,
+  .feature-card,
+  .company-chip,
+  .portal-banner,
+  .stat-card,
+  .panel-card,
+  .metric-card,
+  .search-box,
+  .threads-panel,
+  .messages-panel,
+  .portal-card
+) {
+  background: #fff;
+  border-color: #e6e9e1;
+  color: #25372a;
+  box-shadow: 0 8px 24px rgba(48, 65, 43, 0.035);
+}
+
+app-root .app-shell .main-panel app-overview .hero-card {
+  background: #e9eedf;
+  border-color: #e0e7d6;
+}
+
+app-root .app-shell .main-panel app-overview .mini-card.active,
+app-root .app-shell .main-panel app-discovery .metric-card.accent,
+app-root .app-shell .main-panel app-payments .metric-card.accent,
+app-root .app-shell .main-panel app-media-kit .metric-card.accent {
+  background: #edf3e4;
+  border-color: #e0e8d5;
+}
+
+app-root .app-shell .main-panel app-portal-selection .portal-card.creator {
+  background: #eef3e6;
+}
+
+app-root .app-shell .main-panel app-portal-selection .portal-card.sponsor {
+  background: #f4efe8;
+}
+
+app-root .app-shell .main-panel :is(
+  app-overview,
+  app-creator-portal,
+  app-company-portal,
+  app-discovery,
+  app-campaigns,
+  app-messaging,
+  app-payments,
+  app-media-kit,
+  app-portal-selection
+) :is(
+  .primary-button,
+  .secondary-button,
+  .ghost-button,
+  .header-action,
+  .portal-link,
+  .composer button
+) {
+  border: 1px solid #193b2a;
+  background: #193b2a;
+  color: #fff;
+}
+
+app-root .app-shell .main-panel :is(
+  app-overview,
+  app-creator-portal,
+  app-company-portal,
+  app-discovery,
+  app-campaigns,
+  app-messaging,
+  app-payments,
+  app-media-kit,
+  app-portal-selection
+) :is(
+  .primary-button,
+  .secondary-button,
+  .ghost-button,
+  .header-action,
+  .portal-link,
+  .composer button
+):hover {
+  background: #2b5a3e;
+  border-color: #2b5a3e;
+}
+
+app-root .app-shell .main-panel :is(
+  app-overview,
+  app-creator-portal,
+  app-company-portal,
+  app-discovery,
+  app-campaigns,
+  app-messaging,
+  app-payments,
+  app-media-kit,
+  app-portal-selection
+) :is(
+  .hero-text,
+  .metric-pill span,
+  .mini-card span,
+  .mini-card p,
+  .campaign-row span,
+  .creator-row span,
+  .feature-card p,
+  .creator-meta p,
+  .campaign-card p,
+  .metric-card span,
+  .metric-card small,
+  .stat-card span,
+  .panel-card p,
+  .panel-card li,
+  .panel-card li span,
+  .creator-card p,
+  .stat-row span,
+  .card-head p,
+  .timeline-item small,
+  .footer-row span,
+  .thread p,
+  .message-header small,
+  .bubble small,
+  .portal-card p,
+  .portal-card li,
+  .channel-list span,
+  .checklist
+) {
+  color: #748078;
+}
+
+app-root .app-shell .main-panel :is(
+  app-overview,
+  app-creator-portal,
+  app-company-portal,
+  app-discovery,
+  app-campaigns,
+  app-messaging,
+  app-payments,
+  app-media-kit,
+  app-portal-selection
+) :is(
+  .creator-topline strong,
+  .campaign-card strong,
+  .mini-card h3,
+  .creator-card strong,
+  .stat-card strong,
+  .panel-card li strong,
+  .metric-card strong,
+  .card-head strong,
+  .footer-row strong,
+  .thread strong,
+  .message-header strong,
+  .portal-card h3,
+  .company-chip
+) {
+  color: #26382b;
+}
+
+app-root .app-shell .main-panel :is(
+  app-overview,
+  app-discovery,
+  app-campaigns,
+  app-messaging,
+  app-payments,
+  app-media-kit
+) :is(.chip, .tab-button, .tier-button, .thread, .list-row, .channel-list li, .rate-item, .metric-pill) {
+  border-color: #e6e9e1;
+  background: #f8f9f6;
+  color: #39483b;
+}
+
+app-root .app-shell .main-panel :is(
+  app-overview,
+  app-discovery,
+  app-campaigns,
+  app-messaging,
+  app-payments,
+  app-media-kit
+) :is(.chip.active, .tab-button.active, .tier-button.active, .thread.active, .campaign-card.selected) {
+  border-color: #a6c77d;
+  background: #edf3e4;
+  color: #35522f;
+}
+
+app-root .app-shell .main-panel app-discovery .search-box input,
+app-root .app-shell .main-panel app-messaging .composer input {
+  border-color: #e0e5db;
+  background: #f8f9f6;
+  color: #29372d;
+}
+
+app-root .app-shell .main-panel app-messaging .bubble {
+  background: #f0f2ec;
+  color: #29372d;
+}
+
+app-root .app-shell .main-panel app-messaging .bubble.me {
+  background: #e5eed9;
+}
+
+app-root .app-shell .main-panel app-messaging .status-pill,
+app-root .app-shell .main-panel app-media-kit .status {
+  background: #e8f1df;
+  color: #527638;
+}
+
+.site-header ~ app-login .auth-screen {
+  background: radial-gradient(circle at top, rgba(201, 225, 167, 0.42), transparent 42%), #f5f6f1;
+}
+
+.site-header ~ app-login .auth-card {
+  border-color: #e6e9e1;
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(48, 65, 43, 0.1);
+  color: #25372a;
+}
+
+.site-header ~ app-login :is(.brand-row, h1, label) {
+  color: #25372a;
+}
+
+.site-header ~ app-login .brand-mark {
+  background: #c8f169;
+  color: #1f3b28;
+}
+
+.site-header ~ app-login .eyebrow {
+  color: #6b8e45;
+}
+
+.site-header ~ app-login :is(.account-picker button, input, .demo-box) {
+  border-color: #e6e9e1;
+  background: #f8f9f6;
+  color: #39483b;
+}
+
+.site-header ~ app-login .account-picker .active {
+  border-color: #a6c77d;
+  background: #edf3e4;
+  color: #35522f;
+}
+
+.site-header ~ app-login .submit-button {
+  background: #193b2a;
+}
+
+.site-header ~ app-login :is(.helper-text, .demo-box span) {
+  color: #748078;
+}
+
+@media (max-width: 560px) {
+  .app-shell {
+    min-height: calc(100vh - 66px);
+  }
+
+  .topbar h2 {
+    font-size: 1.1rem;
+  }
 }
