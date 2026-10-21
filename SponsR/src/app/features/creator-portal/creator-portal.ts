@@ -84,6 +84,7 @@ import { SessionService } from '../../core/session.service';
                       <strong>{{ campaign.title }}</strong>
                       <span>{{ campaign.companyName }} · {{ campaign.category }}</span>
                     </div>
+                    <button type="button" class="registered-view-button" (click)="openCampaign(campaign.id)">View</button>
                     <button type="button" class="withdraw-button" (click)="withdrawCampaignInterest(campaign.id)">Withdraw</button>
                   </li>
                 }
@@ -101,6 +102,7 @@ import { SessionService } from '../../core/session.service';
                       <strong>{{ job.title }}</strong>
                       <span>{{ job.companyName }} · {{ job.category }} · Due {{ job.interestDeadline }}</span>
                     </div>
+                    <button type="button" class="registered-view-button" (click)="openJob(job.id)">View</button>
                     <button type="button" class="withdraw-button" (click)="withdrawJobInterest(job.id)">Withdraw</button>
                   </li>
                 }
@@ -482,6 +484,22 @@ import { SessionService } from '../../core/session.service';
         border: 1px solid #e6e9e1;
         color: #557842;
       }
+      .registered-view-button {
+        flex: 0 0 auto;
+        padding: 0.55rem 0.8rem;
+        border: 1px solid #d8e1d1;
+        border-radius: 999px;
+        background: #edf3e8;
+        color: #456737;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+      .registered-view-button:hover {
+        border-color: #9eb48c;
+        background: #e3ecd9;
+      }
       .withdraw-button:hover {
         border-color: #d7aaa3;
         color: #9c493c;
@@ -587,6 +605,14 @@ export class CreatorPortalComponent {
 
   withdrawBrandInterest(brandId: string): void {
     this.workspace.toggleBrandInterest(brandId);
+  }
+
+  openCampaign(campaignId: string): void {
+    this.dialogs.openCampaignById(campaignId);
+  }
+
+  openJob(jobId: string): void {
+    this.dialogs.openJobById(jobId);
   }
 
   addTag(value: string): void {
@@ -786,7 +812,8 @@ export class CreatorPortalComponent {
       'Campaigns you have registered interest in.',
       this.registeredCampaigns().map((campaign) => ({
         title: campaign.title,
-        subtitle: `${campaign.companyName} · ${campaign.category}`
+        subtitle: `${campaign.companyName} · ${campaign.category}`,
+        campaignId: campaign.id
       })),
       'YOUR INTEREST'
     );
@@ -799,7 +826,8 @@ export class CreatorPortalComponent {
       this.registeredJobs().map((job) => ({
         title: job.title,
         subtitle: `${job.companyName} · ${job.category}`,
-        meta: `Interest deadline ${job.interestDeadline}`
+        meta: `Interest deadline ${job.interestDeadline}`,
+        jobId: job.id
       })),
       'YOUR INTEREST'
     );

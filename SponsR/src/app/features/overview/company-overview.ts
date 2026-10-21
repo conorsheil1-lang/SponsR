@@ -180,7 +180,8 @@ export class CompanyOverviewComponent {
       this.activeJobs().map((job) => ({
         title: job.title,
         subtitle: `${job.companyName} · Interest by ${job.interestDeadline}`,
-        meta: `${job.interestedCreatorIds.length} interested`
+        meta: `${job.interestedCreatorIds.length} interested`,
+        jobId: job.id
       })),
       'YOUR OPENINGS'
     );
@@ -219,12 +220,7 @@ export class CompanyOverviewComponent {
   }
 
   protected showJob(job: JobOpportunity): void {
-    this.dialogs.openDetails(job.title, job.description, [
-      { label: 'Campaign', value: job.campaignTitle ?? 'Standalone job' },
-      { label: 'Budget', value: `$${job.budgetMin.toLocaleString()}–$${job.budgetMax.toLocaleString()}` },
-      { label: 'Interest deadline', value: job.interestDeadline },
-      { label: 'Creator capacity', value: `${job.assignedCreatorIds.length} / ${job.creatorCapacity} assigned` }
-    ], 'JOB DETAILS');
+    this.dialogs.openJob(job);
   }
 
   protected showProposal(proposal: (typeof this.proposals)[number]): void {

@@ -395,6 +395,40 @@
   padding: 0.75rem 0.85rem;
 }
 
+.dialog-reference-link {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.dialog-reference-link:hover strong { color: #557842; text-decoration: underline; }
+.dialog-reference-link span { text-align: left; }
+
+.dialog-review-action {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.65rem;
+  border: 0;
+  border-radius: 999px;
+  background: #193b2a;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 650;
+}
+
+.dialog-review-action:hover { background: #2b5a3e; }
+.opportunity-submissions { padding-top: 0.8rem; }
+
 .related-jobs-empty {
   margin: 0;
   padding: 0.85rem;
@@ -406,7 +440,9 @@
 
 .opportunity-dialog-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 0.6rem;
   padding: 0 2rem 1.5rem;
 }
 

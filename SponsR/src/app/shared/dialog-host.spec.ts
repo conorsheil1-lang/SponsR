@@ -107,7 +107,8 @@ describe('DialogHostComponent', () => {
       relatedJobs: [{
         title: 'Spring launch video',
         subtitle: '$1,000–$3,000 · Interest closes Nov 1, 2026',
-        meta: '3 spots'
+        meta: '3 spots',
+        jobId: 'job-goodfolk-morning'
       }]
     });
     fixture.detectChanges();
@@ -117,6 +118,13 @@ describe('DialogHostComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('$1,000–$3,000');
     expect(fixture.nativeElement.textContent).toContain('Spring launch video');
     expect(fixture.nativeElement.textContent).toContain('Interested creators');
+    (fixture.nativeElement.querySelector('.dialog-reference-link') as HTMLButtonElement).click();
+    const relatedJobDialog = dialogs.activeDialog();
+    expect(relatedJobDialog?.kind).toBe('opportunity');
+    if (relatedJobDialog?.kind !== 'opportunity') {
+      throw new Error('Expected the related job opportunity dialog.');
+    }
+    expect(relatedJobDialog.opportunityType).toBe('Job');
 
     dialogs.close();
     dialogs.openOpportunity({
@@ -134,6 +142,51 @@ describe('DialogHostComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Delivery deadline');
     expect(fixture.nativeElement.textContent).not.toContain('Jobs in this campaign');
+  });
+
+  it('lets the owning company approve a pending deliverable from the job dialog', () => {
+    const workspace = TestBed.inject(MarketplaceWorkspaceService);
+    const job = workspace.jobs().find((candidate) => candidate.id === 'job-mint-home');
+    if (!job) {
+      throw new Error('Expected the Mint & Moss job mock.');
+    }
+    const originalSubmissions = job.deliverableSubmissions;
+    job.deliverableSubmissions = [{
+      id: 'deliverable-pending-review',
+      creatorName: 'Maya Chen',
+      creatorEmail: 'creator@sponsr.com',
+      type: 'url',
+      url: 'https://example.com/content',
+      fileName: null,
+      fileSize: null,
+      submittedAt: new Date().toISOString(),
+      status: 'Pending review'
+    }];
+    TestBed.inject(SessionService).signIn({
+      type: 'company',
+      name: 'Mint & Moss',
+      email: 'company@sponsr.com'
+    });
+    const dialogs = TestBed.inject(DialogService);
+    const fixture = TestBed.createComponent(DialogHostComponent);
+
+    try {
+      dialogs.openJob(job);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('.opportunity-status')?.textContent).not.toContain('Accepted partnership');
+      expect(fixture.nativeElement.textContent).not.toContain('Manage deliverables');
+      expect(fixture.nativeElement.querySelector('.dialog-review-action')).toBeTruthy();
+      (fixture.nativeElement.querySelector('.dialog-review-action') as HTMLButtonElement).click();
+      fixture.detectChanges();
+
+      expect(workspace.jobs().find((candidate) => candidate.id === job.id)?.deliverableSubmissions[0].status).toBe('Completed');
+      expect(fixture.nativeElement.textContent).toContain('Completed');
+      expect(dialogs.activeDialog()?.kind).toBe('opportunity');
+    } finally {
+      workspace.jobs.update((jobs) => jobs.map((candidate) =>
+        candidate.id === job.id ? { ...candidate, deliverableSubmissions: originalSubmissions } : candidate
+      ));
+    }
   });
 
   it('requires confirmation before accepting or declining a proposal', () => {

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
+import { DialogService } from '../../core/dialog.service';
 import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
 import { CreatorProfileService } from '../../core/creator-profile.service';
 import { SessionService } from '../../core/session.service';
@@ -44,6 +45,15 @@ describe('CreatorPortalComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Make room for a reset');
     expect(fixture.nativeElement.textContent).toContain('Morrow · Wellness');
     expect(fixture.nativeElement.querySelector('.registered-opportunities li')).toBeTruthy();
+
+    (fixture.nativeElement.querySelector('.registered-view-button') as HTMLButtonElement).click();
+    const campaignDialog = TestBed.inject(DialogService).activeDialog();
+    expect(campaignDialog?.kind).toBe('opportunity');
+    if (campaignDialog?.kind !== 'opportunity') {
+      throw new Error('Expected the registered campaign opportunity dialog.');
+    }
+    expect(campaignDialog.title).toBe('Make room for a reset');
+    TestBed.inject(DialogService).close();
 
     const jobsToggle = fixture.nativeElement.querySelector('.interest-toggle button:last-child') as HTMLButtonElement;
     jobsToggle.click();

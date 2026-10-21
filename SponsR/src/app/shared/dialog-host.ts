@@ -1,6 +1,6 @@
 import { Component, computed, effect, HostListener, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DialogService } from '../core/dialog.service';
+import { DialogService, type AppDialog } from '../core/dialog.service';
 import { creatorProposals, type CreatorProposal } from '../core/creator-workspace-data';
 import type { JobOpportunity } from '../core/job-marketplace-data';
 import { MarketplaceWorkspaceService } from '../core/marketplace-workspace.service';
@@ -105,7 +105,13 @@ import { SessionService } from '../core/session.service';
                   <div class="dialog-list">
                     @for (item of dialog.relatedJobs; track item.title) {
                       <article>
-                        <div><strong>{{ item.title }}</strong><span>{{ item.subtitle }}</span></div>
+                        @if (item.jobId) {
+                          <button type="button" class="dialog-reference-link" (click)="openJobReference(item.jobId)">
+                            <strong>{{ item.title }}</strong><span>{{ item.subtitle }}</span>
+                          </button>
+                        } @else {
+                          <div><strong>{{ item.title }}</strong><span>{{ item.subtitle }}</span></div>
+                        }
                         @if (item.meta) { <small>{{ item.meta }}</small> }
                       </article>
                     }
@@ -115,8 +121,35 @@ import { SessionService } from '../core/session.service';
                 }
               </section>
             }
+            @if (dialog.opportunityType === 'Job' && dialog.submissions?.length
+              && ((dialog.viewerType === 'company' && dialog.companyName === currentUserName())
+                || (dialog.viewerType === 'creator' && hasViewerSubmission(dialog)))) {
+              <section class="related-jobs opportunity-submissions">
+                <div class="related-jobs-heading"><h3>Submitted deliverables</h3><span>{{ dialog.submissions?.length }}</span></div>
+                <div class="dialog-list">
+                  @for (submission of dialog.submissions; track submission.id) {
+                    <article>
+                      <div><strong>{{ submission.creatorName }}</strong><span>{{ submission.type === 'url' ? 'Content link' : submission.fileName }}</span></div>
+                      <a [href]="submission.url" target="_blank" rel="noopener noreferrer">Open</a>
+                      <small>{{ submission.status }}</small>
+                      @if (dialog.viewerType === 'company' && dialog.companyName === currentUserName() && submission.status === 'Pending review') {
+                        <button type="button" class="dialog-review-action" (click)="approveOpportunitySubmission(dialog, submission.id)">Approve & complete</button>
+                      }
+                    </article>
+                  }
+                </div>
+              </section>
+            }
             <div class="opportunity-dialog-actions">
-              <button type="button" class="dialog-primary" (click)="dialogs.close()">Done</button>
+              @if (dialog.canRegister) {
+                <button type="button" class="dialog-primary" (click)="dialogs.toggleOpportunityRegistration()">
+                  {{ dialog.isRegistered ? 'Withdraw interest' : 'Register interest' }}
+                </button>
+              }
+              @if (dialog.opportunityType === 'Job' && dialog.status === 'Accepted partnership' && dialog.viewerType === 'creator') {
+                <button type="button" class="dialog-primary" (click)="manageAcceptedJob(dialog.opportunityId)">Manage deliverables</button>
+              }
+              <button type="button" class="dialog-secondary" (click)="dialogs.close()">Close</button>
             </div>
           } @else if (dialog.kind === 'list') {
             <p class="eyebrow">{{ dialog.eyebrow }}</p>
@@ -125,7 +158,17 @@ import { SessionService } from '../core/session.service';
             <div class="dialog-list">
               @for (item of dialog.items; track $index) {
                 <article>
-                  <div><strong>{{ item.title }}</strong><span>{{ item.subtitle }}</span></div>
+                  @if (item.campaignId) {
+                    <button type="button" class="dialog-reference-link" (click)="openCampaignReference(item.campaignId)">
+                      <strong>{{ item.title }}</strong><span>{{ item.subtitle }}</span>
+                    </button>
+                  } @else if (item.jobId) {
+                    <button type="button" class="dialog-reference-link" (click)="openJobReference(item.jobId)">
+                      <strong>{{ item.title }}</strong><span>{{ item.subtitle }}</span>
+                    </button>
+                  } @else {
+                    <div><strong>{{ item.title }}</strong><span>{{ item.subtitle }}</span></div>
+                  }
                   @if (item.meta) { <small>{{ item.meta }}</small> }
                 </article>
               } @empty {
@@ -283,6 +326,48 @@ export class DialogHostComponent {
   protected deliverableSubmissionType: 'url' | 'file' = 'url';
   protected deliverableUrl = '';
   protected selectedDeliverableFile: File | null = null;
+
+  protected currentUserName(): string | undefined {
+    return this.session.currentUser()?.name;
+  }
+
+  protected hasViewerSubmission(dialog: Extract<AppDialog, { kind: 'opportunity' }>): boolean {
+    const email = this.session.currentUser()?.email;
+    return Boolean(email && dialog.submissions?.some((submission) => submission.creatorEmail === email));
+  }
+
+  protected openCampaignReference(campaignId: string): void {
+    this.dialogs.openCampaignById(campaignId);
+  }
+
+  protected openJobReference(jobId: string): void {
+    this.dialogs.openJobById(jobId);
+  }
+
+  protected manageAcceptedJob(jobId: string | undefined): void {
+    if (!jobId) {
+      throw new Error('The accepted job reference is missing.');
+    }
+    const job = this.workspace.jobs().find((candidate) => candidate.id === jobId);
+    const proposal = creatorProposals.find((candidate) =>
+      candidate.status === 'Accepted'
+      && candidate.campaign === job?.title
+      && candidate.brand === job?.companyName
+    );
+    if (!job || !proposal) {
+      throw new Error(`Accepted job ${jobId} or its proposal was not found.`);
+    }
+    this.dialogs.openCreatorJob(job, proposal);
+  }
+
+  protected approveOpportunitySubmission(dialog: Extract<AppDialog, { kind: 'opportunity' }>, submissionId: string): void {
+    const companyName = this.session.currentUser()?.name;
+    if (dialog.opportunityType !== 'Job' || !dialog.opportunityId || !companyName || companyName !== dialog.companyName) {
+      throw new Error('A signed-in owning company is required to approve this deliverable.');
+    }
+    this.workspace.approveDeliverable(dialog.opportunityId, submissionId, companyName);
+    this.dialogs.openJobById(dialog.opportunityId);
+  }
 
   constructor() {
     effect(() => {

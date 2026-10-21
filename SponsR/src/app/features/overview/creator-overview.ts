@@ -2,7 +2,10 @@ import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { creatorCampaigns, creatorDeadlines, creatorNotifications, creatorProposals } from '../../core/creator-workspace-data';
 import { DialogService } from '../../core/dialog.service';
+import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
+import { mockMarketplaceCampaigns } from '../../core/marketplace-mock-data';
 import { SessionService } from '../../core/session.service';
+import type { CampaignOpportunity, JobOpportunity } from '../../core/job-marketplace-data';
 
 @Component({
   selector: 'app-creator-overview',
@@ -80,6 +83,11 @@ import { SessionService } from '../../core/session.service';
                   <strong>{{ deadline.task }}</strong>
                   <span>{{ deadline.campaign }}</span>
                 </div>
+                @if (findReferencedJob(deadline.campaign); as job) {
+                  <button class="row-detail-action" type="button" (click)="showJob(job)">View</button>
+                } @else if (findReferencedCampaign(deadline.campaign); as campaign) {
+                  <button class="row-detail-action" type="button" (click)="showCampaign(campaign)">View</button>
+                }
               </li>
             }
           </ul>
@@ -124,6 +132,9 @@ import { SessionService } from '../../core/session.service';
                   <span>{{ campaign.brand }} · {{ campaign.nextStep }}</span>
                 </div>
                 <span class="campaign-amount">{{ campaign.amount }}</span>
+                @if (findCampaignId(campaign.name, campaign.brand); as campaignId) {
+                  <button class="row-detail-action" type="button" (click)="showCampaignById(campaignId)">View</button>
+                }
               </li>
             }
           </ul>
@@ -135,6 +146,7 @@ import { SessionService } from '../../core/session.service';
 export class CreatorOverviewComponent {
   private readonly session = inject(SessionService);
   private readonly dialogs = inject(DialogService);
+  private readonly workspace = inject(MarketplaceWorkspaceService);
   protected readonly notifications = creatorNotifications;
   protected readonly proposals = creatorProposals;
   protected readonly deadlines = creatorDeadlines;
@@ -161,7 +173,11 @@ export class CreatorOverviewComponent {
       this.deadlines.map((deadline) => ({
         title: deadline.task,
         subtitle: deadline.campaign,
-        meta: `${deadline.dueDate} · ${deadline.priority}`
+        meta: `${deadline.dueDate} · ${deadline.priority}`,
+        jobId: this.findReferencedJob(deadline.campaign)?.id,
+        campaignId: this.findReferencedJob(deadline.campaign)
+          ? undefined
+          : this.findReferencedCampaign(deadline.campaign)?.id
       })),
       'WHAT’S NEXT'
     );
@@ -187,10 +203,45 @@ export class CreatorOverviewComponent {
       this.campaigns.map((campaign) => ({
         title: campaign.name,
         subtitle: `${campaign.brand} · ${campaign.status}`,
-        meta: campaign.nextStep
+        meta: campaign.nextStep,
+        campaignId: this.findCampaignId(campaign.name, campaign.brand)
       })),
       'WORK IN MOTION'
     );
+  }
+
+  protected showJob(job: JobOpportunity): void {
+    this.dialogs.openJob(job);
+  }
+
+  protected showCampaign(campaign: CampaignOpportunity): void {
+    this.dialogs.openCampaign(campaign);
+  }
+
+  protected showCampaignById(campaignId: string): void {
+    this.dialogs.openCampaignById(campaignId);
+  }
+
+  protected findReferencedJob(reference: string): JobOpportunity | undefined {
+    const [title, companyName] = reference.split(' · ');
+    return this.workspace.jobs().find((job) =>
+      job.title === title && (!companyName || job.companyName === companyName)
+    );
+  }
+
+  protected findReferencedCampaign(reference: string): CampaignOpportunity | undefined {
+    const [title, companyName] = reference.split(' · ');
+    return this.workspace.campaigns().find((campaign) =>
+      campaign.title === title && (!companyName || campaign.companyName === companyName)
+    );
+  }
+
+  protected findCampaignId(title: string, companyName: string): string | undefined {
+    return this.workspace.campaigns().find((campaign) =>
+      campaign.title === title && campaign.companyName === companyName
+    )?.id ?? mockMarketplaceCampaigns.find((campaign) =>
+      campaign.title === title && campaign.brandName === companyName
+    )?.id;
   }
 
   protected showProposal(proposal: (typeof creatorProposals)[number]): void {

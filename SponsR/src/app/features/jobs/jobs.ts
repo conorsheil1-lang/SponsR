@@ -78,11 +78,7 @@ export class JobsComponent {
   }
 
   protected showCampaign(campaign: CampaignOpportunity): void {
-    this.dialogs.openDetails(campaign.title, campaign.description, [
-      { label: 'Creator capacity', value: `${this.getCampaignAssignedCount(campaign)} / ${campaign.creatorCapacity} assigned` },
-      { label: 'Interested creators', value: `${this.getCampaignInterestCount(campaign)}` },
-      { label: 'Related jobs', value: `${this.getCampaignJobCount(campaign.id)}` }
-    ], 'CAMPAIGN DETAILS');
+    this.dialogs.openCampaign(campaign);
   }
 
   protected showCreator(creatorId: string): void {
@@ -99,15 +95,7 @@ export class JobsComponent {
   }
 
   protected showJob(job: JobOpportunity): void {
-    this.dialogs.openDetails(job.title, job.description, [
-      { label: 'Company', value: job.companyName },
-      { label: 'Campaign', value: job.campaignTitle ?? 'Standalone job' },
-      { label: 'Budget', value: this.formatBudget(job.budgetMin, job.budgetMax) },
-      { label: 'Interest deadline', value: this.formatDate(job.interestDeadline) },
-      { label: 'Delivery deadline', value: this.formatDate(job.deliveryDeadline) },
-      { label: 'Creator capacity', value: `${job.assignedCreatorIds.length} / ${job.creatorCapacity} assigned` },
-      { label: 'Content review', value: job.requiresContentReview ? 'Required before completion' : 'Not required' }
-    ], 'JOB DETAILS');
+    this.dialogs.openJob(job);
   }
 
   protected getInterestedCreators(job: JobOpportunity) {

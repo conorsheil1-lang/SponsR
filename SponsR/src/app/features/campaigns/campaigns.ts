@@ -113,13 +113,6 @@ export class CampaignsComponent {
   }
 
   protected showDetails(campaign: CampaignOpportunity): void {
-    const relatedJobs = this.isCompany
-      ? this.jobs().filter((job) => job.campaignId === campaign.id)
-      : this.acceptedCreatorJobs().filter((job) => job.campaignId === campaign.id);
-    this.dialogs.openDetails(campaign.title, campaign.description, [
-      { label: 'Capacity', value: `${this.getAssignedCount(campaign)} / ${campaign.creatorCapacity} assigned` },
-      { label: 'Creator interest', value: `${this.getInterestCount(campaign)} creators` },
-      { label: 'Related jobs', value: relatedJobs.map((job) => job.title).join(', ') || 'No jobs yet' }
-    ], 'CAMPAIGN DETAILS');
+    this.dialogs.openCampaign(campaign);
   }
 }

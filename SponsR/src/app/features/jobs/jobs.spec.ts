@@ -41,7 +41,7 @@ describe('JobsComponent', () => {
     fixture.detectChanges();
 
     (fixture.nativeElement.querySelector('.accepted-job-view-button') as HTMLButtonElement).click();
-    expect(TestBed.inject(DialogService).activeDialog()?.kind).toBe('details');
+    expect(TestBed.inject(DialogService).activeDialog()?.kind).toBe('opportunity');
     TestBed.inject(DialogService).close();
 
     (fixture.nativeElement.querySelector('.accepted-job-action') as HTMLButtonElement).click();
@@ -71,7 +71,7 @@ describe('JobsComponent', () => {
       const campaignLink = fixture.nativeElement.querySelector('.campaign-parent-link') as HTMLButtonElement;
       expect(campaignLink.textContent).toContain('The slower mornings series');
       campaignLink.click();
-      expect(TestBed.inject(DialogService).activeDialog()?.kind).toBe('details');
+      expect(TestBed.inject(DialogService).activeDialog()?.kind).toBe('opportunity');
     } finally {
       job.campaignId = originalCampaignId;
       job.campaignTitle = originalCampaignTitle;
