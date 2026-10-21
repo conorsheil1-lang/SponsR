@@ -3,14 +3,34 @@ import { provideRouter } from '@angular/router';
 import { DialogService } from '../../core/dialog.service';
 import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
 import { CreatorProfileService } from '../../core/creator-profile.service';
+import { SessionService } from '../../core/session.service';
 import { CreatorPortalComponent } from './creator-portal';
 
 describe('CreatorPortalComponent', () => {
   beforeEach(async () => {
+    localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [CreatorPortalComponent],
       providers: [provideRouter([])]
     }).compileComponents();
+  });
+
+  it('remembers hiding the introduction separately for each creator', () => {
+    const session = TestBed.inject(SessionService);
+    session.signIn({ type: 'creator', accountId: 'creator-maya', name: 'Maya Chen', email: 'maya@example.com' });
+
+    const firstFixture = TestBed.createComponent(CreatorPortalComponent);
+    firstFixture.detectChanges();
+    expect(firstFixture.nativeElement.querySelector('.portal-banner')).toBeTruthy();
+    (firstFixture.nativeElement.querySelector('.dismiss-banner-button') as HTMLButtonElement).click();
+    firstFixture.detectChanges();
+    expect(firstFixture.nativeElement.querySelector('.portal-banner')).toBeNull();
+
+    firstFixture.destroy();
+    session.signIn({ type: 'creator', accountId: 'creator-eli', name: 'Eli Williams', email: 'eli@example.com' });
+    const secondFixture = TestBed.createComponent(CreatorPortalComponent);
+    secondFixture.detectChanges();
+    expect(secondFixture.nativeElement.querySelector('.portal-banner')).toBeTruthy();
   });
 
   it('shows registered campaigns and jobs, and allows switching and withdrawing interest', () => {
@@ -50,7 +70,7 @@ describe('CreatorPortalComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Morrow');
     expect(fixture.nativeElement.textContent).toContain('Wellness · 8 open campaigns');
 
-    const withdrawButton = fixture.nativeElement.querySelector('.registered-opportunities:last-child .withdraw-button') as HTMLButtonElement;
+    const withdrawButton = fixture.nativeElement.querySelector('.registered-opportunities .withdraw-button') as HTMLButtonElement;
     withdrawButton.click();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No brands saved yet');
@@ -61,10 +81,17 @@ describe('CreatorPortalComponent', () => {
     const fixture = TestBed.createComponent(CreatorPortalComponent);
     const dialogs = TestBed.inject(DialogService);
     fixture.detectChanges();
-    const cards = fixture.nativeElement.querySelectorAll('.content-grid > .panel-card');
-    const matchesCard = cards[0] as HTMLElement;
-    const linksCard = cards[1] as HTMLElement;
+    expect(fixture.nativeElement.querySelector('.section-heading')?.textContent?.trim()).toBe('My Content');
+    const cards = Array.from(fixture.nativeElement.querySelectorAll('.content-grid > .panel-card')) as HTMLElement[];
+    const matchesCard = cards.find((card) => card.querySelector('h3')?.textContent?.includes('Campaigns matching your profile'));
+    const linksCard = cards.find((card) => card.querySelector('h3')?.textContent?.includes('Profile & social links'));
+    const registeredInterestsCard = cards.find((card) => card.querySelector('h3')?.textContent?.includes('Registered interest'));
 
+    if (!matchesCard || !linksCard || !registeredInterestsCard) {
+      throw new Error('Expected campaign matches, social links, and registered interests cards.');
+    }
+
+    expect(cards.indexOf(matchesCard)).toBeGreaterThan(cards.indexOf(registeredInterestsCard));
     expect(matchesCard.querySelectorAll('li')).toHaveLength(3);
     (matchesCard.querySelector('.show-more-button') as HTMLButtonElement).click();
     const campaignDialog = dialogs.activeDialog();

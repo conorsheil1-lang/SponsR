@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { CreatorProfileService } from '../../core/creator-profile.service';
 import { DialogService } from '../../core/dialog.service';
 import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
+import { SessionService } from '../../core/session.service';
 
 @Component({
   selector: 'app-creator-portal',
@@ -11,36 +12,34 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
   imports: [FormsModule, RouterLink],
   template: `
     <section class="portal-page">
-      <div class="portal-banner">
-        <div>
-          <p class="eyebrow">Creator portal</p>
-          <h2>Grow your creator brand and track campaign interest</h2>
+      @if (showBanner()) {
+        <div class="portal-banner">
+          <div>
+            <p class="eyebrow">Creator portal</p>
+            <h2>Grow your creator brand and track campaign interest</h2>
+          </div>
+          <div class="portal-banner-actions">
+            <a class="primary-button" routerLink="/discovery">Find campaigns</a>
+            <button type="button" class="dismiss-banner-button" aria-label="Hide creator portal introduction"
+              (click)="dismissBanner()">×</button>
+          </div>
         </div>
-        <a class="primary-button" routerLink="/discovery">Find campaigns</a>
-      </div>
+      }
 
-      <div class="stats-grid">
-        @for (stat of stats(); track stat.label) {
-          <article class="stat-card">
-            <span>{{ stat.label }}</span>
-            <strong>{{ stat.value }}</strong>
-          </article>
-        }
-      </div>
+      <section class="metrics-area" aria-labelledby="creator-metrics-heading">
+        <h3 id="creator-metrics-heading">Metrics</h3>
+        <div class="stats-grid">
+          @for (stat of stats(); track stat.label) {
+            <article class="stat-card">
+              <span>{{ stat.label }}</span>
+              <strong>{{ stat.value }}</strong>
+            </article>
+          }
+        </div>
+      </section>
 
       <div class="content-grid">
-        <article class="panel-card">
-          <div class="panel-heading">
-            <h3>Campaigns matching your profile</h3>
-            <button type="button" class="show-more-button" (click)="viewCampaignMatches()">View all</button>
-          </div>
-          <ul>
-            @for (match of matchingCampaigns().slice(0, 3); track match.name) {
-              <li><strong>{{ match.name }}</strong><span>{{ match.meta }}</span></li>
-            }
-          </ul>
-        </article>
-
+        <h3 class="section-heading">My Content</h3>
         <article class="panel-card">
           <div class="panel-heading">
             <h3>Profile & social links</h3>
@@ -173,6 +172,18 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
             <p class="interest-empty">No brands saved yet. Explore popular brands to let them know you’re interested.</p>
           }
         </article>
+
+        <article class="panel-card wide">
+          <div class="panel-heading">
+            <h3>Campaigns matching your profile</h3>
+            <button type="button" class="show-more-button" (click)="viewCampaignMatches()">View all</button>
+          </div>
+          <ul>
+            @for (match of matchingCampaigns().slice(0, 3); track match.name) {
+              <li><strong>{{ match.name }}</strong><span>{{ match.meta }}</span></li>
+            }
+          </ul>
+        </article>
       </div>
     </section>
   `,
@@ -189,6 +200,11 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
         display: grid;
         gap: 1rem;
       }
+      .metrics-area {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
       .portal-banner {
         grid-template-columns: 1fr auto;
         align-items: center;
@@ -196,6 +212,25 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
         border: 1px solid #e0e7d6;
         border-radius: 22px;
         padding: 1.2rem 1.3rem;
+      }
+      .portal-banner-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+      }
+      .dismiss-banner-button {
+        display: grid;
+        place-items: center;
+        width: 2rem;
+        height: 2rem;
+        border: 1px solid #d0d9c6;
+        border-radius: 50%;
+        background: transparent;
+        color: #486a36;
+        cursor: pointer;
+        font: inherit;
+        font-size: 1.25rem;
+        line-height: 1;
       }
       .eyebrow {
         margin: 0 0 0.35rem;
@@ -243,6 +278,12 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
       .panel-card h3 {
         color: #26382b;
         font-size: 1rem;
+      }
+      .section-heading {
+        grid-column: 1 / -1;
+        margin: 0;
+        color: #26382b;
+        font-size: 1.1rem;
       }
       .panel-heading {
         display: flex;
@@ -383,6 +424,8 @@ export class CreatorPortalComponent {
   private readonly dialogs = inject(DialogService);
   private readonly workspace = inject(MarketplaceWorkspaceService);
   private readonly creatorProfile = inject(CreatorProfileService);
+  private readonly session = inject(SessionService);
+  protected readonly showBanner = signal(!this.isBannerDismissed());
   protected readonly profile = this.creatorProfile.profile;
   protected readonly suggestedTags = ['lifestyle', 'living', 'tech', 'wellness', 'food', 'travel', 'fashion', 'gaming', 'beauty', 'fitness'];
   protected readonly platforms = ['Instagram', 'TikTok', 'YouTube', 'Twitch', 'Pinterest', 'Podcast', 'Newsletter', 'Other'];
@@ -479,6 +522,21 @@ export class CreatorPortalComponent {
 
   removeSocialLink(platform: string): void {
     this.creatorProfile.removeSocialLink(platform);
+  }
+
+  dismissBanner(): void {
+    localStorage.setItem(this.bannerStorageKey(), 'dismissed');
+    this.showBanner.set(false);
+  }
+
+  private isBannerDismissed(): boolean {
+    return localStorage.getItem(this.bannerStorageKey()) === 'dismissed';
+  }
+
+  private bannerStorageKey(): string {
+    const user = this.session.currentUser();
+    const userKey = user?.accountId ?? user?.email.toLocaleLowerCase() ?? 'guest';
+    return `sponsr-creator-portal-banner:${encodeURIComponent(userKey)}`;
   }
 
   viewCampaignMatches(): void {
