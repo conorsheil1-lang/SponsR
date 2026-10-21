@@ -4,6 +4,7 @@ export interface CreatorAccount {
   name: string;
   handle: string;
   niche: string;
+  contentTags: string[];
   bio: string;
   channels: string[];
   audienceSize: number;

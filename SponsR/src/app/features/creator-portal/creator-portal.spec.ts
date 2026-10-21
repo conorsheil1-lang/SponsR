@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { DialogService } from '../../core/dialog.service';
 import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
+import { CreatorProfileService } from '../../core/creator-profile.service';
 import { CreatorPortalComponent } from './creator-portal';
 
 describe('CreatorPortalComponent', () => {
@@ -56,7 +57,7 @@ describe('CreatorPortalComponent', () => {
     expect(workspace.isInterestedInBrand('brand-morrow')).toBe(false);
   });
 
-  it('opens full profile and campaign matching lists in dialogs without expanding the cards', () => {
+  it('opens campaign matches in a dialog and displays linked social profiles', () => {
     const fixture = TestBed.createComponent(CreatorPortalComponent);
     const dialogs = TestBed.inject(DialogService);
     fixture.detectChanges();
@@ -74,13 +75,55 @@ describe('CreatorPortalComponent', () => {
     expect(campaignDialog.items).toHaveLength(5);
     expect(matchesCard.querySelectorAll('li')).toHaveLength(3);
 
-    expect(linksCard.querySelectorAll('li')).toHaveLength(3);
-    (linksCard.querySelector('.show-more-button') as HTMLButtonElement).click();
-    const linksDialog = dialogs.activeDialog();
-    if (linksDialog?.kind !== 'list') {
-      throw new Error('Expected social links list dialog.');
+    expect(linksCard.querySelectorAll('.social-profile-row')).toHaveLength(3);
+    expect(linksCard.textContent).toContain('@mayamakes');
+    expect(linksCard.querySelector('.social-profile-row a')?.getAttribute('href')).toBe('https://instagram.com/mayamakes');
+    expect(linksCard.querySelector('.profile-editor-form')).toBeTruthy();
+  });
+
+  it('adds suggested and custom content tags and links new social platforms', async () => {
+    const fixture = TestBed.createComponent(CreatorPortalComponent);
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const suggestedTag = Array.from(fixture.nativeElement.querySelectorAll('.tag-suggestions button') as NodeListOf<HTMLButtonElement>)
+      .find((button) => button.textContent?.includes('tech'));
+    if (!suggestedTag) {
+      throw new Error('Expected suggested tech tag.');
     }
-    expect(linksDialog.items).toHaveLength(5);
-    expect(linksCard.querySelectorAll('li')).toHaveLength(3);
+    suggestedTag.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.creator-content-tags')?.textContent).toContain('tech');
+
+    component.addTag('slow living');
+    fixture.detectChanges();
+    expect(TestBed.inject(CreatorProfileService).profile().contentTags).toContain('slow living');
+
+    const platformInput = fixture.nativeElement.querySelector('[name="socialPlatform"]') as HTMLSelectElement;
+    platformInput.value = 'Twitch';
+    platformInput.dispatchEvent(new Event('change', { bubbles: true }));
+    const handleInput = fixture.nativeElement.querySelector('[name="socialHandle"]') as HTMLInputElement;
+    handleInput.value = '@mayamakesvideo';
+    handleInput.dispatchEvent(new Event('input', { bubbles: true }));
+    const urlInput = fixture.nativeElement.querySelector('[name="socialUrl"]') as HTMLInputElement;
+    urlInput.value = 'https://twitch.tv/mayamakesvideo';
+    urlInput.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    component.addSocialLink();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.profile-error')?.textContent).toBeFalsy();
+    const socialLinks = fixture.nativeElement.querySelectorAll('.social-profile-row');
+    expect(socialLinks).toHaveLength(4);
+    expect(fixture.nativeElement.textContent).toContain('@mayamakesvideo');
+    const profile = TestBed.inject(CreatorProfileService).profile;
+    expect(profile().channels).toContain('Twitch');
+
+    component.removeSocialLink('Twitch');
+    component.removeContentTag('tech');
+    fixture.detectChanges();
+    expect(profile().socialLinks.some((link) => link.platform === 'Twitch')).toBe(false);
+    expect(profile().contentTags).not.toContain('tech');
   });
 });

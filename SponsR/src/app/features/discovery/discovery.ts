@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { mockCompanyAccounts, mockCreatorAccounts, mockMarketplaceCampaigns } from '../../core/marketplace-mock-data';
 import type { CompanyAccount, CreatorAccount, MarketplaceCampaign } from '../../core/marketplace-models';
 import { DialogService } from '../../core/dialog.service';
+import { CreatorProfileService } from '../../core/creator-profile.service';
 import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
 import type { JobOpportunity } from '../../core/job-marketplace-data';
 import { SessionService } from '../../core/session.service';
@@ -29,11 +30,18 @@ export class DiscoveryComponent {
   private readonly session = inject(SessionService);
   private readonly dialogs = inject(DialogService);
   private readonly workspace = inject(MarketplaceWorkspaceService);
+  private readonly creatorProfile = inject(CreatorProfileService);
   readonly searchQuery = signal('');
   readonly creators = signal<CreatorAccount[]>(mockCreatorAccounts);
+  private readonly creatorDirectory = computed(() => this.creators().map((creator) =>
+    creator.id === this.creatorProfile.profile().id
+      ? { ...creator, contentTags: this.creatorProfile.profile().contentTags }
+      : creator
+  ));
   readonly campaigns = signal<MarketplaceCampaign[]>(mockMarketplaceCampaigns);
   readonly companies = signal<CompanyAccount[]>(mockCompanyAccounts);
   readonly creatorNicheFilter = signal('');
+  readonly creatorTagFilter = signal('');
   readonly creatorPlatformFilter = signal('');
   readonly creatorAudienceFilter = signal('');
   readonly creatorEngagementFilter = signal('');
@@ -49,7 +57,7 @@ export class DiscoveryComponent {
 
   readonly hotCreators = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
-    return this.creators()
+    return this.creatorDirectory()
       .filter((creator) => !query || this.creatorSearchText(creator).includes(query))
       .slice()
       .sort((a, b) => b.trendingScore - a.trendingScore || a.name.localeCompare(b.name));
@@ -73,8 +81,9 @@ export class DiscoveryComponent {
 
   readonly isCompany = computed(() => this.session.currentUser()?.type === 'company');
 
-  readonly creatorNiches = computed(() => this.unique(this.creators().map((creator) => creator.niche)));
-  readonly creatorPlatforms = computed(() => this.unique(this.creators().flatMap((creator) => creator.channels)));
+  readonly creatorNiches = computed(() => this.unique(this.creatorDirectory().map((creator) => creator.niche)));
+  readonly creatorContentTags = computed(() => this.unique(this.creatorDirectory().flatMap((creator) => creator.contentTags)));
+  readonly creatorPlatforms = computed(() => this.unique(this.creatorDirectory().flatMap((creator) => creator.channels)));
   readonly campaignBrands = computed(() => this.unique(this.campaignListings().map((campaign) => campaign.brandName)));
   readonly jobBrands = computed(() => this.unique(this.availableJobs().map((job) => job.companyName)));
   readonly campaignCategories = computed(() => this.unique(this.campaignListings().map((campaign) => campaign.category)));
@@ -82,13 +91,14 @@ export class DiscoveryComponent {
 
   readonly allCreators = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
-    return this.creators()
+    return this.creatorDirectory()
       .filter((creator) => {
         const audience = this.creatorAudienceFilter();
         const engagement = Number(this.creatorEngagementFilter());
         const maxRate = Number(this.creatorRateFilter());
         return (!query || this.creatorSearchText(creator).includes(query))
           && (!this.creatorNicheFilter() || creator.niche === this.creatorNicheFilter())
+          && (!this.creatorTagFilter() || creator.contentTags.includes(this.creatorTagFilter()))
           && (!this.creatorPlatformFilter() || creator.channels.includes(this.creatorPlatformFilter()))
           && (!audience || (audience === 'under-100k' ? creator.audienceSize < 100_000
             : audience === '100k-500k' ? creator.audienceSize >= 100_000 && creator.audienceSize < 500_000
@@ -162,7 +172,7 @@ export class DiscoveryComponent {
 
   readonly creatorsForYou = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
-    return this.creators()
+    return this.creatorDirectory()
       .filter((creator) => !query || this.creatorSearchText(creator).includes(query))
       .slice()
       .sort((a, b) => b.engagementRate - a.engagementRate || b.trendingScore - a.trendingScore);
@@ -175,13 +185,14 @@ export class DiscoveryComponent {
     }
   }
 
-  updateFilter(event: Event, filter: 'creatorNiche' | 'creatorPlatform' | 'creatorAudience' | 'creatorEngagement' | 'creatorRate' | 'campaignCategory' | 'campaignBrand' | 'campaignStatus' | 'jobCategory' | 'jobBrand' | 'jobBudget' | 'jobDeadline'): void {
+  updateFilter(event: Event, filter: 'creatorNiche' | 'creatorTag' | 'creatorPlatform' | 'creatorAudience' | 'creatorEngagement' | 'creatorRate' | 'campaignCategory' | 'campaignBrand' | 'campaignStatus' | 'jobCategory' | 'jobBrand' | 'jobBudget' | 'jobDeadline'): void {
     const target = event.target;
     if (!(target instanceof HTMLSelectElement)) {
       return;
     }
     const filters = {
       creatorNiche: this.creatorNicheFilter,
+      creatorTag: this.creatorTagFilter,
       creatorPlatform: this.creatorPlatformFilter,
       creatorAudience: this.creatorAudienceFilter,
       creatorEngagement: this.creatorEngagementFilter,
@@ -227,6 +238,7 @@ export class DiscoveryComponent {
   showCreator(creator: CreatorAccount): void {
     this.dialogs.openDetails(creator.name, creator.bio, [
       { label: 'Niche', value: creator.niche },
+      { label: 'Content tags', value: creator.contentTags.join(', ') },
       { label: 'Audience', value: this.formatAudience(creator.audienceSize) },
       { label: 'Engagement', value: `${creator.engagementRate}%` },
       { label: 'Channels', value: creator.channels.join(', ') },
@@ -329,7 +341,7 @@ export class DiscoveryComponent {
   }
 
   private creatorSearchText(creator: CreatorAccount): string {
-    return `${creator.name} ${creator.handle} ${creator.niche} ${creator.bio} ${creator.channels.join(' ')}`.toLowerCase();
+    return `${creator.name} ${creator.handle} ${creator.niche} ${creator.contentTags.join(' ')} ${creator.bio} ${creator.channels.join(' ')}`.toLowerCase();
   }
 
   private campaignSearchText(campaign: DiscoveryCampaign | MarketplaceCampaign): string {

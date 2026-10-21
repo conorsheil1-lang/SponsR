@@ -1,0 +1,80 @@
+import { Injectable, signal } from '@angular/core';
+import { mockCreatorUser, type CreatorSocialLink, type CreatorUserProfile } from './mock-users';
+
+@Injectable({ providedIn: 'root' })
+export class CreatorProfileService {
+  readonly profile = signal<CreatorUserProfile>({
+    ...mockCreatorUser.profile,
+    contentTags: [...mockCreatorUser.profile.contentTags],
+    channels: [...mockCreatorUser.profile.channels],
+    languages: [...mockCreatorUser.profile.languages],
+    contentFormats: [...mockCreatorUser.profile.contentFormats],
+    audienceDemographics: {
+      ...mockCreatorUser.profile.audienceDemographics,
+      topLocations: [...mockCreatorUser.profile.audienceDemographics.topLocations],
+      audienceGenderSplit: { ...mockCreatorUser.profile.audienceDemographics.audienceGenderSplit }
+    },
+    rateCard: mockCreatorUser.profile.rateCard.map((item) => ({ ...item })),
+    socialLinks: mockCreatorUser.profile.socialLinks.map((link) => ({ ...link }))
+  });
+
+  addContentTag(value: string): void {
+    const tag = value.trim().toLocaleLowerCase();
+    if (!tag) {
+      return;
+    }
+    this.profile.update((profile) => profile.contentTags.includes(tag)
+      ? profile
+      : { ...profile, contentTags: [...profile.contentTags, tag] }
+    );
+  }
+
+  removeContentTag(tag: string): void {
+    this.profile.update((profile) => ({
+      ...profile,
+      contentTags: profile.contentTags.filter((current) => current !== tag)
+    }));
+  }
+
+  addSocialLink(link: CreatorSocialLink): void {
+    const platform = link.platform.trim();
+    const handle = link.handle.trim();
+    const url = link.url.trim();
+    if (!platform || !handle || !url) {
+      throw new Error('Choose a platform and enter both its handle and profile URL.');
+    }
+
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(url);
+    } catch {
+      throw new Error('Enter a valid platform profile URL.');
+    }
+    if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+      throw new Error('Platform profile links must use HTTP or HTTPS.');
+    }
+
+    this.profile.update((profile) => {
+      if (profile.socialLinks.some((current) => current.platform.toLowerCase() === platform.toLowerCase())) {
+        throw new Error(`${platform} is already linked. Remove the current link before adding another.`);
+      }
+      return {
+        ...profile,
+        channels: profile.channels.includes(platform) ? profile.channels : [...profile.channels, platform],
+        socialLinks: [...profile.socialLinks, { platform, handle, url }]
+      };
+    });
+  }
+
+  removeSocialLink(platform: string): void {
+    this.profile.update((profile) => {
+      const socialLinks = profile.socialLinks.filter((link) => link.platform !== platform);
+      const stillLinked = socialLinks.some((link) => link.platform === platform);
+      return {
+        ...profile,
+        socialLinks,
+        channels: stillLinked ? profile.channels : profile.channels.filter((channel) => channel !== platform)
+      };
+    });
+  }
+}

@@ -386,6 +386,23 @@
   border: 1px solid #edf0e9;
   border-radius: 6px;
   color: #758075;
+}
+
+.discovery-content-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.45rem;
+}
+
+.discovery-content-tags span {
+  padding: 0.22rem 0.42rem;
+  border: 1px solid #dce5d2;
+  border-radius: 999px;
+  background: #f4f7f0;
+  color: #5b744c;
+  font-size: 0.55rem;
+  font-weight: 650;
   font-size: 0.53rem;
 }
 

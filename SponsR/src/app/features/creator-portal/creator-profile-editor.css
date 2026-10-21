@@ -1,0 +1,166 @@
+app-root app-creator-portal .panel-heading > div { min-width: 0; }
+
+app-root app-creator-portal .panel-heading > div > p {
+  margin: 0.3rem 0 0;
+  color: #748078;
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
+app-root app-creator-portal .profile-completion {
+  flex: 0 0 auto;
+  padding: 0.36rem 0.55rem;
+  border-radius: 999px;
+  background: #edf3e4;
+  color: #557842;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+app-root app-creator-portal .social-profile-row { align-items: center; }
+
+app-root app-creator-portal .social-profile-row > a {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+app-root app-creator-portal .social-profile-row > a:hover strong { color: #557842; }
+app-root app-creator-portal .social-profile-row > a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+app-root app-creator-portal .remove-profile-item {
+  flex: 0 0 auto;
+  padding: 0.28rem 0.45rem;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8b9589;
+  cursor: pointer;
+  font-size: 0.63rem;
+}
+
+app-root app-creator-portal .remove-profile-item:hover { background: #f6e8e5; color: #9c493c; }
+
+app-root app-creator-portal .profile-editor-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #edf0e9;
+}
+
+app-root app-creator-portal .profile-editor-form label,
+app-root app-creator-portal .add-tag-form label {
+  min-width: 0;
+  display: grid;
+  gap: 0.3rem;
+  color: #69766a;
+  font-size: 0.63rem;
+  font-weight: 650;
+}
+
+app-root app-creator-portal .profile-editor-form label:nth-child(3),
+app-root app-creator-portal .profile-editor-form label:nth-child(4),
+app-root app-creator-portal .profile-editor-form .show-more-button { grid-column: 1 / -1; }
+
+app-root app-creator-portal .profile-editor-form input,
+app-root app-creator-portal .profile-editor-form select,
+app-root app-creator-portal .add-tag-form input {
+  width: 100%;
+  min-height: 36px;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid #e1e6dc;
+  border-radius: 8px;
+  background: #fff;
+  color: #39483b;
+  font: inherit;
+  font-size: 0.68rem;
+}
+
+app-root app-creator-portal .profile-editor-form .show-more-button {
+  justify-self: start;
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 9px;
+  background: #193b2a;
+  color: #fff;
+}
+
+app-root app-creator-portal .profile-editor-form .show-more-button:hover { background: #2b5a3e; text-decoration: none; }
+app-root app-creator-portal .profile-error { margin: 0.6rem 0 0; color: #9c493c; font-size: 0.68rem; }
+app-root app-creator-portal .creator-content-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+app-root app-creator-portal .creator-content-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.55rem 0.4rem 0.7rem;
+  border: 1px solid #dce5d2;
+  border-radius: 999px;
+  background: #f4f7f0;
+  color: #4e6841;
+  font-size: 0.68rem;
+  font-weight: 650;
+}
+
+app-root app-creator-portal .creator-content-tag button {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #74856a;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+app-root app-creator-portal .creator-content-tag button:hover { background: #e6eddd; color: #294432; }
+app-root app-creator-portal .empty-profile-copy { margin: 0; color: #889287; font-size: 0.72rem; }
+app-root app-creator-portal .tag-suggestions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-top: 1rem; }
+app-root app-creator-portal .tag-suggestions > span { margin-right: 0.2rem; color: #909a8d; font-size: 0.61rem; font-weight: 650; }
+
+app-root app-creator-portal .tag-suggestions button {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #e3e8df;
+  border-radius: 999px;
+  background: #fff;
+  color: #687566;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.6rem;
+}
+
+app-root app-creator-portal .tag-suggestions button:disabled { background: #edf3e4; color: #64804c; cursor: default; }
+app-root app-creator-portal .add-tag-form { display: grid; gap: 0.35rem; margin-top: 1rem; }
+app-root app-creator-portal .add-tag-form > div { display: flex; gap: 0.5rem; }
+
+app-root app-creator-portal .add-tag-form button {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.75rem;
+  border: 0;
+  border-radius: 8px;
+  background: #193b2a;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 650;
+}
+
+app-root app-creator-portal .add-tag-form button:hover { background: #2b5a3e; }
+
+@media (max-width: 620px) {
+  app-root app-creator-portal .profile-editor-form { grid-template-columns: 1fr; }
+  app-root app-creator-portal .profile-editor-form label,
+  app-root app-creator-portal .profile-editor-form label:nth-child(3),
+  app-root app-creator-portal .profile-editor-form label:nth-child(4),
+  app-root app-creator-portal .profile-editor-form .show-more-button { grid-column: auto; }
+}

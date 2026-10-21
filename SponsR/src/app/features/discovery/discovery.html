@@ -110,7 +110,7 @@
       <div>
         <p class="eyebrow">EXPLORE THE MARKETPLACE</p>
         <h3 id="all-creators-heading">All creators</h3>
-        <p class="section-description">Filter creator profiles by niche, channel, audience size, engagement, and typical rate.</p>
+        <p class="section-description">Filter creator profiles by content tags, niche, channel, audience size, engagement, and typical rate.</p>
       </div>
       <span class="result-count">{{ allCreators().length }} creators</span>
     </div>
@@ -119,6 +119,12 @@
         <select aria-label="Filter creators by niche" [value]="creatorNicheFilter()" (change)="updateFilter($event, 'creatorNiche')">
           <option value="">All tags</option>
           @for (niche of creatorNiches(); track niche) { <option [value]="niche">{{ niche }}</option> }
+        </select>
+      </label>
+      <label>Content type
+        <select aria-label="Filter creators by content tag" [value]="creatorTagFilter()" (change)="updateFilter($event, 'creatorTag')">
+          <option value="">Any content type</option>
+          @for (tag of creatorContentTags(); track tag) { <option [value]="tag">{{ tag }}</option> }
         </select>
       </label>
       <label>Platform
@@ -154,6 +160,7 @@
             <div class="profile-name"><h4>{{ creator.name }} @if (creator.verified) { <span class="verified" aria-label="Verified">✓</span> }</h4><span>{{ creator.handle }}</span></div>
           </div>
           <span class="niche-tag">{{ creator.niche }}</span>
+          <div class="discovery-content-tags">@for (tag of creator.contentTags; track tag) { <span>{{ tag }}</span> }</div>
           <p class="card-description">{{ creator.bio }}</p>
           <div class="channel-tags">@for (channel of creator.channels; track channel) { <span>{{ channel }}</span> }</div>
           <div class="card-stats">

@@ -17,6 +17,12 @@ export interface CreatorRateCardItem {
   currency: 'USD';
 }
 
+export interface CreatorSocialLink {
+  platform: string;
+  handle: string;
+  url: string;
+}
+
 export interface CreatorUserProfile extends CreatorAccount {
   email: string;
   location: string;
@@ -24,6 +30,7 @@ export interface CreatorUserProfile extends CreatorAccount {
   contentFormats: string[];
   audienceDemographics: CreatorAudienceDemographics;
   rateCard: CreatorRateCardItem[];
+  socialLinks: CreatorSocialLink[];
   mediaKitUrl: string;
   website: string;
 }
@@ -65,6 +72,7 @@ export const mockCreatorUser: MockCreatorUser = {
     email: 'creator@sponsr.com',
     handle: '@mayamakes',
     niche: 'Food & lifestyle',
+    contentTags: ['lifestyle', 'living', 'food'],
     bio: 'Approachable recipes, everyday rituals, and thoughtful finds for a slower, more joyful home life.',
     channels: ['Instagram', 'TikTok', 'YouTube'],
     audienceSize: 186000,
@@ -85,6 +93,11 @@ export const mockCreatorUser: MockCreatorUser = {
       { deliverable: 'Short-form video', platform: 'Instagram or TikTok', rate: 2400, currency: 'USD' },
       { deliverable: 'Story frames (3)', platform: 'Instagram', rate: 750, currency: 'USD' },
       { deliverable: 'Recipe photography set', platform: 'Instagram or Pinterest', rate: 1100, currency: 'USD' }
+    ],
+    socialLinks: [
+      { platform: 'Instagram', handle: '@mayamakes', url: 'https://instagram.com/mayamakes' },
+      { platform: 'TikTok', handle: '@mayamakes', url: 'https://tiktok.com/@mayamakes' },
+      { platform: 'YouTube', handle: '@MayaMakes', url: 'https://youtube.com/@MayaMakes' }
     ],
     mediaKitUrl: 'https://sponsr.example/creators/maya-chen',
     website: 'https://maya-chen.example'

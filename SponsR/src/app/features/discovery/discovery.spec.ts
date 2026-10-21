@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { DiscoveryComponent } from './discovery';
 import { SessionService } from '../../core/session.service';
 import { DialogService } from '../../core/dialog.service';
+import { CreatorProfileService } from '../../core/creator-profile.service';
 
 describe('DiscoveryComponent', () => {
   beforeEach(async () => {
@@ -91,6 +92,25 @@ describe('DiscoveryComponent', () => {
     component.creatorEngagementFilter.set('');
     component.creatorRateFilter.set('2000');
     expect(component.allCreators().every((creator) => creator.typicalRate <= 2_000)).toBe(true);
+  });
+
+  it('filters creators by content tags and reflects creator profile tag edits', () => {
+    TestBed.inject(SessionService).signIn({ type: 'company', name: 'Northstar Labs', email: 'company@sponsr.com' });
+    const fixture = TestBed.createComponent(DiscoveryComponent);
+    const component = fixture.componentInstance;
+
+    component.creatorTagFilter.set('tech');
+    expect(component.allCreators().map((creator) => creator.id)).toEqual([
+      'creator-noah-bennett',
+      'creator-eli-williams',
+      'creator-finn-murphy',
+      'creator-theo-brooks'
+    ]);
+
+    component.creatorTagFilter.set('');
+    TestBed.inject(CreatorProfileService).addContentTag('slow living');
+    component.creatorTagFilter.set('slow living');
+    expect(component.allCreators().map((creator) => creator.id)).toEqual(['creator-maya-chen']);
   });
 
   it('filters all campaigns and jobs by tag, brand, budget, and deadline', () => {
