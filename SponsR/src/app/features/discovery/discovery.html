@@ -204,13 +204,13 @@
             <span class="applicant-count">{{ campaign.applicants }} interested</span>
           </div>
           <div class="opportunity-card-actions">
-            <button type="button" class="discovery-card-action" (click)="showCampaign(campaign)">View campaign</button>
             <button
               type="button"
               class="interest-toggle-button"
               [class.registered]="isRegisteredForCampaign(campaign.id)"
               (click)="toggleCampaignInterest(campaign.id)"
             >{{ isRegisteredForCampaign(campaign.id) ? 'Interested ✓' : 'Register interest' }}</button>
+            <button type="button" class="discovery-card-action" (click)="showCampaign(campaign)">View campaign details</button>
           </div>
         </article>
       } @empty {
@@ -319,13 +319,13 @@
               <div class="campaign-footer"><div><span>CAMPAIGN BUDGET</span><strong>Set per related job</strong></div></div>
             }
             <div class="opportunity-card-actions">
-              <button type="button" class="discovery-card-action" (click)="showCampaign(campaign)">View campaign</button>
               <button
                 type="button"
                 class="interest-toggle-button"
                 [class.registered]="isRegisteredForCampaign(campaign.id)"
                 (click)="toggleCampaignInterest(campaign.id)"
               >{{ isRegisteredForCampaign(campaign.id) ? 'Interested ✓' : 'Register interest' }}</button>
+              <button type="button" class="discovery-card-action" (click)="showCampaign(campaign)">View campaign details</button>
             </div>
           </article>
         } @empty {
@@ -366,7 +366,6 @@
             <p class="card-description">{{ job.description }}</p>
             <div class="campaign-footer"><div><span>BUDGET</span><strong>{{ formatBudget(job.budgetMin, job.budgetMax) }}</strong></div></div>
             <div class="opportunity-card-actions">
-              <button type="button" class="discovery-card-action" (click)="showJob(job)">View job</button>
               <button
                 type="button"
                 class="interest-toggle-button"
@@ -374,6 +373,7 @@
                 [disabled]="!isJobInterestOpen(job)"
                 (click)="toggleJobInterest(job.id)"
               >{{ isRegisteredForJob(job.id) ? 'Interested ✓' : isJobInterestOpen(job) ? 'Register interest' : 'Closed' }}</button>
+              <button type="button" class="discovery-card-action" (click)="showJob(job)">View job details</button>
             </div>
           </article>
         } @empty {

@@ -13,6 +13,7 @@ import { SessionService } from '../core/session.service';
       <div class="dialog-backdrop" (click)="dialogs.close()">
         <section
           class="app-dialog"
+          [class.opportunity-dialog]="dialog.kind === 'opportunity'"
           role="dialog"
           aria-modal="true"
           [attr.aria-label]="dialog.kind === 'create-job' ? 'Create job' : dialog.kind === 'create-campaign' ? 'Create campaign' : dialog.title"
@@ -29,6 +30,51 @@ import { SessionService } from '../core/session.service';
                 <div><dt>{{ detail.label }}</dt><dd>{{ detail.value }}</dd></div>
               }
             </dl>
+          } @else if (dialog.kind === 'opportunity') {
+            <div class="opportunity-hero">
+              <p class="eyebrow">{{ dialog.opportunityType }} opportunity</p>
+              <div class="opportunity-heading-row">
+                <div>
+                  <span class="opportunity-category">{{ dialog.category }}</span>
+                  <h2>{{ dialog.title }}</h2>
+                  <p class="opportunity-company">A collaboration with <strong>{{ dialog.companyName }}</strong></p>
+                </div>
+                <span class="opportunity-status">{{ dialog.status }}</span>
+              </div>
+              <div class="opportunity-budget">
+                <span>CREATOR BUDGET</span>
+                <strong>{{ dialog.budget }}</strong>
+              </div>
+            </div>
+            <p class="opportunity-description">{{ dialog.description }}</p>
+            <dl class="opportunity-metrics">
+              @for (detail of dialog.metrics; track detail.label) {
+                <div><dt>{{ detail.label }}</dt><dd>{{ detail.value }}</dd></div>
+              }
+            </dl>
+            @if (dialog.opportunityType === 'Campaign') {
+              <section class="related-jobs">
+                <div class="related-jobs-heading">
+                  <h3>Jobs in this campaign</h3>
+                  <span>{{ dialog.relatedJobs.length }}</span>
+                </div>
+                @if (dialog.relatedJobs.length) {
+                  <div class="dialog-list">
+                    @for (item of dialog.relatedJobs; track item.title) {
+                      <article>
+                        <div><strong>{{ item.title }}</strong><span>{{ item.subtitle }}</span></div>
+                        @if (item.meta) { <small>{{ item.meta }}</small> }
+                      </article>
+                    }
+                  </div>
+                } @else {
+                  <p class="related-jobs-empty">This campaign hasn’t added any jobs yet.</p>
+                }
+              </section>
+            }
+            <div class="opportunity-dialog-actions">
+              <button type="button" class="dialog-primary" (click)="dialogs.close()">Done</button>
+            </div>
           } @else if (dialog.kind === 'list') {
             <p class="eyebrow">{{ dialog.eyebrow }}</p>
             <h2>{{ dialog.title }}</h2>

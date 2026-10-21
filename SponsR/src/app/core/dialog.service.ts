@@ -11,8 +11,21 @@ export interface DialogListItem {
   meta?: string;
 }
 
+export interface OpportunityDialogData {
+  opportunityType: 'Campaign' | 'Job';
+  title: string;
+  companyName: string;
+  category: string;
+  description: string;
+  status: string;
+  budget: string;
+  metrics: DialogDetail[];
+  relatedJobs: DialogListItem[];
+}
+
 export type AppDialog =
   | { kind: 'details'; title: string; eyebrow: string; description: string; details: DialogDetail[] }
+  | ({ kind: 'opportunity' } & OpportunityDialogData)
   | { kind: 'list'; title: string; eyebrow: string; description: string; items: DialogListItem[] }
   | { kind: 'create-job' }
   | { kind: 'create-campaign' };
@@ -23,6 +36,10 @@ export class DialogService {
 
   openDetails(title: string, description: string, details: DialogDetail[], eyebrow = 'DETAILS'): void {
     this.activeDialog.set({ kind: 'details', title, description, details, eyebrow });
+  }
+
+  openOpportunity(opportunity: OpportunityDialogData): void {
+    this.activeDialog.set({ kind: 'opportunity', ...opportunity });
   }
 
   openList(title: string, description: string, items: DialogListItem[], eyebrow = 'YOUR WORKSPACE'): void {

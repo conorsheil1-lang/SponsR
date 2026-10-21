@@ -22,6 +22,180 @@
   box-shadow: 0 24px 80px rgba(24, 38, 28, 0.22);
 }
 
+.app-dialog.opportunity-dialog {
+  width: min(100%, 700px);
+  padding: 0;
+  overflow: hidden auto;
+}
+
+.opportunity-hero {
+  padding: 2rem 2rem 1.5rem;
+  background:
+    radial-gradient(ellipse at 92% 5%, rgba(172, 196, 138, 0.34), transparent 35%),
+    linear-gradient(135deg, #eef3e5 0%, #f8f8f0 60%, #f2eee2 100%);
+}
+
+.app-dialog.opportunity-dialog .opportunity-hero .eyebrow {
+  color: #64794e;
+}
+
+.opportunity-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.9rem;
+}
+
+.app-dialog.opportunity-dialog h2 {
+  margin-top: 0.5rem;
+  color: #1d3325;
+  font-size: clamp(1.65rem, 5vw, 2.15rem);
+}
+
+.opportunity-category,
+.opportunity-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  color: #5f7749;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.opportunity-status {
+  flex: 0 0 auto;
+  background: #e3edd8;
+  color: #496b37;
+}
+
+.opportunity-company {
+  margin: 0.5rem 0 0;
+  color: #758173;
+  font-size: 0.82rem;
+}
+
+.opportunity-company strong {
+  color: #3b503d;
+}
+
+.opportunity-budget {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 1.4rem;
+}
+
+.opportunity-budget span {
+  color: #788572;
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+}
+
+.opportunity-budget strong {
+  color: #2e5736;
+  font-size: 1.45rem;
+  letter-spacing: -0.04em;
+}
+
+.opportunity-description {
+  margin: 0;
+  padding: 1.4rem 2rem 1.1rem;
+  color: #687568;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.opportunity-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0 2rem 1.4rem;
+}
+
+.opportunity-metrics > div {
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid #e9ede4;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.opportunity-metrics dt {
+  color: #879184;
+  font-size: 0.68rem;
+}
+
+.opportunity-metrics dd {
+  margin: 0.3rem 0 0;
+  color: #354937;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.related-jobs {
+  padding: 1.2rem 2rem 1.4rem;
+  border-top: 1px solid #edf0e9;
+  background: #fbfcf8;
+}
+
+.related-jobs-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.related-jobs-heading h3 {
+  margin: 0;
+  color: #344535;
+  font-size: 0.95rem;
+}
+
+.related-jobs-heading > span {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 50%;
+  background: #edf3e4;
+  color: #5f7749;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.related-jobs .dialog-list article {
+  align-items: center;
+  padding: 0.75rem 0.85rem;
+}
+
+.related-jobs-empty {
+  margin: 0;
+  padding: 0.85rem;
+  border: 1px dashed #dfe5d8;
+  border-radius: 12px;
+  color: #828d80;
+  font-size: 0.78rem;
+}
+
+.opportunity-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 2rem 1.5rem;
+}
+
+.opportunity-dialog-actions .dialog-primary {
+  min-width: 110px;
+  min-height: 44px;
+  font-size: 0.85rem;
+}
+
 .app-dialog .eyebrow {
   margin: 0 0 0.45rem;
   color: #77866e;
@@ -189,6 +363,35 @@
 @media (max-width: 560px) {
   .app-dialog {
     padding: 1.25rem;
+  }
+
+  .app-dialog.opportunity-dialog {
+    max-height: 94vh;
+  }
+
+  .opportunity-hero {
+    padding: 1.6rem 1.25rem 1.25rem;
+  }
+
+  .opportunity-heading-row {
+    flex-direction: column;
+  }
+
+  .opportunity-description {
+    padding: 1.2rem 1.25rem 0.9rem;
+  }
+
+  .opportunity-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0 1.25rem 1.2rem;
+  }
+
+  .related-jobs {
+    padding: 1.1rem 1.25rem;
+  }
+
+  .opportunity-dialog-actions {
+    padding: 0 1.25rem 1.25rem;
   }
 
   .dialog-form-row {

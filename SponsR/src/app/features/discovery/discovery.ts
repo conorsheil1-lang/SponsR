@@ -235,12 +235,40 @@ export class DiscoveryComponent {
   }
 
   showCampaign(campaign: DiscoveryCampaign): void {
-    this.dialogs.openDetails(campaign.title, campaign.description, [
-      { label: 'Brand', value: campaign.brandName },
+    const workspaceCampaign = this.workspace.campaigns().find((item) => item.id === campaign.id);
+    const relatedJobs = this.workspace.jobs()
+      .filter((job) => job.campaignId === campaign.id || job.campaignTitle === campaign.title)
+      .map((job) => ({
+        title: job.title,
+        subtitle: `${this.formatBudget(job.budgetMin, job.budgetMax)} · Interest closes ${this.formatDate(job.interestDeadline)}`,
+        meta: `${Math.max(job.creatorCapacity - job.assignedCreatorIds.length, 0)} spots`
+      }));
+    const metrics = [
       { label: 'Category', value: campaign.category },
-      { label: 'Budget', value: campaign.budgetMax ? this.formatBudget(campaign.budgetMin, campaign.budgetMax) : 'Set per related job' },
-      { label: 'Status', value: campaign.status }
-    ], 'OPEN CAMPAIGN');
+      { label: 'Interested creators', value: `${campaign.applicants}` }
+    ];
+    if (workspaceCampaign) {
+      metrics.push(
+        { label: 'Creator capacity', value: `${workspaceCampaign.creatorCapacity}` },
+        { label: 'Jobs in campaign', value: `${relatedJobs.length}` }
+      );
+    } else {
+      metrics.push({ label: 'Trending score', value: `${campaign.trendingScore}` });
+    }
+
+    this.dialogs.openOpportunity({
+      opportunityType: 'Campaign',
+      title: campaign.title,
+      companyName: campaign.brandName,
+      category: campaign.category,
+      description: campaign.description,
+      status: campaign.status,
+      budget: campaign.budgetMax
+        ? this.formatBudget(campaign.budgetMin, campaign.budgetMax)
+        : 'Set per related job',
+      metrics,
+      relatedJobs
+    });
   }
 
   isRegisteredForCampaign(campaignId: string): boolean {
@@ -264,14 +292,23 @@ export class DiscoveryComponent {
   }
 
   showJob(job: JobOpportunity): void {
-    this.dialogs.openDetails(job.title, job.description, [
-      { label: 'Company', value: job.companyName },
-      { label: 'Campaign', value: job.campaignTitle ?? 'Standalone job' },
-      { label: 'Category', value: job.category },
-      { label: 'Budget', value: this.formatBudget(job.budgetMin, job.budgetMax) },
-      { label: 'Interest deadline', value: this.formatDate(job.interestDeadline) },
-      { label: 'Delivery deadline', value: this.formatDate(job.deliveryDeadline) }
-    ], 'OPEN JOB');
+    this.dialogs.openOpportunity({
+      opportunityType: 'Job',
+      title: job.title,
+      companyName: job.companyName,
+      category: job.category,
+      description: job.description,
+      status: this.isJobInterestOpen(job) ? 'Accepting interest' : 'Interest closed',
+      budget: this.formatBudget(job.budgetMin, job.budgetMax),
+      metrics: [
+        { label: 'Campaign', value: job.campaignTitle ?? 'Standalone job' },
+        { label: 'Interest deadline', value: this.formatDate(job.interestDeadline) },
+        { label: 'Delivery deadline', value: this.formatDate(job.deliveryDeadline) },
+        { label: 'Creator spots', value: `${Math.max(job.creatorCapacity - job.assignedCreatorIds.length, 0)} of ${job.creatorCapacity} open` },
+        { label: 'Interested creators', value: `${job.interestedCreatorIds.length}` }
+      ],
+      relatedJobs: []
+    });
   }
 
   showCompany(company: CompanyAccount): void {

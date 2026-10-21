@@ -555,48 +555,56 @@
 }
 
 .discovery-card-action {
-  margin-top: 0.55rem;
-  padding: 0;
-  border: 0;
-  background: none;
+  min-height: 38px;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #e3e9dd;
+  border-radius: 9px;
+  background: #fff;
   color: #557842;
   cursor: pointer;
   font: inherit;
-  font-size: 0.57rem;
+  font-size: 0.7rem;
   font-weight: 700;
 }
 
 .opportunity-card-actions {
   width: 100%;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
   margin-top: 0.55rem;
-}
-
-.opportunity-card-actions .discovery-card-action {
-  margin: 0;
-  text-align: left;
 }
 
 .interest-toggle-button {
   min-width: 0;
-  padding: 0.35rem 0.4rem;
-  border: 1px solid #dce5d4;
-  border-radius: 7px;
-  background: #fff;
-  color: #557842;
+  min-height: 42px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #244d32;
+  border-radius: 10px;
+  background: #244d32;
+  color: #fff;
   cursor: pointer;
   font: inherit;
-  font-size: 0.52rem;
+  font-size: 0.74rem;
   font-weight: 700;
-  white-space: nowrap;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.interest-toggle-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #183c25;
+  background: #183c25;
 }
 
 .interest-toggle-button.registered {
   border-color: #d4e3c7;
   background: #edf3e4;
   color: #486a36;
+}
+
+.interest-toggle-button.registered:hover:not(:disabled) {
+  border-color: #b8cfa7;
+  background: #e3edd8;
 }
 
 .interest-toggle-button:disabled {

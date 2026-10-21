@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { DiscoveryComponent } from './discovery';
 import { SessionService } from '../../core/session.service';
+import { DialogService } from '../../core/dialog.service';
 
 describe('DiscoveryComponent', () => {
   beforeEach(async () => {
@@ -180,5 +181,31 @@ describe('DiscoveryComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.interest-toggle-button')).toBeNull();
+  });
+
+  it('opens detailed campaign and job dialogs from opportunity cards', () => {
+    TestBed.inject(SessionService).signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
+    const fixture = TestBed.createComponent(DiscoveryComponent);
+    const dialogs = TestBed.inject(DialogService);
+    fixture.detectChanges();
+
+    fixture.componentInstance.showCampaign(fixture.componentInstance.allCampaigns()[0]);
+    const campaignDialog = dialogs.activeDialog();
+    expect(campaignDialog?.kind).toBe('opportunity');
+    if (campaignDialog?.kind !== 'opportunity') {
+      throw new Error('Expected campaign opportunity dialog.');
+    }
+    expect(campaignDialog.opportunityType).toBe('Campaign');
+    expect(campaignDialog.metrics.map((metric) => metric.label)).toContain('Interested creators');
+
+    const job = fixture.componentInstance.allJobs()[0];
+    fixture.componentInstance.showJob(job);
+    const jobDialog = dialogs.activeDialog();
+    expect(jobDialog?.kind).toBe('opportunity');
+    if (jobDialog?.kind !== 'opportunity') {
+      throw new Error('Expected job opportunity dialog.');
+    }
+    expect(jobDialog.metrics.map((metric) => metric.label)).toContain('Interest deadline');
+    expect(jobDialog.metrics.map((metric) => metric.label)).toContain('Creator spots');
   });
 });
