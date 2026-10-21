@@ -30,7 +30,7 @@ describe('SignupComponent', () => {
       name: 'Avery Lane',
       email: 'avery@example.com'
     });
-    expect(router.url).toBe('/creator');
+    expect(router.url).toBe('/overview');
   });
 
   it('creates and signs in a company account', async () => {
@@ -47,7 +47,7 @@ describe('SignupComponent', () => {
     await fixture.whenStable();
 
     expect(session.currentUser()?.type).toBe('company');
-    expect(router.url).toBe('/company');
+    expect(router.url).toBe('/overview');
   });
 
   it('does not sign in with missing details or a short password', () => {

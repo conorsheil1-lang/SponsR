@@ -86,6 +86,11 @@ button, input {
   color: #5d6961;
   font-size: 0.8rem;
   font-weight: 600;
+  text-decoration: none;
+}
+
+.signed-in-name:hover {
+  color: #1e3b2a;
 }
 
 .site-actions .sign-up-link {

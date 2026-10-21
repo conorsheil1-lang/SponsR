@@ -268,6 +268,6 @@ export class LoginComponent {
       name: matchedUser.name,
       email: matchedUser.email
     });
-    this.router.navigateByUrl(this.selectedType() === 'creator' ? '/creator' : '/company');
+    this.router.navigateByUrl('/overview');
   }
 }

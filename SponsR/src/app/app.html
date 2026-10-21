@@ -15,7 +15,7 @@
 
   <div class="site-actions">
     @if (session.currentUser(); as user) {
-      <span class="signed-in-name">{{ user.name }}</span>
+      <a class="signed-in-name" routerLink="/overview">{{ user.name }}</a>
       <button class="sign-up-link sign-out-button" type="button" (click)="signOut()">Sign out</button>
     } @else {
       <a class="sign-in-link" routerLink="/login">Sign in</a>

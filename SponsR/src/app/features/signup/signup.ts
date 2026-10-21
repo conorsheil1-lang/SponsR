@@ -292,6 +292,6 @@ export class SignupComponent {
 
     this.errorMessage.set('');
     this.session.signIn({ type: this.selectedType(), name, email });
-    void this.router.navigateByUrl(this.selectedType() === 'creator' ? '/creator' : '/company');
+    void this.router.navigateByUrl('/overview');
   }
 }
