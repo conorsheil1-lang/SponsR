@@ -1,0 +1,267 @@
+.jobs-page {
+  gap: 1.6rem;
+}
+
+.jobs-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.jobs-section-heading h3 {
+  margin: 0;
+  color: #29382d;
+  font-size: 1.12rem;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
+.jobs-section-heading > div > p:last-child {
+  margin: 0.25rem 0 0;
+  color: #838d82;
+  font-size: 0.68rem;
+}
+
+.campaign-opportunity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.7rem;
+}
+
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.job-card {
+  min-width: 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid #e6e9e1;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(48, 65, 43, 0.035);
+}
+
+.job-card-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.job-category,
+.capacity-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.48rem;
+  border-radius: 999px;
+  background: #f0f3eb;
+  color: #637a53;
+  font-size: 0.53rem;
+  font-weight: 650;
+}
+
+.capacity-pill {
+  background: #f7f8f5;
+  color: #778276;
+  white-space: nowrap;
+}
+
+.job-card h4 {
+  margin: 0.55rem 0 0;
+  color: #2b3a2f;
+  font-size: 0.88rem;
+  font-weight: 680;
+  letter-spacing: -0.025em;
+}
+
+.job-description,
+.job-company {
+  margin: 0.35rem 0 0;
+  color: #788277;
+  font-size: 0.65rem;
+  line-height: 1.5;
+}
+
+.job-company {
+  color: #53694a;
+  font-weight: 650;
+}
+
+.job-company span {
+  color: #879184;
+  font-weight: 450;
+}
+
+.campaign-opportunity-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+  color: #7d887b;
+  font-size: 0.58rem;
+}
+
+.job-interest-button,
+.shortlist-button {
+  min-height: 31px;
+  padding: 0.42rem 0.65rem;
+  border: 1px solid #193b2a;
+  border-radius: 999px;
+  background: #193b2a;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.58rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.job-interest-button:hover,
+.shortlist-button:hover {
+  background: #2b5a3e;
+}
+
+.job-interest-button.registered,
+.shortlist-button.shortlisted {
+  border-color: #c8d9b4;
+  background: #edf3e4;
+  color: #4f7039;
+}
+
+.job-interest-button:disabled,
+.shortlist-button:disabled {
+  border-color: #e4e8e0;
+  background: #f1f2ef;
+  color: #9aa197;
+  cursor: not-allowed;
+}
+
+.campaign-opportunity-card .job-interest-button {
+  width: 100%;
+  margin-top: 0.65rem;
+}
+
+.job-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4rem;
+  margin-top: 0.75rem;
+}
+
+.job-details > span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.job-details small {
+  color: #969f94;
+  font-size: 0.47rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.job-details strong {
+  color: #455c3c;
+  font-size: 0.63rem;
+  font-weight: 650;
+}
+
+.creator-job-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid #f0f2ed;
+}
+
+.interest-deadline-copy {
+  color: #899388;
+  font-size: 0.57rem;
+}
+
+.interested-creators {
+  margin-top: 0.8rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid #f0f2ed;
+}
+
+.interested-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+  color: #465344;
+  font-size: 0.61rem;
+}
+
+.interested-heading > span {
+  color: #879184;
+  font-size: 0.57rem;
+}
+
+.interested-creator-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-top: 1px solid #f4f5f2;
+}
+
+.creator-initials {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  flex: 0 0 27px;
+  place-items: center;
+  border-radius: 50%;
+  background: #e8efdf;
+  color: #557442;
+  font-size: 0.52rem;
+  font-weight: 700;
+}
+
+.interested-creator-info {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.interested-creator-info strong {
+  overflow: hidden;
+  color: #3d493d;
+  font-size: 0.59rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.interested-creator-info small {
+  overflow: hidden;
+  color: #919a8e;
+  font-size: 0.51rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.no-interested-creators {
+  margin: 0.45rem 0 0;
+  color: #929b90;
+  font-size: 0.58rem;
+}
+
+@media (max-width: 600px) {
+  .job-details {
+    gap: 0.85rem;
+  }
+
+  .creator-job-action {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,136 @@
+<section class="creator-workspace-page jobs-page">
+  <header class="workspace-page-heading">
+    <div>
+      <p class="eyebrow">{{ isCompany ? 'COMPANY WORKSPACE' : 'CREATOR WORKSPACE' }}</p>
+      <h2>{{ isCompany ? 'Jobs' : 'Find your next job' }}</h2>
+      <p>
+        {{ isCompany
+          ? 'Manage openings, review interested creators, and build your shortlist.'
+          : 'Explore individual opportunities, or register interest in a campaign.' }}
+      </p>
+    </div>
+    @if (isCompany) {
+      <span class="page-count">{{ jobs().length }} open jobs</span>
+    } @else {
+      <span class="page-count">{{ availableJobs().length }} accepting interest</span>
+    }
+  </header>
+
+  <section class="jobs-section">
+    <div class="jobs-section-heading">
+      <div>
+        <p class="eyebrow">CAMPAIGN UMBRELLAS</p>
+        <h3>Campaigns</h3>
+        <p>{{ isCompany ? 'See capacity and campaign-level interest.' : 'Register interest in a campaign to be considered across its related work.' }}</p>
+      </div>
+    </div>
+    <div class="campaign-opportunity-grid">
+      @for (campaign of campaigns(); track campaign.id) {
+        <article class="job-card campaign-opportunity-card">
+          <div class="job-card-topline">
+            <span class="job-category">Campaign</span>
+            <span class="capacity-pill">{{ getCampaignAssignedCount(campaign) }} / {{ campaign.creatorCapacity }} creators</span>
+          </div>
+          <h4>{{ campaign.title }}</h4>
+          <p class="job-description">{{ campaign.description }}</p>
+          <div class="campaign-opportunity-meta">
+            <span>{{ getCampaignInterestCount(campaign) }} interested</span>
+            <span>{{ getCampaignJobCount(campaign.id) }} related jobs</span>
+          </div>
+          @if (!isCompany) {
+            <button
+              type="button"
+              class="job-interest-button"
+              [class.registered]="isInterestedInCampaign(campaign.id)"
+              (click)="toggleCampaignInterest(campaign.id)"
+            >
+              {{ isInterestedInCampaign(campaign.id) ? 'Interest registered ✓' : 'Register campaign interest' }}
+            </button>
+          }
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="jobs-section">
+    <div class="jobs-section-heading">
+      <div>
+        <p class="eyebrow">{{ isCompany ? 'YOUR OPENINGS' : 'OPEN OPPORTUNITIES' }}</p>
+        <h3>{{ isCompany ? 'Job listings' : 'Available jobs' }}</h3>
+        <p>{{ isCompany ? 'Review applicants for each job and shortlist creators for a proposal.' : 'Every job has its own interest cutoff and delivery deadline.' }}</p>
+      </div>
+    </div>
+
+    <div class="job-list">
+      @for (job of isCompany ? jobs() : availableJobs(); track job.id) {
+        <article class="job-card">
+          <div class="job-main">
+            <div class="job-card-topline">
+              <span class="job-category">{{ job.category }}</span>
+              <span class="capacity-pill">{{ job.assignedCreatorIds.length }} / {{ job.creatorCapacity }} creators assigned</span>
+            </div>
+            <h4>{{ job.title }}</h4>
+            <p class="job-company">{{ job.companyName }} @if (job.campaignTitle) { <span>· {{ job.campaignTitle }}</span> }</p>
+            <p class="job-description">{{ job.description }}</p>
+            <div class="job-details">
+              <span><small>BUDGET</small><strong>{{ formatBudget(job.budgetMin, job.budgetMax) }}</strong></span>
+              <span><small>INTEREST BY</small><strong>{{ formatDate(job.interestDeadline) }}</strong></span>
+              <span><small>DELIVERY DUE</small><strong>{{ formatDate(job.deliveryDeadline) }}</strong></span>
+            </div>
+          </div>
+
+          @if (isCompany) {
+            <div class="interested-creators">
+              <div class="interested-heading">
+                <strong>Interested creators</strong>
+                <span>{{ getInterestedCreators(job).length }}</span>
+              </div>
+              @for (creator of getInterestedCreators(job); track creator.id) {
+                <div class="interested-creator-row">
+                  <span class="creator-initials">{{ getInitials(creator.name) }}</span>
+                  <span class="interested-creator-info">
+                    <strong>{{ creator.name }}</strong>
+                    <small>{{ creator.niche }} · {{ formatAudience(creator.audienceSize) }} audience</small>
+                  </span>
+                  <button
+                    type="button"
+                    class="shortlist-button"
+                    [class.shortlisted]="isShortlisted(job, creator.id)"
+                    (click)="toggleShortlist(job.id, creator.id)"
+                  >
+                    {{ isShortlisted(job, creator.id) ? 'Shortlisted ✓' : 'Shortlist' }}
+                  </button>
+                </div>
+              } @empty {
+                <p class="no-interested-creators">No creator interest yet.</p>
+              }
+            </div>
+          } @else {
+            <div class="creator-job-action">
+              <span class="interest-deadline-copy">
+                {{ isInterestOpen(job)
+                  ? 'Interest closes ' + formatDate(job.interestDeadline)
+                  : 'Interest registration closed' }}
+              </span>
+              <button
+                type="button"
+                class="job-interest-button"
+                [class.registered]="isInterestedInJob(job.id)"
+                [disabled]="!isInterestOpen(job)"
+                (click)="toggleJobInterest(job.id)"
+              >
+                {{ !isInterestOpen(job)
+                  ? 'Closed'
+                  : isInterestedInJob(job.id)
+                    ? 'Interest registered ✓'
+                    : 'Register interest' }}
+              </button>
+            </div>
+          }
+        </article>
+      } @empty {
+        <p class="workspace-empty">No jobs are currently open for interest.</p>
+      }
+    </div>
+  </section>
+</section>

@@ -72,6 +72,7 @@ describe('App', () => {
     expect(compiled.querySelector('.sidebar')).toBeTruthy();
     expect(compiled.querySelector('.user-card')?.textContent).toContain('Maya Chen');
     expect(compiled.querySelector('.nav')?.textContent).toContain('Media Kit');
+    expect(compiled.querySelector('.nav')?.textContent).toContain('Jobs');
     expect(compiled.querySelector('.nav')?.textContent).toContain('Proposals');
     expect(compiled.querySelector('.nav')?.textContent).toContain('Deadlines');
     expect(compiled.querySelector('.nav')?.textContent).toContain('Payments');
@@ -109,6 +110,7 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.sidebar')).toBeTruthy();
     expect(compiled.querySelector('.nav')?.textContent).toContain('Company Portal');
+    expect(compiled.querySelector('.nav')?.textContent).toContain('Jobs');
     expect(compiled.querySelector('.nav')?.textContent).not.toContain('Media Kit');
   });
 

@@ -14,6 +14,7 @@ import { requireAccountType, requireSession } from './core/session.guard';
 import { SignupComponent } from './features/signup/signup';
 import { ProposalsComponent } from './features/proposals/proposals';
 import { DeadlinesComponent } from './features/deadlines/deadlines';
+import { JobsComponent } from './features/jobs/jobs';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent, pathMatch: 'full' },
@@ -27,6 +28,7 @@ export const routes: Routes = [
   { path: 'media-kit', component: MediaKitComponent, canActivate: [requireAccountType('creator')] },
   { path: 'proposals', component: ProposalsComponent, canActivate: [requireAccountType('creator')] },
   { path: 'deadlines', component: DeadlinesComponent, canActivate: [requireAccountType('creator')] },
+  { path: 'jobs', component: JobsComponent, canActivate: [requireSession] },
   { path: 'campaigns', component: CampaignsComponent, canActivate: [requireSession] },
   { path: 'messaging', component: MessagingComponent, canActivate: [requireSession] },
   { path: 'payments', component: PaymentsComponent, canActivate: [requireSession] },
