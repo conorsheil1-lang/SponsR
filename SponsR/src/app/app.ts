@@ -24,7 +24,7 @@ export class App {
   }
 
   private isPublicRoute(url: string): boolean {
-    return url === '/' || url.startsWith('/login') || url.startsWith('/signup') || url.startsWith('/discovery');
+    return url === '/' || url.startsWith('/login') || url.startsWith('/signup');
   }
 
   protected signOut(): void {

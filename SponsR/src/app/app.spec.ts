@@ -42,6 +42,23 @@ describe('App', () => {
     expect(compiled.querySelector('.topbar')).toBeNull();
   });
 
+  it('shows the signed-in workspace sidebar on Discover without the overview summary', async () => {
+    const fixture = TestBed.createComponent(App);
+    const session = TestBed.inject(SessionService);
+    const router = TestBed.inject(Router);
+    session.signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
+    await router.navigateByUrl('/discovery');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('app-discovery')).toBeTruthy();
+    expect(compiled.querySelector('.sidebar')).toBeTruthy();
+    expect(compiled.querySelector('.nav')?.textContent).toContain('Discover');
+    expect(compiled.querySelector('.overview-grid')).toBeNull();
+    expect(compiled.querySelector('.topbar')).toBeNull();
+  });
+
   it('shows creator navigation only for a signed-in creator', async () => {
     const fixture = TestBed.createComponent(App);
     const session = TestBed.inject(SessionService);
@@ -55,7 +72,29 @@ describe('App', () => {
     expect(compiled.querySelector('.sidebar')).toBeTruthy();
     expect(compiled.querySelector('.user-card')?.textContent).toContain('Maya Chen');
     expect(compiled.querySelector('.nav')?.textContent).toContain('Media Kit');
+    expect(compiled.querySelector('.nav')?.textContent).toContain('Proposals');
+    expect(compiled.querySelector('.nav')?.textContent).toContain('Deadlines');
+    expect(compiled.querySelector('.nav')?.textContent).toContain('Payments');
     expect(compiled.querySelector('.nav')?.textContent).not.toContain('Company Portal');
+    expect(compiled.querySelector('.nav')?.textContent).not.toContain('Messaging');
+  });
+
+  it('shows the creator overview dashboard with notifications and work summaries', async () => {
+    const fixture = TestBed.createComponent(App);
+    const session = TestBed.inject(SessionService);
+    const router = TestBed.inject(Router);
+    session.signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
+    await router.navigateByUrl('/overview');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('app-creator-overview')).toBeTruthy();
+    expect(compiled.textContent).toContain('Notifications');
+    expect(compiled.textContent).toContain('Next payout');
+    expect(compiled.textContent).toContain('Recent proposals');
+    expect(compiled.textContent).toContain('Upcoming deadlines');
+    expect(compiled.textContent).toContain('Campaigns');
   });
 
   it('shows company navigation only for a signed-in company', async () => {

@@ -1,5 +1,6 @@
 @import './app/features/landing/landing.css';
 @import './app/features/discovery/discovery.css';
+@import './app/features/overview/creator-overview.css';
 
 html, body {
   margin: 0;

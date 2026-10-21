@@ -42,13 +42,18 @@
         @if (session.currentUser()?.type === 'creator') {
           <a routerLink="/creator" routerLinkActive="active">Creator Portal</a>
           <a routerLink="/media-kit" routerLinkActive="active">Media Kit</a>
+          <a routerLink="/discovery">Discover</a>
+          <a routerLink="/campaigns" routerLinkActive="active">Campaigns</a>
+          <a routerLink="/proposals" routerLinkActive="active">Proposals</a>
+          <a routerLink="/deadlines" routerLinkActive="active">Deadlines</a>
+          <a routerLink="/payments" routerLinkActive="active">Payments</a>
         } @else {
           <a routerLink="/company" routerLinkActive="active">Company Portal</a>
+          <a routerLink="/discovery">Discover</a>
+          <a routerLink="/campaigns" routerLinkActive="active">Campaigns</a>
+          <a routerLink="/messaging" routerLinkActive="active">Messaging</a>
+          <a routerLink="/payments" routerLinkActive="active">Payments</a>
         }
-        <a routerLink="/discovery">Discover</a>
-        <a routerLink="/campaigns" routerLinkActive="active">Campaigns</a>
-        <a routerLink="/messaging" routerLinkActive="active">Messaging</a>
-        <a routerLink="/payments" routerLinkActive="active">Payments</a>
       </nav>
 
       <div class="user-card">

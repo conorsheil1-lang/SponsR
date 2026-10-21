@@ -1,0 +1,386 @@
+.creator-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.creator-welcome,
+.creator-dashboard-grid,
+.creator-metrics {
+  display: grid;
+  gap: 1rem;
+}
+
+.creator-welcome {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.creator-welcome h2,
+.workspace-page-heading h2 {
+  margin: 0;
+  color: #1b2a20;
+  font-size: clamp(1.8rem, 3vw, 2.45rem);
+  font-weight: 550;
+  letter-spacing: -0.06em;
+}
+
+.creator-welcome > div > p:last-child,
+.workspace-page-heading > div > p:last-child {
+  margin: 0.35rem 0 0;
+  color: #768078;
+  font-size: 0.78rem;
+}
+
+.creator-welcome .eyebrow,
+.workspace-page-heading .eyebrow,
+.dashboard-panel .eyebrow {
+  margin: 0 0 0.35rem;
+  color: #748274;
+  font-size: 0.6rem;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+}
+
+.dashboard-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  background: #193b2a;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.creator-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.creator-metric,
+.dashboard-panel,
+.creator-workspace-card {
+  border: 1px solid #e6e9e1;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(48, 65, 43, 0.035);
+}
+
+.creator-metric {
+  min-height: 105px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.27rem;
+  padding: 0.9rem 1rem;
+}
+
+.creator-metric.accent {
+  background: #edf3e4;
+}
+
+.creator-metric > span,
+.creator-metric > small {
+  color: #7a857a;
+  font-size: 0.66rem;
+}
+
+.creator-metric > strong {
+  color: #29382d;
+  font-size: 1.55rem;
+  letter-spacing: -0.05em;
+}
+
+.creator-metric > small {
+  font-size: 0.57rem;
+}
+
+.creator-dashboard-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dashboard-panel {
+  min-width: 0;
+  padding: 1rem;
+}
+
+.dashboard-panel-heading,
+.dashboard-panel-heading > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dashboard-panel-heading h3 {
+  margin: 0;
+  color: #2a392e;
+  font-size: 0.95rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.dashboard-panel-heading > a {
+  color: #557842;
+  font-size: 0.65rem;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.notification-count {
+  display: inline-grid;
+  width: 19px;
+  height: 19px;
+  place-items: center;
+  border-radius: 50%;
+  background: #edf3e4;
+  color: #577740;
+  font-size: 0.58rem;
+  vertical-align: 0.08em;
+}
+
+.dashboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashboard-list li {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0;
+  border-top: 1px solid #f0f2ed;
+}
+
+.list-copy {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.list-copy strong {
+  overflow: hidden;
+  color: #39473c;
+  font-size: 0.68rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-copy > span,
+.dashboard-list time {
+  overflow: hidden;
+  color: #8b958a;
+  font-size: 0.57rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-list time {
+  flex: 0 0 auto;
+  font-size: 0.52rem;
+}
+
+.notification-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: #9bb773;
+}
+
+.notification-dot.payment { background: #7aa58f; }
+.notification-dot.campaign { background: #d5a77e; }
+
+.deadline-date {
+  min-width: 56px;
+  padding: 0.36rem 0.4rem;
+  border-radius: 7px;
+  background: #eff3e9;
+  color: #5d7946;
+  font-size: 0.57rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.deadline-date.due-soon {
+  background: #f8eee4;
+  color: #a26f43;
+}
+
+.proposal-status,
+.deadline-priority {
+  flex: 0 0 auto;
+  padding: 0.33rem 0.48rem;
+  border-radius: 999px;
+  background: #f0f2ec;
+  color: #6c7968;
+  font-size: 0.51rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.proposal-status.shortlisted,
+.proposal-status.accepted {
+  background: #edf3e4;
+  color: #52743c;
+}
+
+.proposal-status.needs-update,
+.deadline-priority.due-soon {
+  background: #f8eee4;
+  color: #9d6b42;
+}
+
+.deadline-priority.upcoming {
+  background: #eff3e9;
+  color: #647952;
+}
+
+.campaign-mark,
+.workspace-card-mark {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 10px;
+  background: #e7efdc;
+  color: #52713d;
+  font-family: Georgia, serif;
+  font-size: 0.85rem;
+}
+
+.campaign-amount {
+  flex: 0 0 auto;
+  color: #496a3b;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.creator-workspace-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.workspace-page-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.25rem 0 0.35rem;
+}
+
+.page-count {
+  padding: 0.45rem 0.65rem;
+  border-radius: 999px;
+  background: #edf3e4;
+  color: #607a4d;
+  font-size: 0.6rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.proposal-cards,
+.deadline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.creator-workspace-card {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+}
+
+.proposal-info,
+.deadline-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.proposal-info h3,
+.deadline-info h3 {
+  overflow: hidden;
+  margin: 0;
+  color: #2c3a30;
+  font-size: 0.8rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.proposal-info p,
+.deadline-info p {
+  overflow: hidden;
+  margin: 0.25rem 0 0;
+  color: #899388;
+  font-size: 0.63rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.proposal-amount {
+  color: #435e38;
+  font-size: 0.73rem;
+}
+
+.deadline-item .deadline-date {
+  min-width: 64px;
+}
+
+.workspace-empty {
+  margin: 0;
+  padding: 1.5rem;
+  border: 1px dashed #dfe5d8;
+  border-radius: 12px;
+  color: #778177;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  .creator-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .creator-welcome {
+    align-items: flex-start;
+    grid-template-columns: 1fr;
+  }
+
+  .creator-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .creator-workspace-card {
+    flex-wrap: wrap;
+  }
+
+  .proposal-amount {
+    margin-left: auto;
+  }
+
+  .proposal-status {
+    margin-left: 2.5rem;
+  }
+}
