@@ -43,7 +43,12 @@
           <a routerLink="/discovery">Discover</a>
           <a routerLink="/campaigns" routerLinkActive="active">Campaigns</a>
           <a routerLink="/jobs" routerLinkActive="active">Jobs</a>
-          <a routerLink="/proposals" routerLinkActive="active">Proposals</a>
+          <a routerLink="/proposals" routerLinkActive="active">
+            <span>Proposals</span>
+            @if (pendingProposalCount() > 0) {
+              <span class="nav-badge" [attr.aria-label]="pendingProposalCount() + ' pending proposals'">{{ pendingProposalCount() }}</span>
+            }
+          </a>
           <a routerLink="/deadlines" routerLinkActive="active">Deadlines</a>
           <a routerLink="/payments" routerLinkActive="active">Payments</a>
         } @else {

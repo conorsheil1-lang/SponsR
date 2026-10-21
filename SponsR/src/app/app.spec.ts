@@ -3,6 +3,8 @@ import { provideRouter, Router } from '@angular/router';
 import { App } from './app';
 import { routes } from './app.routes';
 import { SessionService } from './core/session.service';
+import { creatorProposals } from './core/creator-workspace-data';
+import { DialogService } from './core/dialog.service';
 
 describe('App', () => {
   beforeEach(async () => {
@@ -46,6 +48,7 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     const session = TestBed.inject(SessionService);
     const router = TestBed.inject(Router);
+    const dialogs = TestBed.inject(DialogService);
     session.signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
     await router.navigateByUrl('/discovery');
     await fixture.whenStable();
@@ -78,6 +81,39 @@ describe('App', () => {
     expect(compiled.querySelector('.nav')?.textContent).toContain('Payments');
     expect(compiled.querySelector('.nav')?.textContent).not.toContain('Company Portal');
     expect(compiled.querySelector('.nav')?.textContent).not.toContain('Messaging');
+  });
+
+  it('shows and updates the pending proposal count in creator navigation', async () => {
+    const fixture = TestBed.createComponent(App);
+    const session = TestBed.inject(SessionService);
+    const router = TestBed.inject(Router);
+    session.signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
+    await router.navigateByUrl('/creator');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const badge = fixture.nativeElement.querySelector('.nav-badge') as HTMLElement;
+    expect(badge.textContent?.trim()).toBe('3');
+    expect(badge.getAttribute('aria-label')).toBe('3 pending proposals');
+
+    const pendingProposal = creatorProposals.find((proposal) => proposal.status === 'In review');
+    if (!pendingProposal) {
+      throw new Error('Expected a proposal awaiting review.');
+    }
+    const previousStatus = pendingProposal.status;
+    const previousStatus = pendingProposal.status;
+    dialogs.confirmProposalDecision({
+      decision: 'Accept',
+      title: 'Accept this proposal?',
+      description: 'Test confirmation.',
+      confirmLabel: 'Confirm acceptance',
+      onConfirm: () => { pendingProposal.status = 'Accepted'; }
+    });
+    dialogs.applyProposalDecision();
+    fixture.detectChanges();
+
+    expect(badge.textContent?.trim()).toBe('2');
+    pendingProposal.status = previousStatus;
   });
 
   it('shows the creator overview dashboard with notifications and work summaries', async () => {

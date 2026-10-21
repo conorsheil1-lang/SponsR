@@ -44,6 +44,7 @@ export type AppDialog =
 export class DialogService {
   readonly activeDialog = signal<AppDialog | null>(null);
   readonly proposalConfirmation = signal<ProposalDecisionConfirmation | null>(null);
+  readonly proposalStatusVersion = signal(0);
 
   openDetails(title: string, description: string, details: DialogDetail[], eyebrow = 'DETAILS'): void {
     this.activeDialog.set({ kind: 'details', title, description, details, eyebrow });
@@ -72,6 +73,7 @@ export class DialogService {
       return;
     }
     confirmation.onConfirm();
+    this.proposalStatusVersion.update((version) => version + 1);
     this.proposalConfirmation.set(null);
     this.activeDialog.set(null);
   }
