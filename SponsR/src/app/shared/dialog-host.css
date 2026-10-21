@@ -429,6 +429,45 @@
 .dialog-review-action:hover { background: #2b5a3e; }
 .opportunity-submissions { padding-top: 0.8rem; }
 
+.opportunity-creator-row {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.opportunity-creator-row .dialog-reference-link {
+  min-width: 210px;
+}
+
+.opportunity-creator-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.opportunity-creator-actions .dialog-primary,
+.opportunity-creator-actions .dialog-secondary {
+  min-height: 34px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.67rem;
+}
+
+.opportunity-creator-actions .dialog-primary:disabled {
+  border-color: #dfe5da;
+  background: #e8ebe4;
+  color: #899287;
+  cursor: not-allowed;
+}
+
+.opportunity-creator-row .dialog-reference-link small {
+  color: #7b8878;
+  font-size: 0.64rem;
+}
+
+.dialog-form .dialog-actions {
+  margin-top: 0.25rem;
+}
+
 .related-jobs-empty {
   margin: 0;
   padding: 0.85rem;

@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DialogService, type DialogListItem } from '../../core/dialog.service';
+import { DialogService, type DialogDetail, type DialogListItem } from '../../core/dialog.service';
 import { mockCreatorAccounts } from '../../core/marketplace-mock-data';
 import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
 import { SessionService } from '../../core/session.service';
@@ -30,7 +30,7 @@ import type { JobOpportunity } from '../../core/job-marketplace-data';
         <article class="creator-metric">
           <span>Interested creators</span>
           <strong>{{ interestedCreatorCount() }}</strong>
-          <small>Across your open job listings</small>
+          <small>Across your campaigns and jobs</small>
         </article>
         <article class="creator-metric">
           <span>Shortlisted</span>
@@ -75,6 +75,24 @@ import type { JobOpportunity } from '../../core/job-marketplace-data';
               </li>
             } @empty {
               <li><div class="list-copy"><strong>No open jobs</strong><span>Create a job to start receiving creator interest.</span></div></li>
+            }
+          </ul>
+        </section>
+
+        <section class="dashboard-panel">
+          <div class="dashboard-panel-heading">
+            <div><p class="eyebrow">CREATOR INTEREST</p><h3>Interested creators</h3></div>
+            <button class="dashboard-view-action" type="button" (click)="showAllInterestedCreators()">View all</button>
+          </div>
+          <ul class="dashboard-list">
+            @for (creator of interestedCreators().slice(0, 3); track creator.id) {
+              <li>
+                <span class="company-creator-avatar">{{ getInitials(creator.name) }}</span>
+                <div class="list-copy"><strong>{{ creator.name }}</strong><span>{{ creator.niche }} · {{ creator.interestedFor }}</span></div>
+                <button class="row-detail-action" type="button" (click)="showCreator(creator)">View</button>
+              </li>
+            } @empty {
+              <li><div class="list-copy"><strong>No creator interest yet</strong><span>Creators who register for your jobs will appear here.</span></div></li>
             }
           </ul>
         </section>
@@ -134,19 +152,53 @@ export class CompanyOverviewComponent {
     this.jobs().filter((job) => new Date(`${job.interestDeadline}T23:59:59`).getTime() >= Date.now())
   );
   protected readonly interestedCreatorCount = computed(() =>
-    new Set(this.jobs().flatMap((job) => job.interestedCreatorIds)).size
+    this.interestedCreators().length
   );
-  protected readonly shortlistedCreators = computed(() => {
-    const assignments = this.jobs().flatMap((job) =>
-      job.shortlistedCreatorIds.map((creatorId) => ({
-        creatorId,
-        jobTitle: job.title
-      }))
-    );
-    const uniqueAssignments = new Map(assignments.map((assignment) => [assignment.creatorId, assignment.jobTitle]));
+  protected readonly interestedCreators = computed(() => {
+    const opportunitiesByCreator = new Map<string, string[]>();
+    for (const campaign of this.campaigns()) {
+      for (const creatorId of campaign.interestedCreatorIds) {
+        const titles = opportunitiesByCreator.get(creatorId) ?? [];
+        titles.push(campaign.title);
+        opportunitiesByCreator.set(creatorId, titles);
+      }
+    }
+    for (const job of this.jobs()) {
+      for (const creatorId of job.interestedCreatorIds) {
+        const titles = opportunitiesByCreator.get(creatorId) ?? [];
+        titles.push(job.title);
+        opportunitiesByCreator.set(creatorId, titles);
+      }
+    }
     return mockCreatorAccounts
-      .filter((creator) => uniqueAssignments.has(creator.id))
-      .map((creator) => ({ ...creator, shortlistedFor: uniqueAssignments.get(creator.id) ?? '' }));
+      .filter((creator) => opportunitiesByCreator.has(creator.id))
+      .map((creator) => ({
+        ...creator,
+        interestedFor: (opportunitiesByCreator.get(creator.id) ?? []).join(', ')
+      }));
+  });
+  protected readonly shortlistedCreators = computed(() => {
+    const opportunitiesByCreator = new Map<string, string[]>();
+    for (const campaign of this.campaigns()) {
+      for (const creatorId of campaign.shortlistedCreatorIds) {
+        const titles = opportunitiesByCreator.get(creatorId) ?? [];
+        titles.push(campaign.title);
+        opportunitiesByCreator.set(creatorId, titles);
+      }
+    }
+    for (const job of this.jobs()) {
+      for (const creatorId of job.shortlistedCreatorIds) {
+        const titles = opportunitiesByCreator.get(creatorId) ?? [];
+        titles.push(job.title);
+        opportunitiesByCreator.set(creatorId, titles);
+      }
+    }
+    return mockCreatorAccounts
+      .filter((creator) => opportunitiesByCreator.has(creator.id))
+      .map((creator) => ({
+        ...creator,
+        shortlistedFor: (opportunitiesByCreator.get(creator.id) ?? []).join(', ')
+      }));
   });
 
   protected firstName(): string {
@@ -168,8 +220,23 @@ export class CompanyOverviewComponent {
       this.recommendedCreators.map((creator) => ({
         title: creator.name,
         subtitle: `${creator.niche} · ${this.formatAudience(creator.audienceSize)} audience`,
-        meta: `${creator.engagementRate}% engagement`
+        meta: `${creator.engagementRate}% engagement`,
+        creatorId: creator.id
       }))
+    );
+  }
+
+  protected showAllInterestedCreators(): void {
+    this.dialogs.openList(
+      'Interested creators',
+      'Creators who registered interest in one or more of your jobs.',
+      this.interestedCreators().map((creator) => ({
+        title: creator.name,
+        subtitle: `${creator.niche} · Interested in ${creator.interestedFor}`,
+        meta: `${this.formatAudience(creator.audienceSize)} audience · ${creator.engagementRate}% engagement`,
+        creatorId: creator.id
+      })),
+      'CREATOR INTEREST'
     );
   }
 
@@ -191,7 +258,8 @@ export class CompanyOverviewComponent {
     const items: DialogListItem[] = this.shortlistedCreators().map((creator) => ({
       title: creator.name,
       subtitle: `${creator.niche} · ${creator.shortlistedFor}`,
-      meta: `${this.formatAudience(creator.audienceSize)} audience`
+      meta: `${this.formatAudience(creator.audienceSize)} audience · ${creator.engagementRate}% engagement`,
+      creatorId: creator.id
     }));
     this.dialogs.openList('Shortlisted creators', 'Creators your team has shortlisted for job proposals.', items, 'YOUR SHORTLIST');
   }
@@ -210,13 +278,14 @@ export class CompanyOverviewComponent {
   }
 
   protected showCreator(creator: (typeof mockCreatorAccounts)[number] & { shortlistedFor?: string }): void {
-    this.dialogs.openDetails(creator.name, creator.bio, [
-      { label: 'Niche', value: creator.niche },
-      { label: 'Audience', value: this.formatAudience(creator.audienceSize) },
-      { label: 'Engagement', value: `${creator.engagementRate}%` },
-      { label: 'Channels', value: creator.channels.join(', ') },
-      ...(creator.shortlistedFor ? [{ label: 'Shortlisted for', value: creator.shortlistedFor }] : [])
-    ], 'CREATOR PROFILE');
+    const context: DialogDetail[] = [];
+    if ('shortlistedFor' in creator && typeof creator.shortlistedFor === 'string' && creator.shortlistedFor) {
+      context.push({ label: 'Shortlisted for', value: creator.shortlistedFor });
+    }
+    if ('interestedFor' in creator && typeof creator.interestedFor === 'string' && creator.interestedFor) {
+      context.push({ label: 'Registered interest', value: creator.interestedFor });
+    }
+    this.dialogs.openCreatorProfile(creator.id, context);
   }
 
   protected showJob(job: JobOpportunity): void {

@@ -2,8 +2,8 @@ import { inject, Injectable, signal } from '@angular/core';
 import type { CreatorProposal } from './creator-workspace-data';
 import { creatorProposals } from './creator-workspace-data';
 import type { JobOpportunity } from './job-marketplace-data';
-import { mockMarketplaceCampaigns } from './marketplace-mock-data';
-import { MarketplaceWorkspaceService } from './marketplace-workspace.service';
+import { mockCreatorAccounts, mockMarketplaceCampaigns } from './marketplace-mock-data';
+import { MarketplaceWorkspaceService, type CompanyProposal } from './marketplace-workspace.service';
 import { SessionService, type AccountType } from './session.service';
 
 export interface DialogDetail {
@@ -17,6 +17,20 @@ export interface DialogListItem {
   meta?: string;
   campaignId?: string;
   jobId?: string;
+  creatorId?: string;
+}
+
+export interface OpportunityCreator {
+  creatorId: string;
+  creatorName: string;
+  niche: string;
+  audienceSize: number;
+  engagementRate: number;
+  interested: boolean;
+  shortlisted: boolean;
+  sourceType: 'Campaign' | 'Job';
+  sourceId: string;
+  sourceTitle: string;
 }
 
 export interface OpportunityDialogData {
@@ -36,6 +50,16 @@ export interface OpportunityDialogData {
   requiresContentReview?: boolean;
   deliverableStatus?: string;
   submissions?: JobOpportunity['deliverableSubmissions'];
+  creatorCandidates?: OpportunityCreator[];
+  canManageCreators?: boolean;
+}
+
+export interface CompanyProposalDraft {
+  creatorId: string;
+  creatorName: string;
+  opportunityType: 'Campaign' | 'Job';
+  opportunityId: string;
+  opportunityTitle: string;
 }
 
 export interface CampaignDialogSource {
@@ -48,6 +72,7 @@ export interface CampaignDialogSource {
   creatorCapacity?: number;
   assignedCreatorIds?: string[];
   interestedCreatorIds?: string[];
+  shortlistedCreatorIds?: string[];
   budgetMin?: number;
   budgetMax?: number;
   applicants?: number;
@@ -66,7 +91,9 @@ export type AppDialog =
   | { kind: 'details'; title: string; eyebrow: string; description: string; details: DialogDetail[] }
   | ({ kind: 'opportunity' } & OpportunityDialogData)
   | { kind: 'proposal'; proposal: CreatorProposal }
+  | { kind: 'company-proposal'; proposal: CompanyProposal }
   | { kind: 'creator-job'; job: JobOpportunity; proposal: CreatorProposal }
+  | { kind: 'compose-company-proposal'; draft: CompanyProposalDraft }
   | { kind: 'list'; title: string; eyebrow: string; description: string; items: DialogListItem[] }
   | { kind: 'create-job' }
   | { kind: 'create-campaign' };
@@ -89,11 +116,11 @@ export class DialogService {
 
   openCampaign(campaign: CampaignDialogSource): void {
     const workspaceCampaign = this.workspace.campaigns().find((item) => item.id === campaign.id);
-    const relatedJobs = this.workspace.jobs().filter((job) =>
-      job.campaignId === campaign.id
-      || (job.campaignTitle === campaign.title && job.companyName === (campaign.companyName ?? campaign.brandName))
-    );
     const campaignCompany = campaign.companyName ?? campaign.brandName;
+    const relatedJobs = this.workspace.jobs().filter((job) =>
+      job.companyName === campaignCompany
+      && (job.campaignId === campaign.id || job.campaignTitle === campaign.title)
+    );
     const maxBudget = 'budgetMax' in campaign ? campaign.budgetMax : undefined;
     const minBudget = 'budgetMin' in campaign ? campaign.budgetMin : undefined;
     const capacity = campaign.creatorCapacity ?? workspaceCampaign?.creatorCapacity;
@@ -105,7 +132,49 @@ export class DialogService {
       ...(campaign.interestedCreatorIds ?? workspaceCampaign?.interestedCreatorIds ?? []),
       ...relatedJobs.flatMap((job) => job.interestedCreatorIds)
     ]);
+    const campaignInterested = new Set(campaign.interestedCreatorIds ?? workspaceCampaign?.interestedCreatorIds ?? []);
     const viewerType = this.session.currentUser()?.type ?? null;
+    const companyName = this.session.currentUser()?.name;
+    const campaignShortlisted = campaign.shortlistedCreatorIds ?? workspaceCampaign?.shortlistedCreatorIds ?? [];
+    const campaignCandidates = new Set([...campaignInterested, ...campaignShortlisted]);
+    const candidateSources = [
+      ...[...campaignCandidates].map((creatorId) => ({
+        creatorId,
+        sourceType: 'Campaign' as const,
+        sourceId: campaign.id,
+        sourceTitle: campaign.title,
+        interested: campaignInterested.has(creatorId),
+        shortlisted: campaignShortlisted.includes(creatorId)
+      })),
+      ...relatedJobs.flatMap((job) => [
+        ...job.interestedCreatorIds.map((creatorId) => ({
+          creatorId,
+          sourceType: 'Job' as const,
+          sourceId: job.id,
+          sourceTitle: job.title,
+          interested: true,
+          shortlisted: job.shortlistedCreatorIds.includes(creatorId)
+        })),
+        ...job.shortlistedCreatorIds.filter((creatorId) => !job.interestedCreatorIds.includes(creatorId)).map((creatorId) => ({
+          creatorId,
+          sourceType: 'Job' as const,
+          sourceId: job.id,
+          sourceTitle: job.title,
+          interested: false,
+          shortlisted: true
+        }))
+      ])
+    ];
+    const creatorCandidates = candidateSources.flatMap((source) => {
+      const creator = mockCreatorAccounts.find((candidate) => candidate.id === source.creatorId);
+      return creator ? [{
+        ...source,
+        creatorName: creator.name,
+        niche: creator.niche,
+        audienceSize: creator.audienceSize,
+        engagementRate: creator.engagementRate
+      }] : [];
+    });
     const metrics: DialogDetail[] = [
       { label: 'Category', value: campaign.category },
       { label: 'Interested creators', value: `${interested.size || ('applicants' in campaign ? campaign.applicants : 0) || 0}` },
@@ -133,7 +202,9 @@ export class DialogService {
       })),
       viewerType,
       isRegistered: this.workspace.isInterestedInCampaign(campaign.id),
-      canRegister: viewerType === 'creator' && (!capacity || assigned.size < capacity)
+      canRegister: viewerType === 'creator' && (!capacity || assigned.size < capacity),
+      creatorCandidates,
+      canManageCreators: viewerType === 'company' && campaignCompany === companyName
     });
   }
 
@@ -160,6 +231,22 @@ export class DialogService {
       && proposal.brand === currentJob.companyName
     );
     const accepted = Boolean(acceptedProposal);
+    const creatorCandidates = [...new Set([...currentJob.interestedCreatorIds, ...currentJob.shortlistedCreatorIds])]
+      .flatMap((creatorId) => {
+        const creator = mockCreatorAccounts.find((candidate) => candidate.id === creatorId);
+        return creator ? [{
+          creatorId,
+          creatorName: creator.name,
+          niche: creator.niche,
+          audienceSize: creator.audienceSize,
+          engagementRate: creator.engagementRate,
+          interested: currentJob.interestedCreatorIds.includes(creatorId),
+          shortlisted: currentJob.shortlistedCreatorIds.includes(creatorId),
+          sourceType: 'Job' as const,
+          sourceId: currentJob.id,
+          sourceTitle: currentJob.title
+        }] : [];
+      });
 
     this.openOpportunity({
       opportunityType: 'Job',
@@ -186,6 +273,8 @@ export class DialogService {
       canRegister: viewerType === 'creator' && isOpen && !accepted,
       requiresContentReview: currentJob.requiresContentReview,
       submissions: currentJob.deliverableSubmissions,
+      creatorCandidates,
+      canManageCreators: viewerType === 'company' && currentJob.companyName === this.session.currentUser()?.name,
       ...(deliverableStatus ? { deliverableStatus } : {})
     });
   }
@@ -196,6 +285,24 @@ export class DialogService {
       throw new Error(`Job ${jobId} was not found.`);
     }
     this.openJob(job);
+  }
+
+  openCreatorProfile(creatorId: string, context: DialogDetail[] = []): void {
+    const creator = mockCreatorAccounts.find((candidate) => candidate.id === creatorId);
+    if (!creator) {
+      throw new Error(`Creator ${creatorId} was not found.`);
+    }
+    const formatter = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+    this.openDetails(creator.name, creator.bio, [
+      { label: 'Handle', value: creator.handle },
+      { label: 'Niche', value: creator.niche },
+      { label: 'Content tags', value: creator.contentTags.join(', ') },
+      { label: 'Audience', value: formatter.format(creator.audienceSize) },
+      { label: 'Engagement', value: `${creator.engagementRate}%` },
+      { label: 'Typical rate', value: `$${creator.typicalRate.toLocaleString('en-US')}` },
+      { label: 'Channels', value: creator.channels.join(', ') },
+      ...context
+    ], 'CREATOR PROFILE');
   }
 
   toggleOpportunityRegistration(): void {
@@ -209,6 +316,74 @@ export class DialogService {
       this.workspace.toggleJobInterest(dialog.opportunityId);
     }
     this.activeDialog.set({ ...dialog, isRegistered: !dialog.isRegistered });
+  }
+
+  toggleOpportunityShortlist(sourceType: 'Campaign' | 'Job', sourceId: string, creatorId: string): void {
+    const dialog = this.activeDialog();
+    const companyName = this.session.currentUser()?.name;
+    if (dialog?.kind !== 'opportunity' || !dialog.canManageCreators || dialog.viewerType !== 'company' || !companyName) {
+      throw new Error('Only the owning company can manage this creator shortlist.');
+    }
+    const source = sourceType === 'Job'
+      ? this.workspace.jobs().find((job) => job.id === sourceId && job.companyName === companyName)
+      : this.workspace.campaigns().find((campaign) => campaign.id === sourceId && campaign.companyName === companyName);
+    if (!source) {
+      throw new Error(`${sourceType} ${sourceId} does not belong to ${companyName}.`);
+    }
+    this.workspace.toggleCreatorShortlist(sourceType, sourceId, creatorId);
+    if (dialog.opportunityType === 'Campaign' && dialog.opportunityId) {
+      this.openCampaignById(dialog.opportunityId);
+    } else if (dialog.opportunityType === 'Job' && dialog.opportunityId) {
+      this.openJobById(dialog.opportunityId);
+    }
+  }
+
+  openCompanyProposalComposer(candidate: OpportunityCreator): void {
+    const dialog = this.activeDialog();
+    const companyName = this.session.currentUser()?.name;
+    if (dialog?.kind !== 'opportunity' || !dialog.canManageCreators || dialog.viewerType !== 'company' || !companyName) {
+      throw new Error('Only the owning company can send a proposal from this opportunity.');
+    }
+    this.activeDialog.set({
+      kind: 'compose-company-proposal',
+      draft: {
+        creatorId: candidate.creatorId,
+        creatorName: candidate.creatorName,
+        opportunityType: candidate.sourceType,
+        opportunityId: candidate.sourceId,
+        opportunityTitle: candidate.sourceTitle
+      }
+    });
+  }
+
+  openCompanyProposal(proposal: CompanyProposal): void {
+    const user = this.session.currentUser();
+    const isCompanyOwner = user?.type === 'company' && proposal.companyName === user.name;
+    const isCreatorRecipient = user?.type === 'creator'
+      && (user.accountId ? user.accountId === proposal.creatorId : user.name === proposal.creatorName);
+    if (!isCompanyOwner && !isCreatorRecipient) {
+      throw new Error('Only the sender or intended creator can view this proposal.');
+    }
+    this.activeDialog.set({ kind: 'company-proposal', proposal });
+  }
+
+  respondToCompanyProposal(proposalId: string, decision: 'Accepted' | 'Declined'): void {
+    const user = this.session.currentUser();
+    if (user?.type !== 'creator') {
+      throw new Error('Only the intended creator can respond to this proposal.');
+    }
+    const creator = mockCreatorAccounts.find((candidate) =>
+      user.accountId ? candidate.id === user.accountId : candidate.name === user.name
+    );
+    if (!creator) {
+      throw new Error(`Creator profile for ${user.name} was not found.`);
+    }
+    this.workspace.respondToCompanyProposal(proposalId, creator.id, decision);
+    const proposal = this.workspace.companyProposals().find((candidate) => candidate.id === proposalId);
+    if (!proposal) {
+      throw new Error(`Proposal ${proposalId} was not found after updating its response.`);
+    }
+    this.activeDialog.set({ kind: 'company-proposal', proposal });
   }
 
   openProposal(proposal: CreatorProposal): void {

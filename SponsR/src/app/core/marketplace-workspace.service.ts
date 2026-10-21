@@ -1,7 +1,8 @@
-import { Injectable, signal } from '@angular/core';
-import { mockCompanyAccounts, mockMarketplaceCampaigns } from './marketplace-mock-data';
+import { inject, Injectable, signal } from '@angular/core';
+import { mockCompanyAccounts, mockCreatorAccounts, mockMarketplaceCampaigns } from './marketplace-mock-data';
 import type { CompanyAccount } from './marketplace-models';
 import { campaignOpportunities, jobOpportunities, type CampaignOpportunity, type JobDeliverableSubmission, type JobOpportunity } from './job-marketplace-data';
+import { SessionService } from './session.service';
 
 export interface NewCampaignInput {
   companyName: string;
@@ -25,13 +26,45 @@ export interface NewJobInput {
   requiresContentReview: boolean;
 }
 
+export interface CompanyProposal {
+  id: string;
+  companyName: string;
+  creatorId: string;
+  creatorName: string;
+  opportunityType: 'Campaign' | 'Job';
+  opportunityId: string;
+  opportunityTitle: string;
+  amount: number;
+  deliverables: string;
+  platforms: string;
+  timeline: string;
+  usageRights: string;
+  brief: string;
+  sentAt: string;
+  status: 'Sent' | 'Accepted' | 'Declined';
+}
+
+export interface NewCompanyProposalInput {
+  creatorId: string;
+  opportunityType: 'Campaign' | 'Job';
+  opportunityId: string;
+  amount: number;
+  deliverables: string;
+  platforms: string;
+  timeline: string;
+  usageRights: string;
+  brief: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MarketplaceWorkspaceService {
+  private readonly session = inject(SessionService);
   readonly campaigns = signal<CampaignOpportunity[]>(campaignOpportunities.map((campaign) => ({ ...campaign })));
   readonly jobs = signal<JobOpportunity[]>(jobOpportunities.map((job) => ({ ...job })));
   readonly registeredCampaignIds = signal<string[]>([]);
   readonly registeredJobIds = signal<string[]>([]);
   readonly registeredBrandIds = signal<string[]>([]);
+  readonly companyProposals = signal<CompanyProposal[]>([]);
 
   isInterestedInCampaign(campaignId: string): boolean {
     return this.registeredCampaignIds().includes(campaignId);
@@ -46,20 +79,139 @@ export class MarketplaceWorkspaceService {
   }
 
   toggleCampaignInterest(campaignId: string): void {
-    this.registeredCampaignIds.update((ids) =>
-      ids.includes(campaignId) ? ids.filter((id) => id !== campaignId) : [...ids, campaignId]
+    const wasRegistered = this.isInterestedInCampaign(campaignId);
+    this.registeredCampaignIds.update((ids) => wasRegistered
+      ? ids.filter((id) => id !== campaignId)
+      : [...ids, campaignId]
     );
+    const creatorId = this.currentCreatorId();
+    if (creatorId) {
+      this.campaigns.update((campaigns) => campaigns.map((campaign) => {
+        if (campaign.id !== campaignId) {
+          return campaign;
+        }
+        const interestedCreatorIds = wasRegistered
+          ? campaign.interestedCreatorIds.filter((id) => id !== creatorId)
+          : campaign.interestedCreatorIds.includes(creatorId)
+            ? campaign.interestedCreatorIds
+            : [...campaign.interestedCreatorIds, creatorId];
+        return { ...campaign, interestedCreatorIds };
+      }));
+    }
   }
 
   toggleJobInterest(jobId: string): void {
-    this.registeredJobIds.update((ids) =>
-      ids.includes(jobId) ? ids.filter((id) => id !== jobId) : [...ids, jobId]
+    const wasRegistered = this.isInterestedInJob(jobId);
+    this.registeredJobIds.update((ids) => wasRegistered
+      ? ids.filter((id) => id !== jobId)
+      : [...ids, jobId]
     );
+    const creatorId = this.currentCreatorId();
+    if (creatorId) {
+      this.jobs.update((jobs) => jobs.map((job) => {
+        if (job.id !== jobId) {
+          return job;
+        }
+        const interestedCreatorIds = wasRegistered
+          ? job.interestedCreatorIds.filter((id) => id !== creatorId)
+          : job.interestedCreatorIds.includes(creatorId)
+            ? job.interestedCreatorIds
+            : [...job.interestedCreatorIds, creatorId];
+        return { ...job, interestedCreatorIds };
+      }));
+    }
   }
 
   toggleBrandInterest(brandId: string): void {
     this.registeredBrandIds.update((ids) =>
       ids.includes(brandId) ? ids.filter((id) => id !== brandId) : [...ids, brandId]
+    );
+  }
+
+  toggleCreatorShortlist(opportunityType: 'Campaign' | 'Job', opportunityId: string, creatorId: string): void {
+    if (opportunityType === 'Campaign') {
+      this.campaigns.update((campaigns) => campaigns.map((campaign) =>
+        campaign.id === opportunityId
+          ? {
+              ...campaign,
+              shortlistedCreatorIds: campaign.shortlistedCreatorIds.includes(creatorId)
+                ? campaign.shortlistedCreatorIds.filter((id) => id !== creatorId)
+                : [...campaign.shortlistedCreatorIds, creatorId]
+            }
+          : campaign
+      ));
+      return;
+    }
+    this.jobs.update((jobs) => jobs.map((job) =>
+      job.id === opportunityId
+        ? {
+            ...job,
+            shortlistedCreatorIds: job.shortlistedCreatorIds.includes(creatorId)
+              ? job.shortlistedCreatorIds.filter((id) => id !== creatorId)
+              : [...job.shortlistedCreatorIds, creatorId]
+          }
+        : job
+    ));
+  }
+
+  sendCompanyProposal(input: NewCompanyProposalInput, companyName: string): void {
+    const creator = mockCreatorAccounts.find((candidate) => candidate.id === input.creatorId);
+    if (!creator) {
+      throw new Error(`Creator ${input.creatorId} was not found.`);
+    }
+    const opportunity = input.opportunityType === 'Job'
+      ? this.jobs().find((job) => job.id === input.opportunityId && job.companyName === companyName)
+      : this.campaigns().find((campaign) => campaign.id === input.opportunityId && campaign.companyName === companyName);
+    if (!opportunity) {
+      throw new Error(`${input.opportunityType} ${input.opportunityId} does not belong to ${companyName}.`);
+    }
+    if (!Number.isFinite(input.amount) || input.amount <= 0) {
+      throw new Error('Proposal amount must be greater than zero.');
+    }
+    if ([input.deliverables, input.platforms, input.timeline, input.usageRights, input.brief].some((value) => !value.trim())) {
+      throw new Error('Complete all proposal details before sending.');
+    }
+    const alreadySent = this.companyProposals().some((proposal) =>
+      proposal.companyName === companyName
+      && proposal.creatorId === creator.id
+      && proposal.opportunityType === input.opportunityType
+      && proposal.opportunityId === input.opportunityId
+      && proposal.status === 'Sent'
+    );
+    if (alreadySent) {
+      throw new Error(`A proposal has already been sent to ${creator.name} for ${opportunity.title}.`);
+    }
+    const proposal: CompanyProposal = {
+      ...input,
+      id: `company-proposal-${Date.now()}`,
+      companyName,
+      creatorName: creator.name,
+      opportunityTitle: opportunity.title,
+      sentAt: new Date().toISOString(),
+      status: 'Sent'
+    };
+    this.companyProposals.update((proposals) => [proposal, ...proposals]);
+  }
+
+  respondToCompanyProposal(proposalId: string, creatorId: string, decision: 'Accepted' | 'Declined'): void {
+    const proposal = this.companyProposals().find((candidate) => candidate.id === proposalId);
+    if (!proposal || proposal.creatorId !== creatorId) {
+      throw new Error(`Proposal ${proposalId} was not sent to creator ${creatorId}.`);
+    }
+    if (proposal.status !== 'Sent') {
+      throw new Error(`Proposal ${proposalId} is no longer awaiting a response.`);
+    }
+    this.companyProposals.update((proposals) => proposals.map((candidate) =>
+      candidate.id === proposalId ? { ...candidate, status: decision } : candidate
+    ));
+  }
+
+  hasCompanyProposal(creatorId: string, opportunityType: 'Campaign' | 'Job', opportunityId: string, companyName: string): boolean {
+    return this.companyProposals().some((proposal) =>
+      proposal.companyName === companyName
+      && proposal.creatorId === creatorId
+      && proposal.opportunityType === opportunityType
+      && proposal.opportunityId === opportunityId
     );
   }
 
@@ -100,7 +252,8 @@ export class MarketplaceWorkspaceService {
       description: input.description,
       creatorCapacity: input.creatorCapacity,
       assignedCreatorIds: [],
-      interestedCreatorIds: []
+      interestedCreatorIds: [],
+      shortlistedCreatorIds: []
     };
     this.campaigns.update((campaigns) => [campaign, ...campaigns]);
   }
@@ -201,5 +354,15 @@ export class MarketplaceWorkspaceService {
           }
         : candidate
     ));
+  }
+
+  private currentCreatorId(): string | undefined {
+    const user = this.session.currentUser();
+    if (user?.type !== 'creator') {
+      return undefined;
+    }
+    return mockCreatorAccounts.find((creator) =>
+      user.accountId ? creator.id === user.accountId : creator.name === user.name
+    )?.id;
   }
 }

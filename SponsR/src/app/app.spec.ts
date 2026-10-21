@@ -235,6 +235,8 @@ describe('App', () => {
     expect(compiled.querySelector('.sidebar')).toBeTruthy();
     expect(compiled.querySelector('.nav')?.textContent).toContain('Company Portal');
     expect(compiled.querySelector('.nav')?.textContent).toContain('Jobs');
+    expect(compiled.querySelector('.nav')?.textContent).toContain('Proposals');
+    expect(compiled.querySelector('.nav')?.textContent).not.toContain('Messaging');
     expect(compiled.querySelector('.nav')?.textContent).not.toContain('Media Kit');
   });
 

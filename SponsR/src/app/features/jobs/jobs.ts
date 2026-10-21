@@ -82,16 +82,7 @@ export class JobsComponent {
   }
 
   protected showCreator(creatorId: string): void {
-    const creator = this.creatorAccounts.find((candidate) => candidate.id === creatorId);
-    if (!creator) {
-      return;
-    }
-    this.dialogs.openDetails(creator.name, creator.bio, [
-      { label: 'Niche', value: creator.niche },
-      { label: 'Audience', value: this.formatAudience(creator.audienceSize) },
-      { label: 'Engagement', value: `${creator.engagementRate}%` },
-      { label: 'Channels', value: creator.channels.join(', ') }
-    ], 'CREATOR PROFILE');
+    this.dialogs.openCreatorProfile(creatorId);
   }
 
   protected showJob(job: JobOpportunity): void {

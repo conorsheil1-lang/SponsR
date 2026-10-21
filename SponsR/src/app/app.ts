@@ -4,6 +4,7 @@ import { filter } from 'rxjs';
 import { SessionService } from './core/session.service';
 import { creatorProposals } from './core/creator-workspace-data';
 import { DialogService } from './core/dialog.service';
+import { MarketplaceWorkspaceService } from './core/marketplace-workspace.service';
 import { DialogHostComponent } from './shared/dialog-host';
 
 @Component({
@@ -15,12 +16,23 @@ import { DialogHostComponent } from './shared/dialog-host';
 export class App {
   protected readonly session = inject(SessionService);
   private readonly dialogs = inject(DialogService);
+  private readonly workspace = inject(MarketplaceWorkspaceService);
   protected readonly isPublicPage = signal(false);
   protected readonly pendingProposalCount = computed(() => {
     this.dialogs.proposalStatusVersion();
-    return creatorProposals.filter((proposal) =>
+    const currentUser = this.session.currentUser();
+    const creatorProposalsAwaitingResponse = creatorProposals.filter((proposal) =>
       proposal.status !== 'Accepted' && proposal.status !== 'Declined'
     ).length;
+    const companyOffersAwaitingResponse = currentUser?.type === 'creator'
+      ? this.workspace.companyProposals().filter((proposal) =>
+          proposal.status === 'Sent'
+          && (currentUser.accountId
+            ? proposal.creatorId === currentUser.accountId
+            : proposal.creatorName === currentUser.name)
+        ).length
+      : 0;
+    return creatorProposalsAwaitingResponse + companyOffersAwaitingResponse;
   });
 
   constructor(private readonly router: Router) {

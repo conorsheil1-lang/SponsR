@@ -4,7 +4,6 @@ import { CreatorPortalComponent } from './features/creator-portal/creator-portal
 import { DiscoveryComponent } from './features/discovery/discovery';
 import { MediaKitComponent } from './features/media-kit/media-kit';
 import { CampaignsComponent } from './features/campaigns/campaigns';
-import { MessagingComponent } from './features/messaging/messaging';
 import { PaymentsComponent } from './features/payments/payments';
 import { RoleOverviewComponent } from './features/overview/role-overview';
 import { PortalSelectionComponent } from './features/portal-selection/portal-selection';
@@ -26,11 +25,10 @@ export const routes: Routes = [
   { path: 'company', component: CompanyPortalComponent, canActivate: [requireAccountType('company')] },
   { path: 'discovery', component: DiscoveryComponent },
   { path: 'media-kit', component: MediaKitComponent, canActivate: [requireAccountType('creator')] },
-  { path: 'proposals', component: ProposalsComponent, canActivate: [requireAccountType('creator')] },
+  { path: 'proposals', component: ProposalsComponent, canActivate: [requireSession] },
   { path: 'deadlines', component: DeadlinesComponent, canActivate: [requireAccountType('creator')] },
   { path: 'jobs', component: JobsComponent, canActivate: [requireSession] },
   { path: 'campaigns', component: CampaignsComponent, canActivate: [requireSession] },
-  { path: 'messaging', component: MessagingComponent, canActivate: [requireSession] },
   { path: 'payments', component: PaymentsComponent, canActivate: [requireSession] },
   { path: '**', redirectTo: '' }
 ];

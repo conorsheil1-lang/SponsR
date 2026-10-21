@@ -144,6 +144,141 @@ describe('DialogHostComponent', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Jobs in this campaign');
   });
 
+  it('manages a creator shortlist from a job dialog and sends a proposal for creator response', async () => {
+    const session = TestBed.inject(SessionService);
+    session.signIn({
+      type: 'company',
+      name: 'Northstar Labs',
+      email: 'company@sponsr.com'
+    });
+    const workspace = TestBed.inject(MarketplaceWorkspaceService);
+    const dialogs = TestBed.inject(DialogService);
+    const job = workspace.jobs().find((candidate) => candidate.id === 'job-northstar-tools');
+    if (!job) {
+      throw new Error('Expected the Northstar job mock.');
+    }
+    const fixture = TestBed.createComponent(DialogHostComponent);
+
+    dialogs.openJob(job);
+    fixture.detectChanges();
+    const theoRow = Array.from(
+      fixture.nativeElement.querySelectorAll('.opportunity-creator-row') as NodeListOf<HTMLElement>
+    ).find((row) => row.textContent?.includes('Theo Brooks'));
+    if (!theoRow) {
+      throw new Error('Expected Theo Brooks in the job’s interested creators.');
+    }
+    (theoRow.querySelector('.dialog-secondary') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(workspace.jobs().find((candidate) => candidate.id === job.id)?.shortlistedCreatorIds).not.toContain('creator-theo-brooks');
+
+    const updatedTheoRow = Array.from(
+      fixture.nativeElement.querySelectorAll('.opportunity-creator-row') as NodeListOf<HTMLElement>
+    ).find((row) => row.textContent?.includes('Theo Brooks'));
+    if (!updatedTheoRow) {
+      throw new Error('Expected the shortlisted creator row after updating the list.');
+    }
+    (updatedTheoRow.querySelector('.dialog-primary') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Send a proposal');
+
+    const setField = (name: string, value: string): void => {
+      const field = fixture.nativeElement.querySelector(`[name="${name}"]`) as HTMLInputElement | HTMLTextAreaElement;
+      field.value = value;
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    setField('proposalAmount', '4700');
+    setField('proposalDeliverables', 'One product explainer video');
+    setField('proposalPlatforms', 'YouTube');
+    setField('proposalTimeline', 'Draft Nov 5, publish Nov 20');
+    setField('proposalUsageRights', 'Organic use for 90 days');
+    setField('proposalBrief', 'Show how the product supports your creative workflow.');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const proposalForm = fixture.nativeElement.querySelector('.dialog-form') as HTMLFormElement;
+    expect(new FormData(proposalForm).get('proposalDeliverables')).toBe('One product explainer video');
+    (fixture.nativeElement.querySelector('.dialog-form button[type="submit"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const sentProposal = workspace.companyProposals()[0];
+    expect(sentProposal.creatorId).toBe('creator-theo-brooks');
+    expect(sentProposal.amount).toBe(4700);
+    expect(sentProposal.status).toBe('Sent');
+    expect(dialogs.activeDialog()).toBeNull();
+
+    session.signIn({
+      type: 'creator',
+      accountId: 'creator-theo-brooks',
+      name: 'Theo Brooks',
+      email: 'theo@example.com'
+    });
+    dialogs.openCompanyProposal(sentProposal);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Accept proposal');
+    (fixture.nativeElement.querySelector('.proposal-accept-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(workspace.companyProposals()[0].status).toBe('Accepted');
+    expect(fixture.nativeElement.textContent).toContain('Accepted');
+  });
+
+  it('lets a company view and manage creator shortlists from a campaign dialog', () => {
+    TestBed.inject(SessionService).signIn({
+      type: 'company',
+      name: 'Northstar Labs',
+      email: 'company@sponsr.com'
+    });
+    const workspace = TestBed.inject(MarketplaceWorkspaceService);
+    const campaign = workspace.campaigns().find((candidate) => candidate.id === 'campaign-northstar-next');
+    if (!campaign) {
+      throw new Error('Expected the Northstar campaign mock.');
+    }
+    const dialogs = TestBed.inject(DialogService);
+    const fixture = TestBed.createComponent(DialogHostComponent);
+
+    dialogs.openCampaign(campaign);
+    fixture.detectChanges();
+    const theoRow = Array.from(
+      fixture.nativeElement.querySelectorAll('.opportunity-creator-row') as NodeListOf<HTMLElement>
+    ).find((row) => row.textContent?.includes('Theo Brooks'));
+    if (!theoRow) {
+      throw new Error('Expected Theo Brooks in the campaign creator list.');
+    }
+    expect(theoRow.textContent).toContain('Shortlisted');
+    (theoRow.querySelector('.dialog-secondary') as HTMLButtonElement).click();
+    expect(workspace.campaigns().find((candidate) => candidate.id === campaign.id)?.shortlistedCreatorIds)
+      .not.toContain('creator-theo-brooks');
+  });
+
+  it('shows a creator registration in the owning company job dialog', () => {
+    const session = TestBed.inject(SessionService);
+    const workspace = TestBed.inject(MarketplaceWorkspaceService);
+    session.signIn({
+      type: 'creator',
+      accountId: 'creator-finn-murphy',
+      name: 'Finn Murphy',
+      email: 'finn@example.com'
+    });
+    workspace.toggleJobInterest('job-northstar-tools');
+    expect(workspace.jobs().find((job) => job.id === 'job-northstar-tools')?.interestedCreatorIds)
+      .toContain('creator-finn-murphy');
+
+    session.signIn({
+      type: 'company',
+      name: 'Northstar Labs',
+      email: 'company@sponsr.com'
+    });
+    const job = workspace.jobs().find((candidate) => candidate.id === 'job-northstar-tools');
+    if (!job) {
+      throw new Error('Expected the Northstar job mock.');
+    }
+    const dialogs = TestBed.inject(DialogService);
+    const fixture = TestBed.createComponent(DialogHostComponent);
+    dialogs.openJob(job);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Finn Murphy');
+    expect(fixture.nativeElement.textContent).toContain('Registered interest');
+  });
+
   it('lets the owning company approve a pending deliverable from the job dialog', () => {
     const workspace = TestBed.inject(MarketplaceWorkspaceService);
     const job = workspace.jobs().find((candidate) => candidate.id === 'job-mint-home');

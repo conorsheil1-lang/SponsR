@@ -7,6 +7,7 @@ export interface CampaignOpportunity {
   creatorCapacity: number;
   assignedCreatorIds: string[];
   interestedCreatorIds: string[];
+  shortlistedCreatorIds: string[];
 }
 
 export interface JobOpportunity {
@@ -50,7 +51,8 @@ export const campaignOpportunities: CampaignOpportunity[] = [
     description: 'A collection of creator-led stories celebrating the small rituals that make mornings feel better.',
     creatorCapacity: 8,
     assignedCreatorIds: ['creator-lena-park', 'creator-aria-morgan'],
-    interestedCreatorIds: ['creator-sam-rivera', 'creator-maya-patel', 'creator-zoe-chen']
+    interestedCreatorIds: ['creator-sam-rivera', 'creator-maya-patel', 'creator-zoe-chen'],
+    shortlistedCreatorIds: ['creator-sam-rivera']
   },
   {
     id: 'campaign-outside-more',
@@ -60,7 +62,8 @@ export const campaignOpportunities: CampaignOpportunity[] = [
     description: 'Inspire more people to find a nearby trail, park, or fresh-air escape.',
     creatorCapacity: 6,
     assignedCreatorIds: ['creator-jules-lee'],
-    interestedCreatorIds: ['creator-eli-williams', 'creator-amara-jones', 'creator-finn-murphy']
+    interestedCreatorIds: ['creator-eli-williams', 'creator-amara-jones', 'creator-finn-murphy'],
+    shortlistedCreatorIds: ['creator-eli-williams']
   },
   {
     id: 'campaign-goodfolk-rituals',
@@ -70,7 +73,8 @@ export const campaignOpportunities: CampaignOpportunity[] = [
     description: 'Creator-led stories for people who make space for a good cup and a slower start.',
     creatorCapacity: 5,
     assignedCreatorIds: [],
-    interestedCreatorIds: ['creator-lena-park', 'creator-aria-morgan']
+    interestedCreatorIds: ['creator-lena-park', 'creator-aria-morgan'],
+    shortlistedCreatorIds: []
   },
   {
     id: 'campaign-northstar-next',
@@ -80,7 +84,8 @@ export const campaignOpportunities: CampaignOpportunity[] = [
     description: 'Show how useful technology can make room for the ideas and projects ahead.',
     creatorCapacity: 3,
     assignedCreatorIds: ['creator-noah-bennett'],
-    interestedCreatorIds: ['creator-theo-brooks', 'creator-marcus-reed']
+    interestedCreatorIds: ['creator-theo-brooks', 'creator-marcus-reed'],
+    shortlistedCreatorIds: ['creator-theo-brooks']
   },
   {
     id: 'campaign-velora-movement',
@@ -90,15 +95,16 @@ export const campaignOpportunities: CampaignOpportunity[] = [
     description: 'Creator-led stories that make movement feel welcoming, joyful, and doable.',
     creatorCapacity: 4,
     assignedCreatorIds: [],
-    interestedCreatorIds: ['creator-amara-jones']
+    interestedCreatorIds: ['creator-amara-jones'],
+    shortlistedCreatorIds: []
   }
 ];
 
 export const jobOpportunities: JobOpportunity[] = [
   {
     id: 'job-morrow-reset',
-    campaignId: 'campaign-goodfolk-rituals',
-    campaignTitle: 'Good mornings, made together',
+    campaignId: 'campaign-slower-mornings',
+    campaignTitle: 'The slower mornings series',
     companyName: 'Morrow',
     title: 'Make room for a reset',
     category: 'Wellness',
@@ -116,8 +122,8 @@ export const jobOpportunities: JobOpportunity[] = [
   },
   {
     id: 'job-goodfolk-morning',
-    campaignId: 'campaign-slower-mornings',
-    campaignTitle: 'The slower mornings series',
+    campaignId: 'campaign-goodfolk-rituals',
+    campaignTitle: 'Good mornings, made together',
     companyName: 'Goodfolk Coffee',
     title: 'A slower kind of morning',
     category: 'Food & drink',

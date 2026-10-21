@@ -1,9 +1,9 @@
 import { Component, computed, effect, HostListener, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DialogService, type AppDialog } from '../core/dialog.service';
+import { DialogService, type AppDialog, type CompanyProposalDraft, type OpportunityCreator, type OpportunityDialogData } from '../core/dialog.service';
 import { creatorProposals, type CreatorProposal } from '../core/creator-workspace-data';
 import type { JobOpportunity } from '../core/job-marketplace-data';
-import { MarketplaceWorkspaceService } from '../core/marketplace-workspace.service';
+import { MarketplaceWorkspaceService, type CompanyProposal } from '../core/marketplace-workspace.service';
 import { SessionService } from '../core/session.service';
 
 @Component({
@@ -16,11 +16,11 @@ import { SessionService } from '../core/session.service';
         <section
           class="app-dialog"
           [class.opportunity-dialog]="dialog.kind === 'opportunity'"
-          [class.proposal-detail-dialog]="dialog.kind === 'proposal'"
+          [class.proposal-detail-dialog]="dialog.kind === 'proposal' || dialog.kind === 'company-proposal'"
           [class.creator-job-dialog]="dialog.kind === 'creator-job'"
           role="dialog"
           aria-modal="true"
-          [attr.aria-label]="dialog.kind === 'create-job' ? 'Create job' : dialog.kind === 'create-campaign' ? 'Create campaign' : dialog.kind === 'proposal' ? dialog.proposal.campaign : dialog.kind === 'creator-job' ? dialog.job.title : dialog.title"
+          [attr.aria-label]="dialogAriaLabel(dialog)"
           (click)="$event.stopPropagation()"
         >
           <button class="dialog-close" type="button" aria-label="Close dialog" (click)="dialogs.close()">×</button>
@@ -95,6 +95,41 @@ import { SessionService } from '../core/session.service';
                 <div><dt>{{ detail.label }}</dt><dd>{{ detail.value }}</dd></div>
               }
             </dl>
+            @if (dialog.canManageCreators && dialog.creatorCandidates?.length) {
+              <section class="related-jobs opportunity-creators">
+                <div class="related-jobs-heading">
+                  <h3>Interested & shortlisted creators</h3>
+                  <span>{{ dialog.creatorCandidates?.length }}</span>
+                </div>
+                <div class="dialog-list">
+                  @for (creator of dialog.creatorCandidates; track creator.creatorId + creator.sourceId) {
+                    <article class="opportunity-creator-row">
+                      <button type="button" class="dialog-reference-link" (click)="openCreatorReference(creator.creatorId)">
+                        <strong>{{ creator.creatorName }}</strong>
+                        <span>{{ creator.niche }} · {{ formatAudience(creator.audienceSize) }} audience · {{ creator.engagementRate }}% engagement</span>
+                        <small>{{ creator.sourceTitle }} · @if (creator.interested) { Registered interest } @if (creator.shortlisted) { · Shortlisted }</small>
+                      </button>
+                      <div class="opportunity-creator-actions">
+                        <button type="button" class="dialog-secondary"
+                          (click)="dialogs.toggleOpportunityShortlist(creator.sourceType, creator.sourceId, creator.creatorId)">
+                          {{ creator.shortlisted ? 'Remove shortlist' : 'Shortlist' }}
+                        </button>
+                        <button type="button" class="dialog-primary"
+                          [disabled]="hasCompanyProposal(creator.creatorId, creator.sourceType, creator.sourceId)"
+                          (click)="beginCompanyProposal(dialog, creator)">
+                          {{ hasCompanyProposal(creator.creatorId, creator.sourceType, creator.sourceId) ? 'Proposal sent' : 'Send proposal' }}
+                        </button>
+                      </div>
+                    </article>
+                  }
+                </div>
+              </section>
+            } @else if (dialog.canManageCreators) {
+              <section class="related-jobs opportunity-creators">
+                <div class="related-jobs-heading"><h3>Interested & shortlisted creators</h3><span>0</span></div>
+                <p class="related-jobs-empty">Creator registrations and shortlist entries will appear here.</p>
+              </section>
+            }
             @if (dialog.opportunityType === 'Campaign') {
               <section class="related-jobs">
                 <div class="related-jobs-heading">
@@ -164,6 +199,10 @@ import { SessionService } from '../core/session.service';
                     </button>
                   } @else if (item.jobId) {
                     <button type="button" class="dialog-reference-link" (click)="openJobReference(item.jobId)">
+                      <strong>{{ item.title }}</strong><span>{{ item.subtitle }}</span>
+                    </button>
+                  } @else if (item.creatorId) {
+                    <button type="button" class="dialog-reference-link" (click)="openCreatorReference(item.creatorId)">
                       <strong>{{ item.title }}</strong><span>{{ item.subtitle }}</span>
                     </button>
                   } @else {
@@ -239,6 +278,49 @@ import { SessionService } from '../core/session.service';
                 </form>
               }
             </section>
+          } @else if (dialog.kind === 'compose-company-proposal') {
+            <p class="eyebrow">COMPANY WORKSPACE</p>
+            <h2>Send a proposal</h2>
+            <p class="dialog-description">Prepare an offer for {{ dialog.draft.creatorName }} on {{ dialog.draft.opportunityTitle }}.</p>
+            <form class="dialog-form" (ngSubmit)="sendCompanyProposal(dialog.draft, $event)">
+              <label>Offer (USD)<input name="proposalAmount" type="number" min="1" step="1" [value]="companyProposalDraft.amount" (input)="updateProposalAmount($event)" required /></label>
+              <label>Deliverables<textarea name="proposalDeliverables" rows="2" [value]="companyProposalDraft.deliverables" (input)="updateProposalText('deliverables', $event)" required></textarea></label>
+              <label>Platforms<input name="proposalPlatforms" [value]="companyProposalDraft.platforms" (input)="updateProposalText('platforms', $event)" placeholder="e.g. Instagram and TikTok" required /></label>
+              <label>Timeline<input name="proposalTimeline" [value]="companyProposalDraft.timeline" (input)="updateProposalText('timeline', $event)" placeholder="e.g. Draft due Nov 5, publish by Nov 20" required /></label>
+              <label>Usage rights<input name="proposalUsageRights" [value]="companyProposalDraft.usageRights" (input)="updateProposalText('usageRights', $event)" placeholder="e.g. Organic social usage for 90 days" required /></label>
+              <label>Brief<textarea name="proposalBrief" rows="3" [value]="companyProposalDraft.brief" (input)="updateProposalText('brief', $event)" required></textarea></label>
+              <div class="dialog-actions">
+                <button type="button" class="dialog-secondary" (click)="returnToOpportunity()">Back</button>
+                <button type="submit" class="dialog-primary">Send proposal</button>
+              </div>
+            </form>
+          } @else if (dialog.kind === 'company-proposal') {
+            <div class="proposal-dialog-hero">
+              <p class="eyebrow">SENT PROPOSAL</p>
+              <div class="proposal-dialog-heading">
+                <div><span class="proposal-brand-label">{{ dialog.proposal.creatorName }}</span><h2>{{ dialog.proposal.opportunityTitle }}</h2></div>
+                <span class="proposal-dialog-status">{{ dialog.proposal.status }}</span>
+              </div>
+              <p class="proposal-dialog-submitted">Sent {{ formatSubmissionDate(dialog.proposal.sentAt) }}</p>
+              <div class="proposal-offer"><span>OFFER</span><strong>{{ formatProposalAmount(dialog.proposal.amount) }}</strong></div>
+            </div>
+            <section class="proposal-dialog-section">
+              <h3>Proposal details</h3>
+              <dl class="proposal-dialog-details">
+                <div><dt>Opportunity</dt><dd>{{ dialog.proposal.opportunityType }}</dd></div>
+                <div><dt>Deliverables</dt><dd>{{ dialog.proposal.deliverables }}</dd></div>
+                <div><dt>Platforms</dt><dd>{{ dialog.proposal.platforms }}</dd></div>
+                <div><dt>Timeline</dt><dd>{{ dialog.proposal.timeline }}</dd></div>
+                <div><dt>Usage rights</dt><dd>{{ dialog.proposal.usageRights }}</dd></div>
+              </dl>
+            </section>
+            <section class="proposal-dialog-brief"><h3>Brief for {{ dialog.proposal.creatorName }}</h3><p>{{ dialog.proposal.brief }}</p></section>
+            @if (isProposalRecipient(dialog.proposal) && dialog.proposal.status === 'Sent') {
+              <div class="proposal-dialog-actions">
+                <button type="button" class="proposal-decline-button" (click)="respondToCompanyProposal(dialog.proposal.id, 'Declined')">Decline</button>
+                <button type="button" class="proposal-accept-button" (click)="respondToCompanyProposal(dialog.proposal.id, 'Accepted')">Accept proposal</button>
+              </div>
+            }
           } @else if (dialog.kind === 'create-job') {
             <p class="eyebrow">COMPANY WORKSPACE</p>
             <h2>Create a job</h2>
@@ -320,6 +402,8 @@ export class DialogHostComponent {
   private readonly session = inject(SessionService);
   protected jobDraft = this.newJobDraft();
   protected campaignDraft = { title: '', category: '', description: '', creatorCapacity: 5 };
+  protected companyProposalDraft = this.newCompanyProposalDraft();
+  protected proposalSourceDialog: OpportunityDialogData | null = null;
   protected readonly companyCampaigns = computed(() =>
     this.workspace.campaigns().filter((campaign) => campaign.companyName === this.session.currentUser()?.name)
   );
@@ -329,6 +413,49 @@ export class DialogHostComponent {
 
   protected currentUserName(): string | undefined {
     return this.session.currentUser()?.name;
+  }
+
+  protected dialogAriaLabel(dialog: AppDialog): string {
+    switch (dialog.kind) {
+      case 'create-job': return 'Create job';
+      case 'create-campaign': return 'Create campaign';
+      case 'compose-company-proposal': return `Proposal for ${dialog.draft.creatorName}`;
+      case 'proposal': return dialog.proposal.campaign;
+      case 'company-proposal': return dialog.proposal.opportunityTitle;
+      case 'creator-job': return dialog.job.title;
+      case 'opportunity': return dialog.title;
+      case 'details':
+      case 'list': return dialog.title;
+    }
+  }
+
+  protected isProposalRecipient(proposal: CompanyProposal): boolean {
+    const user = this.session.currentUser();
+    return user?.type === 'creator'
+      && (user.accountId ? user.accountId === proposal.creatorId : user.name === proposal.creatorName);
+  }
+
+  protected respondToCompanyProposal(proposalId: string, decision: 'Accepted' | 'Declined'): void {
+    this.dialogs.respondToCompanyProposal(proposalId, decision);
+  }
+
+  protected formatAudience(count: number): string {
+    return new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(count);
+  }
+
+  protected formatProposalAmount(amount: number): string {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+  }
+
+  private newCompanyProposalDraft() {
+    return {
+      amount: 2000,
+      deliverables: '',
+      platforms: '',
+      timeline: '',
+      usageRights: '',
+      brief: ''
+    };
   }
 
   protected hasViewerSubmission(dialog: Extract<AppDialog, { kind: 'opportunity' }>): boolean {
@@ -342,6 +469,69 @@ export class DialogHostComponent {
 
   protected openJobReference(jobId: string): void {
     this.dialogs.openJobById(jobId);
+  }
+
+  protected openCreatorReference(creatorId: string): void {
+    this.dialogs.openCreatorProfile(creatorId);
+  }
+
+  protected beginCompanyProposal(dialog: OpportunityDialogData, creator: OpportunityCreator): void {
+    this.proposalSourceDialog = dialog;
+    this.dialogs.openCompanyProposalComposer(creator);
+  }
+
+  protected hasCompanyProposal(creatorId: string, opportunityType: 'Campaign' | 'Job', opportunityId: string): boolean {
+    const companyName = this.session.currentUser()?.name;
+    return companyName
+      ? this.workspace.hasCompanyProposal(creatorId, opportunityType, opportunityId, companyName)
+      : false;
+  }
+
+  protected returnToOpportunity(): void {
+    if (!this.proposalSourceDialog) {
+      throw new Error('The originating opportunity dialog is unavailable.');
+    }
+    this.dialogs.openOpportunity(this.proposalSourceDialog);
+    this.proposalSourceDialog = null;
+  }
+
+  protected sendCompanyProposal(draft: CompanyProposalDraft, event: Event): void {
+    const companyName = this.session.currentUser()?.name;
+    if (this.session.currentUser()?.type !== 'company' || !companyName) {
+      throw new Error('A signed-in company account is required to send proposals.');
+    }
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement)) {
+      throw new Error('Expected the proposal form as the submit event target.');
+    }
+    const formData = new FormData(form);
+    this.workspace.sendCompanyProposal({
+      ...draft,
+      amount: Number(formData.get('proposalAmount')),
+      deliverables: String(formData.get('proposalDeliverables') ?? '').trim(),
+      platforms: String(formData.get('proposalPlatforms') ?? '').trim(),
+      timeline: String(formData.get('proposalTimeline') ?? '').trim(),
+      usageRights: String(formData.get('proposalUsageRights') ?? '').trim(),
+      brief: String(formData.get('proposalBrief') ?? '').trim()
+    }, companyName);
+    this.proposalSourceDialog = null;
+    this.dialogs.close();
+  }
+
+  protected updateProposalText(field: 'deliverables' | 'platforms' | 'timeline' | 'usageRights' | 'brief', event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
+      throw new Error('Expected a text field for the proposal draft.');
+    }
+    this.companyProposalDraft = { ...this.companyProposalDraft, [field]: target.value };
+  }
+
+  protected updateProposalAmount(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) {
+      throw new Error('Expected a number input for the proposal amount.');
+    }
+    this.companyProposalDraft = { ...this.companyProposalDraft, amount: Number(target.value) };
   }
 
   protected manageAcceptedJob(jobId: string | undefined): void {
@@ -380,6 +570,8 @@ export class DialogHostComponent {
         this.deliverableSubmissionType = 'url';
         this.deliverableUrl = '';
         this.selectedDeliverableFile = null;
+      } else if (kind === 'compose-company-proposal') {
+        this.companyProposalDraft = this.newCompanyProposalDraft();
       }
     });
   }
