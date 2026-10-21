@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { mockCompanyAccounts, mockMarketplaceCampaigns } from './marketplace-mock-data';
 import type { CompanyAccount } from './marketplace-models';
-import { campaignOpportunities, jobOpportunities, type CampaignOpportunity, type JobOpportunity } from './job-marketplace-data';
+import { campaignOpportunities, jobOpportunities, type CampaignOpportunity, type JobDeliverableSubmission, type JobOpportunity } from './job-marketplace-data';
 
 export interface NewCampaignInput {
   companyName: string;
@@ -22,6 +22,7 @@ export interface NewJobInput {
   interestDeadline: string;
   deliveryDeadline: string;
   creatorCapacity: number;
+  requiresContentReview: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -121,10 +122,84 @@ export class MarketplaceWorkspaceService {
       interestDeadline: input.interestDeadline,
       deliveryDeadline: input.deliveryDeadline,
       creatorCapacity: input.creatorCapacity,
+      requiresContentReview: input.requiresContentReview,
       assignedCreatorIds: [],
       interestedCreatorIds: [],
-      shortlistedCreatorIds: []
+      shortlistedCreatorIds: [],
+      deliverableSubmissions: []
     };
     this.jobs.update((jobs) => [job, ...jobs]);
+  }
+
+  submitDeliverable(
+    jobId: string,
+    creatorName: string,
+    creatorEmail: string,
+    attachment: { type: 'url'; url: string } | { type: 'file'; file: File }
+  ): void {
+    const job = this.jobs().find((candidate) => candidate.id === jobId);
+    if (!job) {
+      throw new Error(`Job ${jobId} was not found.`);
+    }
+    if (job.deliverableSubmissions.some((submission) => submission.creatorEmail === creatorEmail)) {
+      throw new Error(`A deliverable has already been submitted for job ${jobId}.`);
+    }
+    if (attachment.type === 'url') {
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(attachment.url);
+      } catch {
+        throw new Error('Deliverable links must be valid URLs.');
+      }
+      if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+        throw new Error('Deliverable links must use HTTP or HTTPS.');
+      }
+    }
+    if (attachment.type === 'file' && attachment.file.size === 0) {
+      throw new Error('The uploaded deliverable file is empty.');
+    }
+
+    const file = attachment.type === 'file' ? attachment.file : null;
+    const url = attachment.type === 'url' ? attachment.url : URL.createObjectURL(attachment.file);
+    const submission: JobDeliverableSubmission = {
+      id: `deliverable-${Date.now()}`,
+      creatorName,
+      creatorEmail,
+      type: attachment.type,
+      url,
+      fileName: file?.name ?? null,
+      fileSize: file?.size ?? null,
+      submittedAt: new Date().toISOString(),
+      status: job.requiresContentReview ? 'Pending review' : 'Completed'
+    };
+    this.jobs.update((jobs) => jobs.map((candidate) =>
+      candidate.id === jobId
+        ? { ...candidate, deliverableSubmissions: [...candidate.deliverableSubmissions, submission] }
+        : candidate
+    ));
+  }
+
+  approveDeliverable(jobId: string, submissionId: string, companyName: string): void {
+    const job = this.jobs().find((candidate) => candidate.id === jobId);
+    if (!job || job.companyName !== companyName) {
+      throw new Error(`Job ${jobId} does not belong to ${companyName}.`);
+    }
+    const submission = job.deliverableSubmissions.find((candidate) => candidate.id === submissionId);
+    if (!submission) {
+      throw new Error(`Deliverable ${submissionId} was not found.`);
+    }
+    if (!job.requiresContentReview || submission.status !== 'Pending review') {
+      throw new Error(`Deliverable ${submissionId} is not awaiting content review.`);
+    }
+    this.jobs.update((jobs) => jobs.map((candidate) =>
+      candidate.id === jobId
+        ? {
+            ...candidate,
+            deliverableSubmissions: candidate.deliverableSubmissions.map((submission) =>
+              submission.id === submissionId ? { ...submission, status: 'Completed' } : submission
+            )
+          }
+        : candidate
+    ));
   }
 }

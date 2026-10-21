@@ -36,13 +36,27 @@ export class JobsComponent {
   protected readonly creatorAccounts = mockCreatorAccounts;
 
   protected showAcceptedJob(proposal: (typeof creatorProposals)[number], job: JobOpportunity): void {
-    this.dialogs.openDetails(job.title, job.description, [
-      { label: 'Company', value: job.companyName },
-      { label: 'Proposal status', value: proposal.status },
-      { label: 'Agreed amount', value: proposal.amount },
-      { label: 'Delivery deadline', value: this.formatDate(job.deliveryDeadline) },
-      { label: 'Campaign', value: job.campaignTitle ?? 'Standalone job' }
-    ], 'ACCEPTED JOB');
+    this.dialogs.openCreatorJob(job, proposal);
+  }
+
+  protected getParentCampaign(job: JobOpportunity): CampaignOpportunity | undefined {
+    return this.workspace.campaigns().find((campaign) =>
+      (job.campaignId && campaign.id === job.campaignId)
+      || (job.campaignTitle === campaign.title && job.companyName === campaign.companyName)
+    );
+  }
+
+  protected approveDeliverable(job: JobOpportunity, submissionId: string): void {
+    const companyName = this.session.currentUser()?.name;
+    if (!companyName) {
+      throw new Error('A signed-in company is required to approve deliverables.');
+    }
+    this.workspace.approveDeliverable(job.id, submissionId, companyName);
+  }
+
+  protected creatorSubmission(job: JobOpportunity) {
+    const email = this.session.currentUser()?.email;
+    return job.deliverableSubmissions.find((submission) => submission.creatorEmail === email);
   }
 
   protected toggleShortlist(jobId: string, creatorId: string): void {
@@ -91,7 +105,8 @@ export class JobsComponent {
       { label: 'Budget', value: this.formatBudget(job.budgetMin, job.budgetMax) },
       { label: 'Interest deadline', value: this.formatDate(job.interestDeadline) },
       { label: 'Delivery deadline', value: this.formatDate(job.deliveryDeadline) },
-      { label: 'Creator capacity', value: `${job.assignedCreatorIds.length} / ${job.creatorCapacity} assigned` }
+      { label: 'Creator capacity', value: `${job.assignedCreatorIds.length} / ${job.creatorCapacity} assigned` },
+      { label: 'Content review', value: job.requiresContentReview ? 'Required before completion' : 'Not required' }
     ], 'JOB DETAILS');
   }
 
@@ -108,10 +123,6 @@ export class JobsComponent {
       .split(' ')
       .map((part) => part.charAt(0))
       .join('');
-  }
-
-  protected formatAudience(count: number): string {
-    return new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(count);
   }
 
   protected getCampaignAssignedCount(campaign: CampaignOpportunity): number {
@@ -133,6 +144,10 @@ export class JobsComponent {
     return this.jobs().filter((job) => job.campaignId === campaignId).length;
   }
 
+  protected formatAudience(count: number): string {
+    return new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(count);
+  }
+
   protected formatBudget(min: number, max: number): string {
     const formatter = new Intl.NumberFormat('en', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
     return `${formatter.format(min)}–${formatter.format(max)}`;
@@ -140,6 +155,10 @@ export class JobsComponent {
 
   protected formatDate(date: string): string {
     return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(`${date}T12:00:00`));
+  }
+
+  protected formatSubmissionDate(date: string): string {
+    return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(date));
   }
 
 }

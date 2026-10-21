@@ -304,6 +304,85 @@
   font-size: 0.58rem;
 }
 
+.campaign-parent-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #e8ede2;
+  border-radius: 10px;
+  background: #fbfcf9;
+  color: #7a8675;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.6rem;
+  text-align: left;
+}
+
+.campaign-parent-link strong { color: #526d43; font-weight: 700; }
+.campaign-parent-link > span:last-child { color: #78984d; font-size: 0.85rem; }
+
+.accepted-job-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.65rem;
+  margin-top: 0.7rem;
+}
+
+.accepted-job-view-button {
+  min-height: 42px;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #dfe6d8;
+  border-radius: 10px;
+  background: #fff;
+  color: #4d6643;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.63rem;
+  font-weight: 700;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.accepted-job-view-button:hover { border-color: #bdcdae; background: #f6f9f2; }
+
+.accepted-job-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: auto;
+  min-height: 42px;
+  margin-top: 0;
+  padding: 0.65rem 0.85rem;
+  border: 0;
+  border-radius: 10px;
+  background: #193b2a;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-align: left;
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.accepted-job-action:hover { transform: translateY(-1px); background: #2b5a3e; }
+.accepted-job-action > span:last-child { color: #c8f169; font-size: 0.95rem; }
+
+.job-deliverable-review { margin-top: 0.8rem; padding-top: 0.65rem; border-top: 1px solid #f0f2ed; }
+.job-submission-row { display: flex; align-items: center; gap: 0.65rem; padding: 0.55rem 0; border-top: 1px solid #f4f5f2; }
+.job-submission-row > div { min-width: 0; display: grid; flex: 1; gap: 0.18rem; }
+.job-submission-row > div strong { color: #3d493d; font-size: 0.58rem; }
+.job-submission-row > div small { overflow: hidden; color: #8c9589; font-size: 0.51rem; text-overflow: ellipsis; white-space: nowrap; }
+.job-submission-row > a { color: #527541; font-size: 0.55rem; font-weight: 700; }
+.job-submission-row .shortlist-button { min-height: 28px; font-size: 0.51rem; }
+.submission-status-label { padding: 0.28rem 0.45rem; border-radius: 999px; background: #f7eed9; color: #8a6a2d; font-size: 0.49rem; font-weight: 700; white-space: nowrap; }
+.submission-status-label.completed { background: #e3edd8; color: #496b37; }
+
 @media (max-width: 600px) {
   .job-details {
     gap: 0.85rem;
@@ -313,4 +392,6 @@
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .job-submission-row { align-items: flex-start; flex-wrap: wrap; }
 }

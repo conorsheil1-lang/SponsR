@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import type { CreatorProposal } from './creator-workspace-data';
+import type { JobOpportunity } from './job-marketplace-data';
 
 export interface DialogDetail {
   label: string;
@@ -36,6 +37,7 @@ export type AppDialog =
   | { kind: 'details'; title: string; eyebrow: string; description: string; details: DialogDetail[] }
   | ({ kind: 'opportunity' } & OpportunityDialogData)
   | { kind: 'proposal'; proposal: CreatorProposal }
+  | { kind: 'creator-job'; job: JobOpportunity; proposal: CreatorProposal }
   | { kind: 'list'; title: string; eyebrow: string; description: string; items: DialogListItem[] }
   | { kind: 'create-job' }
   | { kind: 'create-campaign' };
@@ -57,6 +59,10 @@ export class DialogService {
   openProposal(proposal: CreatorProposal): void {
     this.activeDialog.set({ kind: 'proposal', proposal });
     this.proposalConfirmation.set(null);
+  }
+
+  openCreatorJob(job: JobOpportunity, proposal: CreatorProposal): void {
+    this.activeDialog.set({ kind: 'creator-job', job, proposal });
   }
 
   confirmProposalDecision(confirmation: ProposalDecisionConfirmation): void {

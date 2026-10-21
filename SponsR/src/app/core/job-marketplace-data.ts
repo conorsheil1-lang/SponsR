@@ -22,9 +22,23 @@ export interface JobOpportunity {
   interestDeadline: string;
   deliveryDeadline: string;
   creatorCapacity: number;
+  requiresContentReview: boolean;
   assignedCreatorIds: string[];
   interestedCreatorIds: string[];
   shortlistedCreatorIds: string[];
+  deliverableSubmissions: JobDeliverableSubmission[];
+}
+
+export interface JobDeliverableSubmission {
+  id: string;
+  creatorName: string;
+  creatorEmail: string;
+  type: 'url' | 'file';
+  url: string;
+  fileName: string | null;
+  fileSize: number | null;
+  submittedAt: string;
+  status: 'Pending review' | 'Completed';
 }
 
 export const campaignOpportunities: CampaignOpportunity[] = [
@@ -94,9 +108,11 @@ export const jobOpportunities: JobOpportunity[] = [
     interestDeadline: '2026-10-28',
     deliveryDeadline: '2026-11-12',
     creatorCapacity: 4,
+    requiresContentReview: true,
     assignedCreatorIds: ['creator-lena-park'],
     interestedCreatorIds: ['creator-sam-rivera', 'creator-aria-morgan', 'creator-amara-jones'],
-    shortlistedCreatorIds: ['creator-sam-rivera']
+    shortlistedCreatorIds: ['creator-sam-rivera'],
+    deliverableSubmissions: []
   },
   {
     id: 'job-goodfolk-morning',
@@ -111,9 +127,11 @@ export const jobOpportunities: JobOpportunity[] = [
     interestDeadline: '2026-10-30',
     deliveryDeadline: '2026-11-16',
     creatorCapacity: 3,
+    requiresContentReview: false,
     assignedCreatorIds: ['creator-aria-morgan'],
     interestedCreatorIds: ['creator-lena-park', 'creator-maya-patel'],
-    shortlistedCreatorIds: []
+    shortlistedCreatorIds: [],
+    deliverableSubmissions: []
   },
   {
     id: 'job-trailhead-weekend',
@@ -128,9 +146,11 @@ export const jobOpportunities: JobOpportunity[] = [
     interestDeadline: '2026-11-02',
     deliveryDeadline: '2026-11-24',
     creatorCapacity: 3,
+    requiresContentReview: true,
     assignedCreatorIds: [],
     interestedCreatorIds: ['creator-jules-lee', 'creator-zoe-chen', 'creator-finn-murphy'],
-    shortlistedCreatorIds: ['creator-jules-lee', 'creator-zoe-chen']
+    shortlistedCreatorIds: ['creator-jules-lee', 'creator-zoe-chen'],
+    deliverableSubmissions: []
   },
   {
     id: 'job-northstar-tools',
@@ -145,9 +165,11 @@ export const jobOpportunities: JobOpportunity[] = [
     interestDeadline: '2026-11-05',
     deliveryDeadline: '2026-11-30',
     creatorCapacity: 2,
+    requiresContentReview: false,
     assignedCreatorIds: ['creator-noah-bennett'],
     interestedCreatorIds: ['creator-theo-brooks', 'creator-marcus-reed'],
-    shortlistedCreatorIds: ['creator-theo-brooks']
+    shortlistedCreatorIds: ['creator-theo-brooks'],
+    deliverableSubmissions: []
   },
   {
     id: 'job-mint-home',
@@ -162,9 +184,11 @@ export const jobOpportunities: JobOpportunity[] = [
     interestDeadline: '2026-11-08',
     deliveryDeadline: '2026-12-02',
     creatorCapacity: 3,
+    requiresContentReview: true,
     assignedCreatorIds: [],
     interestedCreatorIds: ['creator-maya-patel', 'creator-aria-morgan'],
-    shortlistedCreatorIds: []
+    shortlistedCreatorIds: [],
+    deliverableSubmissions: []
   },
   {
     id: 'job-velora-movement',
@@ -179,8 +203,10 @@ export const jobOpportunities: JobOpportunity[] = [
     interestDeadline: '2026-11-10',
     deliveryDeadline: '2026-12-05',
     creatorCapacity: 3,
+    requiresContentReview: false,
     assignedCreatorIds: [],
     interestedCreatorIds: ['creator-amara-jones'],
-    shortlistedCreatorIds: []
+    shortlistedCreatorIds: [],
+    deliverableSubmissions: []
   }
 ];

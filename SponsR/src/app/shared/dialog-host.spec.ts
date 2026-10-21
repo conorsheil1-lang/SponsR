@@ -49,12 +49,43 @@ describe('DialogHostComponent', () => {
       budgetMax: 3000,
       interestDeadline: '2026-11-01',
       deliveryDeadline: '2026-11-15',
-      creatorCapacity: 3
+      creatorCapacity: 3,
+      requiresContentReview: true
     });
 
     expect(workspace.campaigns()[0].title).toBe('Spring creator series');
     expect(workspace.jobs()[0].title).toBe('Spring launch video');
     expect(workspace.jobs()[0].companyName).toBe('Northstar Labs');
+    expect(workspace.jobs()[0].requiresContentReview).toBe(true);
+  });
+
+  it('lets creators submit a deliverable link and shows the review status', () => {
+    TestBed.inject(SessionService).signIn({
+      type: 'creator',
+      name: 'Maya Chen',
+      email: 'creator@sponsr.com'
+    });
+    const dialogs = TestBed.inject(DialogService);
+    const workspace = TestBed.inject(MarketplaceWorkspaceService);
+    const job = workspace.jobs().find((candidate) => candidate.id === 'job-mint-home');
+    const proposal = creatorProposals.find((candidate) => candidate.id === 'proposal-mint-home');
+    if (!job || !proposal) {
+      throw new Error('Expected the accepted job and proposal mock data.');
+    }
+    const fixture = TestBed.createComponent(DialogHostComponent);
+
+    dialogs.openCreatorJob(job, proposal);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Agreed deliverables');
+    expect(fixture.nativeElement.textContent).toContain('CONTENT REVIEW');
+    workspace.submitDeliverable(job.id, 'Maya Chen', 'creator@sponsr.com', {
+      type: 'url',
+      url: 'https://youtube.com/watch?v=creator-work'
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Pending review');
+    expect(fixture.nativeElement.querySelector('.submitted-deliverable a')?.getAttribute('href')).toBe('https://youtube.com/watch?v=creator-work');
   });
 
   it('renders rich campaign and job opportunity details', () => {

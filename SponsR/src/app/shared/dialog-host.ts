@@ -2,6 +2,7 @@ import { Component, computed, effect, HostListener, inject } from '@angular/core
 import { FormsModule } from '@angular/forms';
 import { DialogService } from '../core/dialog.service';
 import { creatorProposals, type CreatorProposal } from '../core/creator-workspace-data';
+import type { JobOpportunity } from '../core/job-marketplace-data';
 import { MarketplaceWorkspaceService } from '../core/marketplace-workspace.service';
 import { SessionService } from '../core/session.service';
 
@@ -16,9 +17,10 @@ import { SessionService } from '../core/session.service';
           class="app-dialog"
           [class.opportunity-dialog]="dialog.kind === 'opportunity'"
           [class.proposal-detail-dialog]="dialog.kind === 'proposal'"
+          [class.creator-job-dialog]="dialog.kind === 'creator-job'"
           role="dialog"
           aria-modal="true"
-          [attr.aria-label]="dialog.kind === 'create-job' ? 'Create job' : dialog.kind === 'create-campaign' ? 'Create campaign' : dialog.kind === 'proposal' ? dialog.proposal.campaign : dialog.title"
+          [attr.aria-label]="dialog.kind === 'create-job' ? 'Create job' : dialog.kind === 'create-campaign' ? 'Create campaign' : dialog.kind === 'proposal' ? dialog.proposal.campaign : dialog.kind === 'creator-job' ? dialog.job.title : dialog.title"
           (click)="$event.stopPropagation()"
         >
           <button class="dialog-close" type="button" aria-label="Close dialog" (click)="dialogs.close()">×</button>
@@ -130,6 +132,70 @@ import { SessionService } from '../core/session.service';
                 <p class="dialog-empty">Nothing to show yet.</p>
               }
             </div>
+          } @else if (dialog.kind === 'creator-job') {
+            <div class="creator-job-hero">
+              <p class="eyebrow">ACCEPTED PARTNERSHIP</p>
+              <div class="creator-job-heading">
+                <div><span>{{ dialog.job.companyName }}</span><h2>{{ dialog.job.title }}</h2></div>
+                <span class="creator-job-status">{{ currentJob(dialog.job).deliverableSubmissions.length ? submittedDeliverable(dialog.job)?.status : 'In progress' }}</span>
+              </div>
+              <p>{{ dialog.job.description }}</p>
+              <div class="creator-job-quick-facts">
+                <span><small>AGREED FEE</small><strong>{{ dialog.proposal.amount }}</strong></span>
+                <span><small>DELIVERY DUE</small><strong>{{ formatJobDate(dialog.job.deliveryDeadline) }}</strong></span>
+                <span><small>CONTENT REVIEW</small><strong>{{ dialog.job.requiresContentReview ? 'Required' : 'Not required' }}</strong></span>
+              </div>
+            </div>
+            <section class="creator-job-dialog-section">
+              <h3>Agreed deliverables</h3>
+              <p>{{ dialog.proposal.deliverables }}</p>
+              <dl class="creator-job-detail-grid">
+                <div><dt>Platforms</dt><dd>{{ dialog.proposal.platform }}</dd></div>
+                <div><dt>Timeline</dt><dd>{{ dialog.proposal.timeline }}</dd></div>
+                <div><dt>Usage rights</dt><dd>{{ dialog.proposal.usageRights }}</dd></div>
+              </dl>
+            </section>
+            <section class="creator-job-submit-section">
+              <div>
+                <p class="eyebrow">DELIVERABLE SUBMISSION</p>
+                <h3>{{ submittedDeliverable(dialog.job) ? 'Your deliverable' : 'Submit your work' }}</h3>
+                <p>{{ dialog.job.requiresContentReview
+                  ? 'The brand will review your content before this job is marked complete.'
+                  : 'Submit a link or upload your media to mark this job complete.' }}</p>
+              </div>
+              @if (submittedDeliverable(dialog.job); as submission) {
+                <div class="submitted-deliverable">
+                  <span class="submission-status" [class.completed]="submission.status === 'Completed'">{{ submission.status }}</span>
+                  @if (submission.type === 'url') {
+                    <a [href]="submission.url" target="_blank" rel="noopener noreferrer">{{ submission.url }}</a>
+                  } @else {
+                    <a [href]="submission.url" [download]="submission.fileName">{{ submission.fileName }}</a>
+                    <small>{{ formatFileSize(submission.fileSize ?? 0) }}</small>
+                  }
+                  <small>Submitted {{ formatSubmissionDate(submission.submittedAt) }}</small>
+                </div>
+              } @else {
+                <form class="deliverable-form" (ngSubmit)="submitJobDeliverable(dialog.job)">
+                  <label>Submission type
+                    <select name="submissionType" [(ngModel)]="deliverableSubmissionType" (ngModelChange)="resetDeliverableAttachment()">
+                      <option value="url">Share a URL</option>
+                      <option value="file">Upload media</option>
+                    </select>
+                  </label>
+                  @if (deliverableSubmissionType === 'url') {
+                    <label>Content link<input name="deliverableUrl" type="url" [(ngModel)]="deliverableUrl" placeholder="https://…" required /></label>
+                  } @else {
+                    <label>Media file<input name="deliverableFile" type="file" (change)="selectDeliverableFile($event)" required /></label>
+                    @if (selectedDeliverableFile) {
+                      <p class="selected-file">{{ selectedDeliverableFile.name }} · {{ formatFileSize(selectedDeliverableFile.size) }}</p>
+                    }
+                  }
+                  <button class="dialog-primary" type="submit" [disabled]="deliverableSubmissionType === 'file' && !selectedDeliverableFile">
+                    Submit deliverable
+                  </button>
+                </form>
+              }
+            </section>
           } @else if (dialog.kind === 'create-job') {
             <p class="eyebrow">COMPANY WORKSPACE</p>
             <h2>Create a job</h2>
@@ -157,6 +223,10 @@ import { SessionService } from '../core/session.service';
                 <label>Interest deadline<input name="interestDeadline" type="date" [(ngModel)]="jobDraft.interestDeadline" required /></label>
                 <label>Delivery deadline<input name="deliveryDeadline" type="date" [min]="jobDraft.interestDeadline" [(ngModel)]="jobDraft.deliveryDeadline" required /></label>
               </div>
+              <label class="review-toggle">
+                <input name="requiresContentReview" type="checkbox" [(ngModel)]="jobDraft.requiresContentReview" />
+                <span><strong>Require content review before completion</strong><small>Creators submit a draft for approval before the job is marked complete.</small></span>
+              </label>
               <div class="dialog-actions">
                 <button type="button" class="dialog-secondary" (click)="dialogs.close()">Cancel</button>
                 <button type="submit" class="dialog-primary">Create job</button>
@@ -210,6 +280,9 @@ export class DialogHostComponent {
   protected readonly companyCampaigns = computed(() =>
     this.workspace.campaigns().filter((campaign) => campaign.companyName === this.session.currentUser()?.name)
   );
+  protected deliverableSubmissionType: 'url' | 'file' = 'url';
+  protected deliverableUrl = '';
+  protected selectedDeliverableFile: File | null = null;
 
   constructor() {
     effect(() => {
@@ -218,6 +291,10 @@ export class DialogHostComponent {
         this.jobDraft = this.newJobDraft();
       } else if (kind === 'create-campaign') {
         this.campaignDraft = { title: '', category: '', description: '', creatorCapacity: 5 };
+      } else if (kind === 'creator-job') {
+        this.deliverableSubmissionType = 'url';
+        this.deliverableUrl = '';
+        this.selectedDeliverableFile = null;
       }
     });
   }
@@ -262,7 +339,8 @@ export class DialogHostComponent {
       budgetMax: Number(draft.budgetMax),
       interestDeadline: draft.interestDeadline,
       deliveryDeadline: draft.deliveryDeadline,
-      creatorCapacity: Number(draft.creatorCapacity)
+      creatorCapacity: Number(draft.creatorCapacity),
+      requiresContentReview: draft.requiresContentReview
     });
     this.dialogs.close();
   }
@@ -278,6 +356,61 @@ export class DialogHostComponent {
     this.dialogs.close();
   }
 
+  protected currentJob(job: JobOpportunity): JobOpportunity {
+    return this.workspace.jobs().find((candidate) => candidate.id === job.id) ?? job;
+  }
+
+  protected submittedDeliverable(job: JobOpportunity) {
+    const email = this.session.currentUser()?.email;
+    return this.currentJob(job).deliverableSubmissions.find((submission) => submission.creatorEmail === email);
+  }
+
+  protected selectDeliverableFile(event: Event): void {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) {
+      throw new Error('Expected a file input for deliverable upload.');
+    }
+    this.selectedDeliverableFile = input.files?.[0] ?? null;
+  }
+
+  protected resetDeliverableAttachment(): void {
+    this.deliverableUrl = '';
+    this.selectedDeliverableFile = null;
+  }
+
+  protected submitJobDeliverable(job: JobOpportunity): void {
+    const user = this.session.currentUser();
+    if (!user || user.type !== 'creator') {
+      throw new Error('A signed-in creator is required to submit a deliverable.');
+    }
+    if (this.deliverableSubmissionType === 'url') {
+      this.workspace.submitDeliverable(job.id, user.name, user.email, {
+        type: 'url',
+        url: this.deliverableUrl.trim()
+      });
+    } else {
+      if (!this.selectedDeliverableFile) {
+        throw new Error('Choose a media file before submitting the deliverable.');
+      }
+      this.workspace.submitDeliverable(job.id, user.name, user.email, {
+        type: 'file',
+        file: this.selectedDeliverableFile
+      });
+    }
+  }
+
+  protected formatJobDate(date: string): string {
+    return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(`${date}T12:00:00`));
+  }
+
+  protected formatSubmissionDate(date: string): string {
+    return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(date));
+  }
+
+  protected formatFileSize(bytes: number): string {
+    return bytes < 1_000_000 ? `${Math.max(1, Math.round(bytes / 1_000))} KB` : `${(bytes / 1_000_000).toFixed(1)} MB`;
+  }
+
   private newJobDraft() {
     return {
       title: '',
@@ -288,7 +421,8 @@ export class DialogHostComponent {
       budgetMin: 1000,
       budgetMax: 3000,
       interestDeadline: this.dateAfterDays(7),
-      deliveryDeadline: this.dateAfterDays(21)
+      deliveryDeadline: this.dateAfterDays(21),
+      requiresContentReview: false
     };
   }
 

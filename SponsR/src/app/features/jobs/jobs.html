@@ -12,7 +12,7 @@
     @if (isCompany) {
       <button class="page-count page-action" type="button" (click)="createJob()">Create job <span aria-hidden="true">＋</span></button>
     } @else {
-      <span class="page-count">{{ acceptedCreatorJobs().length }} accepted jobs</span>
+      <span class="page-count">{{ acceptedCreatorJobs().length }} accepted {{ acceptedCreatorJobs().length === 1 ? 'job' : 'jobs' }}</span>
     }
   </header>
 
@@ -100,6 +100,22 @@
                 <p class="no-interested-creators">No creator interest yet.</p>
               }
             </div>
+            @if (job.deliverableSubmissions.length) {
+              <div class="job-deliverable-review">
+                <div class="interested-heading"><strong>Submitted deliverables</strong><span>{{ job.deliverableSubmissions.length }}</span></div>
+                @for (submission of job.deliverableSubmissions; track submission.id) {
+                  <div class="job-submission-row">
+                    <div><strong>{{ submission.creatorName }}</strong><small>{{ submission.type === 'url' ? 'Content link' : submission.fileName }} · {{ formatSubmissionDate(submission.submittedAt) }}</small></div>
+                    <a [href]="submission.url" [target]="submission.type === 'url' ? '_blank' : null" rel="noopener noreferrer"
+                      [download]="submission.type === 'file' ? submission.fileName : null">Open</a>
+                    <span class="submission-status-label" [class.completed]="submission.status === 'Completed'">{{ submission.status }}</span>
+                    @if (submission.status === 'Pending review') {
+                      <button type="button" class="shortlist-button" (click)="approveDeliverable(job, submission.id)">Approve & complete</button>
+                    }
+                  </div>
+                }
+              </div>
+            }
           }
         </article>
       } @empty {
@@ -113,7 +129,7 @@
         <div>
           <p class="eyebrow">CONFIRMED PARTNERSHIPS</p>
           <h3>Accepted jobs</h3>
-          <p>Jobs with proposals you have accepted. Browse new opportunities from Discover.</p>
+          <p>Submit your agreed work, track brand review, and keep delivery deadlines in sight.</p>
         </div>
       </div>
       <div class="job-list">
@@ -130,8 +146,19 @@
               <div class="job-details">
                 <span><small>AGREED FEE</small><strong>{{ accepted.proposal.amount }}</strong></span>
                 <span><small>DELIVERY DUE</small><strong>{{ formatDate(accepted.job.deliveryDeadline) }}</strong></span>
+                <span><small>DELIVERABLE</small><strong>{{ creatorSubmission(accepted.job)?.status ?? 'Not submitted' }}</strong></span>
               </div>
-              <button type="button" class="job-detail-button" (click)="showAcceptedJob(accepted.proposal, accepted.job)">View accepted job</button>
+              @if (getParentCampaign(accepted.job); as campaign) {
+                <button type="button" class="campaign-parent-link" (click)="showCampaign(campaign)">
+                  <span>Part of <strong>{{ campaign.title }}</strong></span><span aria-hidden="true">↗</span>
+                </button>
+              }
+              <div class="accepted-job-actions">
+                <button type="button" class="accepted-job-view-button" (click)="showJob(accepted.job)">View job</button>
+                <button type="button" class="accepted-job-action" (click)="showAcceptedJob(accepted.proposal, accepted.job)">
+                  <span>Manage deliverables</span><span aria-hidden="true">→</span>
+                </button>
+              </div>
             </div>
           </article>
         } @empty {
