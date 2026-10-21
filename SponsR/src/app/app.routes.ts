@@ -9,9 +9,10 @@ import { PaymentsComponent } from './features/payments/payments';
 import { OverviewComponent } from './features/overview/overview';
 import { PortalSelectionComponent } from './features/portal-selection/portal-selection';
 import { LoginComponent } from './features/login/login';
+import { LandingComponent } from './features/landing/landing';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', component: LandingComponent, pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'overview', component: OverviewComponent },
   { path: 'portals', component: PortalSelectionComponent },
@@ -22,5 +23,5 @@ export const routes: Routes = [
   { path: 'campaigns', component: CampaignsComponent },
   { path: 'messaging', component: MessagingComponent },
   { path: 'payments', component: PaymentsComponent },
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: '' }
 ];

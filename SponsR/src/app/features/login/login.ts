@@ -90,7 +90,7 @@ const MOCK_USERS: MockUser[] = [
       }
 
       .auth-screen {
-        min-height: 100vh;
+        min-height: calc(100vh - 76px);
         display: grid;
         place-items: center;
         padding: 2rem;

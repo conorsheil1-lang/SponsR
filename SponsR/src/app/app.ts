@@ -10,15 +10,19 @@ import { filter } from 'rxjs';
 })
 export class App {
   protected readonly title = signal('SponsR');
-  protected readonly isLoginPage = signal(false);
+  protected readonly isPublicPage = signal(false);
 
   constructor(private readonly router: Router) {
-    this.isLoginPage.set(this.router.url === '/login');
+    this.isPublicPage.set(this.isPublicRoute(this.router.url));
 
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
-        this.isLoginPage.set(event.urlAfterRedirects === '/login');
+        this.isPublicPage.set(this.isPublicRoute(event.urlAfterRedirects));
       });
+  }
+
+  private isPublicRoute(url: string): boolean {
+    return url === '/' || url.startsWith('/login');
   }
 }

@@ -1,4 +1,23 @@
-﻿@if (isLoginPage()) {
+<header class="site-header">
+  <a class="site-brand" routerLink="/" aria-label="SponsR home">
+    <span class="brand-mark" aria-hidden="true">S</span>
+    <span>SponsR</span>
+    <span class="brand-tag">PARTNERSHIPS, MADE BETTER</span>
+  </a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+    <a routerLink="/" fragment="discover">Discover</a>
+    <a routerLink="/" fragment="creators">For creators</a>
+    <a routerLink="/" fragment="brands">For brands</a>
+  </nav>
+
+  <div class="site-actions">
+    <a class="sign-in-link" routerLink="/login">Sign in</a>
+    <a class="sign-up-link" routerLink="/login">Sign up <span aria-hidden="true">↗</span></a>
+  </div>
+</header>
+
+@if (isPublicPage()) {
   <router-outlet></router-outlet>
 } @else {
   <div class="app-shell">
@@ -12,7 +31,7 @@
       </div>
 
       <nav class="nav">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Overview</a>
+        <a routerLink="/overview" routerLinkActive="active">Overview</a>
         <a routerLink="/portals" routerLinkActive="active">Portals</a>
         <a routerLink="/creator" routerLinkActive="active">Creator Portal</a>
         <a routerLink="/company" routerLinkActive="active">Company Portal</a>
