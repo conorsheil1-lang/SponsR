@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter, Router, withInMemoryScrolling } from '@angular/router';
 import { App } from './app';
 import { routes } from './app.routes';
 import { SessionService } from './core/session.service';
@@ -11,7 +11,7 @@ describe('App', () => {
     sessionStorage.clear();
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter(routes)],
+      providers: [provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled' }))],
     }).compileComponents();
   });
 
@@ -28,6 +28,51 @@ describe('App', () => {
     expect(compiled.querySelector('.site-brand')?.textContent).toContain('SponsR');
     expect(compiled.querySelector('.site-actions')?.textContent).toContain('Sign in');
     expect(compiled.querySelector('.site-actions')?.textContent).toContain('Sign up');
+    expect(compiled.querySelector('.site-nav')?.textContent).toContain('For creators');
+    expect(compiled.querySelector('.site-nav')?.textContent).toContain('For brands');
+    expect(compiled.querySelector('.site-nav')?.textContent).not.toContain('Discover');
+  });
+
+  it('advertises creator and brand features on their landing sections', async () => {
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const creatorFeatures = compiled.querySelector('#creators');
+    const brandFeatures = compiled.querySelector('#brands');
+    expect(creatorFeatures?.textContent).toContain('Media kit');
+    expect(creatorFeatures?.textContent).toContain('Partnership pipeline');
+    expect(creatorFeatures?.textContent).toContain('register interest in campaigns or individual jobs');
+    expect(brandFeatures?.textContent).toContain('Campaigns set the direction');
+    expect(brandFeatures?.textContent).toContain('Jobs define the work');
+    expect(brandFeatures?.textContent).toContain('Shortlist, then propose');
+    expect(brandFeatures?.textContent).toContain('One simple workflow');
+  });
+
+  it('navigates the signed-out creator and brand links to their landing sections', async () => {
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/login');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const links = Array.from(fixture.nativeElement.querySelectorAll('.site-nav a')) as HTMLAnchorElement[];
+    expect(links.map((link) => link.textContent?.trim())).toEqual(['For creators', 'For brands']);
+
+    links[0].click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(router.url).toBe('/#creators');
+    expect(fixture.nativeElement.querySelector('#creators')).toBeTruthy();
+
+    links[1].click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(router.url).toBe('/#brands');
+    expect(fixture.nativeElement.querySelector('#brands')).toBeTruthy();
   });
 
   it('shows Discover without the signed-in workspace shell or overview summary', async () => {

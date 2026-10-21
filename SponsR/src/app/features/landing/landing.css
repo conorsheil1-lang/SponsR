@@ -451,7 +451,8 @@
 .discovery-card,
 .growth-card { grid-column: span 6; }
 .opportunities-card { grid-column: span 7; min-height: 340px; }
-.brand-card { grid-column: span 5; min-height: 340px; }
+.brand-card { grid-column: span 5; min-height: 440px; }
+.growth-card { min-height: 440px; }
 
 .card-heading {
   display: flex;
@@ -500,6 +501,47 @@
   color: #7b857c;
   font-size: 0.73rem;
   line-height: 1.6;
+}
+
+.feature-detail-grid {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.feature-detail-card {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid rgba(220, 227, 210, 0.9);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.detail-icon {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  place-items: center;
+  border-radius: 50%;
+  background: #e5eed9;
+  color: #628640;
+  font-size: 0.55rem;
+  font-weight: 800;
+}
+
+.feature-detail-card strong {
+  color: #354638;
+  font-size: 0.68rem;
+}
+
+.feature-detail-card p {
+  margin: 0.18rem 0 0;
+  color: #748078;
+  font-size: 0.59rem;
+  line-height: 1.45;
 }
 
 .mini-profiles {
@@ -565,42 +607,9 @@
   background: #f0f3e9;
 }
 
-.growth-visual {
-  position: absolute;
-  right: 1.5rem;
-  bottom: 3.7rem;
-  left: 1.5rem;
-  padding: 0.7rem 0.8rem 0.5rem;
-  border: 1px solid rgba(220, 227, 210, 0.9);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.73);
-}
-
-.growth-topline {
-  display: flex;
-  justify-content: space-between;
-  color: #96a08f;
-  font-size: 0.49rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-
-.growth-topline strong {
-  color: #648440;
-  font-size: 0.57rem;
-  letter-spacing: 0;
-}
-
-.growth-topline b { margin-left: 0.2rem; }
-.growth-visual svg { width: 100%; height: 65px; margin-top: 0.4rem; overflow: visible; }
-
-.growth-ticks {
-  display: flex;
-  justify-content: space-between;
-  color: #a0a99a;
-  font-size: 0.45rem;
-  font-weight: 650;
-  letter-spacing: 0.08em;
+.growth-card .detail-icon {
+  background: #f8eee6;
+  color: #a46c42;
 }
 
 .opportunities-card {
@@ -669,6 +678,46 @@
 
 .brand-card {
   background: #f3f0f6;
+}
+
+.brand-detail-grid {
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+}
+
+.brand-detail-grid .feature-detail-card {
+  position: relative;
+  z-index: 1;
+  padding: 0.55rem 0.6rem;
+  border-color: rgba(220, 213, 228, 0.9);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.brand-detail-grid .detail-icon {
+  background: #eae3ef;
+  color: #806198;
+}
+
+.brand-detail-grid .feature-detail-card strong {
+  font-size: 0.62rem;
+}
+
+.brand-detail-grid .feature-detail-card p {
+  font-size: 0.54rem;
+}
+
+.simple-workflow {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.7rem !important;
+  color: #725e84 !important;
+  font-size: 0.61rem !important;
+  font-weight: 650;
+}
+
+.simple-workflow span {
+  margin-right: 0.25rem;
+  color: #9272ac;
 }
 
 .brand-card-decoration {
@@ -794,8 +843,9 @@
   .opportunities-card,
   .brand-card { grid-column: span 12; }
   .feature-card { min-height: 325px; }
+  .growth-card { min-height: 440px; }
   .opportunities-card,
-  .brand-card { min-height: 355px; }
+  .brand-card { min-height: 440px; }
 }
 
 @media (max-width: 520px) {
@@ -817,7 +867,6 @@
   .mini-profiles { gap: 0.35rem; }
   .mini-profile { width: 72px; }
   .profile-count { font-size: 0.5rem; }
-  .growth-visual { right: 1.2rem; left: 1.2rem; }
   .opportunity-budget { font-size: 0.49rem; }
   .closing-cta { min-height: 200px; align-items: flex-start; flex-direction: column; justify-content: center; gap: 1rem; padding: 1.5rem; }
   .closing-cta h2 { font-size: 2rem; }
