@@ -129,4 +129,23 @@ describe('DiscoveryComponent', () => {
       new Date(`${job.interestDeadline}T23:59:59`).getTime() - Date.now() <= 14 * 86_400_000
     )).toBe(true);
   });
+
+  it('toggles the creator all-opportunities section between campaigns and jobs', () => {
+    TestBed.inject(SessionService).signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
+    const fixture = TestBed.createComponent(DiscoveryComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('#all-opportunities-heading')?.textContent).toContain('All campaigns');
+    expect(fixture.nativeElement.querySelector('[aria-label="Filter campaigns"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[aria-label="Filter jobs"]')).toBeNull();
+
+    const jobsToggle = fixture.nativeElement.querySelector('.opportunity-toggle button:last-child') as HTMLButtonElement;
+    jobsToggle.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('#all-opportunities-heading')?.textContent).toContain('All jobs');
+    expect(fixture.nativeElement.querySelector('[aria-label="Filter campaigns"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-label="Filter jobs"]')).toBeTruthy();
+    expect(jobsToggle.getAttribute('aria-pressed')).toBe('true');
+  });
 });

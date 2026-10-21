@@ -88,6 +88,47 @@
   padding-top: 0.25rem;
 }
 
+.all-listings-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.all-listings-heading .section-heading {
+  flex: 1;
+  margin: 0;
+}
+
+.opportunity-toggle {
+  align-self: flex-start;
+  display: inline-flex;
+  gap: 0.2rem;
+  padding: 0.22rem;
+  border: 1px solid #e1e6dc;
+  border-radius: 999px;
+  background: #f0f3eb;
+}
+
+.opportunity-toggle button {
+  min-height: 32px;
+  padding: 0.4rem 0.8rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #70806b;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.64rem;
+  font-weight: 650;
+}
+
+.opportunity-toggle button.active {
+  background: #193b2a;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(25, 59, 42, 0.16);
+}
+
 .result-count {
   flex: 0 0 auto;
   padding: 0.4rem 0.65rem;
@@ -553,6 +594,26 @@
   .section-heading {
     position: relative;
     padding-right: 5rem;
+  }
+
+  .all-listings-heading {
+    flex-direction: column;
+  }
+
+  .all-listings-heading .section-heading {
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .all-listings-heading .result-count {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  .opportunity-toggle {
+    align-self: stretch;
+    justify-content: center;
   }
 
   .carousel-controls {

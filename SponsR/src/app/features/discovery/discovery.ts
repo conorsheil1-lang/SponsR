@@ -45,6 +45,7 @@ export class DiscoveryComponent {
   readonly jobBrandFilter = signal('');
   readonly jobBudgetFilter = signal('');
   readonly jobDeadlineFilter = signal('');
+  readonly selectedOpportunityType = signal<'campaigns' | 'jobs'>('campaigns');
 
   readonly hotCreators = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
@@ -194,6 +195,10 @@ export class DiscoveryComponent {
       jobDeadline: this.jobDeadlineFilter
     };
     filters[filter].set(target.value);
+  }
+
+  selectOpportunityType(type: 'campaigns' | 'jobs'): void {
+    this.selectedOpportunityType.set(type);
   }
 
   scrollCarousel(carousel: HTMLElement, direction: -1 | 1): void {
