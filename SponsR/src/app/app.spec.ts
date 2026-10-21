@@ -48,7 +48,6 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     const session = TestBed.inject(SessionService);
     const router = TestBed.inject(Router);
-    const dialogs = TestBed.inject(DialogService);
     session.signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
     await router.navigateByUrl('/discovery');
     await fixture.whenStable();
@@ -87,6 +86,7 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     const session = TestBed.inject(SessionService);
     const router = TestBed.inject(Router);
+    const dialogs = TestBed.inject(DialogService);
     session.signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
     await router.navigateByUrl('/creator');
     await fixture.whenStable();
@@ -100,7 +100,6 @@ describe('App', () => {
     if (!pendingProposal) {
       throw new Error('Expected a proposal awaiting review.');
     }
-    const previousStatus = pendingProposal.status;
     const previousStatus = pendingProposal.status;
     dialogs.confirmProposalDecision({
       decision: 'Accept',
