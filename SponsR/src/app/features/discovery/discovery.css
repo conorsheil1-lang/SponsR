@@ -1,7 +1,7 @@
 .discover-page {
   display: flex;
   flex-direction: column;
-  gap: 2.6rem;
+  gap: 2rem;
 }
 
 .discover-heading,
@@ -82,7 +82,7 @@
 }
 
 .section-heading {
-  margin-bottom: 1rem;
+  margin-bottom: 0.7rem;
 }
 
 .section-heading h3 {
@@ -130,10 +130,9 @@
 }
 
 .carousel {
-  display: grid;
-  grid-auto-columns: minmax(260px, calc((100% - 32px) / 3));
-  grid-auto-flow: column;
-  gap: 16px;
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
   overflow-x: auto;
   padding: 2px 2px 0.7rem;
   scroll-behavior: smooth;
@@ -143,14 +142,17 @@
 }
 
 .discovery-card {
-  min-width: 0;
-  min-height: 260px;
+  width: 175px;
+  min-width: 175px;
+  max-width: 175px;
+  flex: 0 0 175px;
+  min-height: 215px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 1rem;
+  padding: 0.8rem;
   border: 1px solid #e6e9e1;
-  border-radius: 15px;
+  border-radius: 13px;
   background: #fff;
   box-shadow: 0 8px 24px rgba(48, 65, 43, 0.035);
   scroll-snap-align: start;
@@ -171,8 +173,8 @@
 .trend-tag {
   display: inline-flex;
   align-items: center;
-  min-height: 23px;
-  padding: 0.28rem 0.55rem;
+  min-height: 20px;
+  padding: 0.22rem 0.45rem;
   border-radius: 999px;
   background: #f0f3eb;
   color: #667a56;
@@ -189,15 +191,15 @@
 
 .profile-row {
   justify-content: flex-start;
-  margin-top: 1rem;
+  margin-top: 0.7rem;
 }
 
 .profile-avatar,
 .brand-avatar {
-  width: 43px;
-  height: 43px;
+  width: 36px;
+  height: 36px;
   display: grid;
-  flex: 0 0 43px;
+  flex: 0 0 36px;
   place-items: center;
   border-radius: 14px;
   color: #354636;
@@ -220,7 +222,7 @@
 .discovery-card > h4 {
   margin: 0;
   color: #29382d;
-  font-size: 0.87rem;
+  font-size: 0.78rem;
   font-weight: 680;
   letter-spacing: -0.025em;
 }
@@ -246,21 +248,25 @@
 }
 
 .card-description {
-  margin: 0.8rem 0 0;
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0.55rem 0 0;
   color: #778177;
-  font-size: 0.67rem;
-  line-height: 1.55;
+  font-size: 0.62rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .channel-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  margin-top: 0.65rem;
+  margin-top: 0.45rem;
 }
 
 .channel-tags span {
-  padding: 0.25rem 0.45rem;
+  padding: 0.2rem 0.35rem;
   border: 1px solid #edf0e9;
   border-radius: 6px;
   color: #758075;
@@ -272,9 +278,9 @@
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
+  gap: 0.3rem;
   margin-top: auto;
-  padding-top: 0.85rem;
+  padding-top: 0.6rem;
 }
 
 .card-stats > div,
@@ -287,30 +293,30 @@
 .card-stats strong,
 .brand-stats strong {
   color: #344535;
-  font-size: 0.77rem;
+  font-size: 0.69rem;
   font-weight: 700;
 }
 
 .card-stats span,
 .brand-stats span {
   color: #929b90;
-  font-size: 0.52rem;
+  font-size: 0.47rem;
 }
 
 .campaign-card {
-  min-height: 300px;
+  min-height: 245px;
 }
 
 .campaign-art {
   position: relative;
   width: 100%;
-  min-height: 87px;
+  min-height: 62px;
   display: flex;
   flex-direction: column;
   justify-content: end;
   overflow: hidden;
-  margin-bottom: 0.8rem;
-  padding: 0.75rem;
+  margin-bottom: 0.6rem;
+  padding: 0.6rem;
   border-radius: 11px;
   background: #e4edcf;
 }
@@ -335,16 +341,16 @@
 
 .campaign-art > i {
   position: absolute;
-  top: -22px;
+  top: -30px;
   right: 12px;
   color: rgba(82, 112, 62, 0.17);
-  font-size: 7rem;
+  font-size: 5.5rem;
   font-style: normal;
   line-height: 1;
 }
 
 .campaign-card > h4 {
-  margin-top: 0.7rem;
+  margin-top: 0.5rem;
 }
 
 .brand-byline {
@@ -359,13 +365,13 @@
 }
 
 .campaign-card .card-description {
-  margin-top: 0.55rem;
+  margin-top: 0.4rem;
 }
 
 .campaign-footer {
   align-items: end;
   margin-top: auto;
-  padding-top: 0.7rem;
+  padding-top: 0.55rem;
 }
 
 .campaign-footer > div {
@@ -383,7 +389,7 @@
 
 .campaign-footer > div > strong {
   color: #3e5c36;
-  font-size: 0.79rem;
+  font-size: 0.7rem;
 }
 
 .applicant-count {
@@ -392,11 +398,11 @@
 }
 
 .brand-card {
-  min-height: 252px;
+  min-height: 215px;
 }
 
 .brand-card-top {
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.6rem;
 }
 
 .brand-avatar {
@@ -406,7 +412,7 @@
 }
 
 .brand-card > h4 {
-  margin-top: 0.65rem;
+  margin-top: 0.45rem;
 }
 
 .brand-handle {
@@ -414,7 +420,7 @@
 }
 
 .brand-card .card-description {
-  margin-top: 0.55rem;
+  margin-top: 0.4rem;
 }
 
 .brand-stats {
@@ -432,9 +438,9 @@
   font-size: 0.75rem;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .carousel {
-    grid-auto-columns: minmax(260px, calc((100% - 16px) / 2));
+    gap: 10px;
   }
 }
 
@@ -469,7 +475,13 @@
   }
 
   .carousel {
-    grid-auto-columns: minmax(250px, 86%);
     gap: 12px;
+  }
+
+  .discovery-card {
+    width: 72%;
+    min-width: 72%;
+    max-width: 72%;
+    flex-basis: 72%;
   }
 }
