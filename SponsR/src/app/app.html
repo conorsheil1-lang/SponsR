@@ -5,11 +5,13 @@
     <span class="brand-tag">PARTNERSHIPS, MADE BETTER</span>
   </a>
 
-  <nav class="site-nav" aria-label="Main navigation">
-    <a routerLink="/" fragment="discover">Discover</a>
-    <a routerLink="/" fragment="creators">For creators</a>
-    <a routerLink="/" fragment="brands">For brands</a>
-  </nav>
+  @if (!session.currentUser()) {
+    <nav class="site-nav" aria-label="Main navigation">
+      <a routerLink="/" fragment="discover">Discover</a>
+      <a routerLink="/" fragment="creators">For creators</a>
+      <a routerLink="/" fragment="brands">For brands</a>
+    </nav>
+  }
 
   <div class="site-actions">
     @if (session.currentUser(); as user) {

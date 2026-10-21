@@ -73,6 +73,21 @@ describe('App', () => {
     expect(compiled.querySelector('.nav')?.textContent).not.toContain('Media Kit');
   });
 
+  it('hides public top navigation links when signed in', async () => {
+    const fixture = TestBed.createComponent(App);
+    const session = TestBed.inject(SessionService);
+    const router = TestBed.inject(Router);
+    session.signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
+    await router.navigateByUrl('/creator');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.site-nav')).toBeNull();
+    expect(compiled.querySelector('.signed-in-name')?.textContent).toContain('Maya Chen');
+    expect(compiled.querySelector('.sign-out-button')).toBeTruthy();
+  });
+
   it('keeps sign-up public and links it from the shared header', async () => {
     const fixture = TestBed.createComponent(App);
     const router = TestBed.inject(Router);
