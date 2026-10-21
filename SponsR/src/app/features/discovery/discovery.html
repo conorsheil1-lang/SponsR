@@ -203,7 +203,15 @@
             <div><span>CREATOR BUDGET</span><strong>{{ formatBudget(campaign.budgetMin, campaign.budgetMax) }}</strong></div>
             <span class="applicant-count">{{ campaign.applicants }} interested</span>
           </div>
-          <button type="button" class="discovery-card-action" (click)="showCampaign(campaign)">View campaign</button>
+          <div class="opportunity-card-actions">
+            <button type="button" class="discovery-card-action" (click)="showCampaign(campaign)">View campaign</button>
+            <button
+              type="button"
+              class="interest-toggle-button"
+              [class.registered]="isRegisteredForCampaign(campaign.id)"
+              (click)="toggleCampaignInterest(campaign.id)"
+            >{{ isRegisteredForCampaign(campaign.id) ? 'Interested ✓' : 'Register interest' }}</button>
+          </div>
         </article>
       } @empty {
         <p class="empty-state">No campaigns match that search. Try another brand or category.</p>
@@ -310,7 +318,15 @@
             } @else {
               <div class="campaign-footer"><div><span>CAMPAIGN BUDGET</span><strong>Set per related job</strong></div></div>
             }
-            <button type="button" class="discovery-card-action" (click)="showCampaign(campaign)">View campaign</button>
+            <div class="opportunity-card-actions">
+              <button type="button" class="discovery-card-action" (click)="showCampaign(campaign)">View campaign</button>
+              <button
+                type="button"
+                class="interest-toggle-button"
+                [class.registered]="isRegisteredForCampaign(campaign.id)"
+                (click)="toggleCampaignInterest(campaign.id)"
+              >{{ isRegisteredForCampaign(campaign.id) ? 'Interested ✓' : 'Register interest' }}</button>
+            </div>
           </article>
         } @empty {
           <p class="empty-state">No campaigns match these filters. Try a different tag or brand.</p>
@@ -349,7 +365,16 @@
             <p class="brand-byline">{{ job.companyName }} @if (job.campaignTitle) { <span>· {{ job.campaignTitle }}</span> }</p>
             <p class="card-description">{{ job.description }}</p>
             <div class="campaign-footer"><div><span>BUDGET</span><strong>{{ formatBudget(job.budgetMin, job.budgetMax) }}</strong></div></div>
-            <button type="button" class="discovery-card-action" (click)="showJob(job)">View job</button>
+            <div class="opportunity-card-actions">
+              <button type="button" class="discovery-card-action" (click)="showJob(job)">View job</button>
+              <button
+                type="button"
+                class="interest-toggle-button"
+                [class.registered]="isRegisteredForJob(job.id)"
+                [disabled]="!isJobInterestOpen(job)"
+                (click)="toggleJobInterest(job.id)"
+              >{{ isRegisteredForJob(job.id) ? 'Interested ✓' : isJobInterestOpen(job) ? 'Register interest' : 'Closed' }}</button>
+            </div>
           </article>
         } @empty {
           <p class="empty-state">No jobs match these filters. Try widening your search.</p>

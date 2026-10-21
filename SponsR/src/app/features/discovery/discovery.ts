@@ -243,6 +243,26 @@ export class DiscoveryComponent {
     ], 'OPEN CAMPAIGN');
   }
 
+  isRegisteredForCampaign(campaignId: string): boolean {
+    return this.workspace.isInterestedInCampaign(campaignId);
+  }
+
+  toggleCampaignInterest(campaignId: string): void {
+    this.workspace.toggleCampaignInterest(campaignId);
+  }
+
+  isRegisteredForJob(jobId: string): boolean {
+    return this.workspace.isInterestedInJob(jobId);
+  }
+
+  toggleJobInterest(jobId: string): void {
+    this.workspace.toggleJobInterest(jobId);
+  }
+
+  isJobInterestOpen(job: JobOpportunity): boolean {
+    return new Date(`${job.interestDeadline}T23:59:59`).getTime() >= Date.now();
+  }
+
   showJob(job: JobOpportunity): void {
     this.dialogs.openDetails(job.title, job.description, [
       { label: 'Company', value: job.companyName },

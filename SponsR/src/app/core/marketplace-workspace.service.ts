@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { mockMarketplaceCampaigns } from './marketplace-mock-data';
 import { campaignOpportunities, jobOpportunities, type CampaignOpportunity, type JobOpportunity } from './job-marketplace-data';
 
 export interface NewCampaignInput {
@@ -26,6 +27,51 @@ export interface NewJobInput {
 export class MarketplaceWorkspaceService {
   readonly campaigns = signal<CampaignOpportunity[]>(campaignOpportunities.map((campaign) => ({ ...campaign })));
   readonly jobs = signal<JobOpportunity[]>(jobOpportunities.map((job) => ({ ...job })));
+  readonly registeredCampaignIds = signal<string[]>([]);
+  readonly registeredJobIds = signal<string[]>([]);
+
+  isInterestedInCampaign(campaignId: string): boolean {
+    return this.registeredCampaignIds().includes(campaignId);
+  }
+
+  isInterestedInJob(jobId: string): boolean {
+    return this.registeredJobIds().includes(jobId);
+  }
+
+  toggleCampaignInterest(campaignId: string): void {
+    this.registeredCampaignIds.update((ids) =>
+      ids.includes(campaignId) ? ids.filter((id) => id !== campaignId) : [...ids, campaignId]
+    );
+  }
+
+  toggleJobInterest(jobId: string): void {
+    this.registeredJobIds.update((ids) =>
+      ids.includes(jobId) ? ids.filter((id) => id !== jobId) : [...ids, jobId]
+    );
+  }
+
+  getRegisteredCampaigns(): Array<{ id: string; title: string; companyName: string; category: string }> {
+    const registeredIds = new Set(this.registeredCampaignIds());
+    return [
+      ...mockMarketplaceCampaigns.map((campaign) => ({
+        id: campaign.id,
+        title: campaign.title,
+        companyName: campaign.brandName,
+        category: campaign.category
+      })),
+      ...this.campaigns().map((campaign) => ({
+        id: campaign.id,
+        title: campaign.title,
+        companyName: campaign.companyName,
+        category: campaign.category
+      }))
+    ].filter((campaign) => registeredIds.has(campaign.id));
+  }
+
+  getRegisteredJobs(): JobOpportunity[] {
+    const registeredIds = new Set(this.registeredJobIds());
+    return this.jobs().filter((job) => registeredIds.has(job.id));
+  }
 
   addCampaign(input: NewCampaignInput): void {
     const campaign: CampaignOpportunity = {

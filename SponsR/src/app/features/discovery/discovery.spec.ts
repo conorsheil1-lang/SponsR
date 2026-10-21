@@ -148,4 +148,37 @@ describe('DiscoveryComponent', () => {
     expect(fixture.nativeElement.querySelector('[aria-label="Filter jobs"]')).toBeTruthy();
     expect(jobsToggle.getAttribute('aria-pressed')).toBe('true');
   });
+
+  it('lets creators register and withdraw interest in campaigns and jobs', () => {
+    TestBed.inject(SessionService).signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
+    const fixture = TestBed.createComponent(DiscoveryComponent);
+    fixture.detectChanges();
+
+    const campaignCard = fixture.nativeElement.querySelector('.listing-card.campaign-card') as HTMLElement;
+    const campaignButton = campaignCard.querySelector('.interest-toggle-button') as HTMLButtonElement;
+    expect(campaignButton.textContent).toContain('Register interest');
+    campaignButton.click();
+    fixture.detectChanges();
+    expect(campaignButton.textContent).toContain('Interested');
+
+    fixture.nativeElement.querySelector('.opportunity-toggle button:last-child').click();
+    fixture.detectChanges();
+    const jobButton = fixture.nativeElement.querySelector('.job-listing-card .interest-toggle-button') as HTMLButtonElement;
+    expect(jobButton.textContent).toContain('Register interest');
+    jobButton.click();
+    fixture.detectChanges();
+    expect(jobButton.textContent).toContain('Interested');
+
+    jobButton.click();
+    fixture.detectChanges();
+    expect(jobButton.textContent).toContain('Register interest');
+  });
+
+  it('does not expose creator registration actions to companies', () => {
+    TestBed.inject(SessionService).signIn({ type: 'company', name: 'Northstar Labs', email: 'company@sponsr.com' });
+    const fixture = TestBed.createComponent(DiscoveryComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.interest-toggle-button')).toBeNull();
+  });
 });

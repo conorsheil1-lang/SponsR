@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
 
 @Component({
   selector: 'app-creator-portal',
@@ -41,6 +42,58 @@ import { RouterLink } from '@angular/router';
             <li><strong>YouTube</strong><span>220K subscribers</span></li>
             <li><strong>TikTok</strong><span>93K followers</span></li>
           </ul>
+        </article>
+
+        <article class="panel-card wide registered-opportunities">
+          <div class="registered-heading">
+            <div>
+              <h3>Registered interest</h3>
+              <p>Keep track of the campaigns and jobs you’ve raised your hand for.</p>
+            </div>
+            <div class="interest-toggle" role="group" aria-label="Registered opportunity type">
+              <button type="button" [class.active]="selectedInterestType() === 'campaigns'"
+                [attr.aria-pressed]="selectedInterestType() === 'campaigns'" (click)="selectedInterestType.set('campaigns')">
+                Campaigns <span>{{ registeredCampaigns().length }}</span>
+              </button>
+              <button type="button" [class.active]="selectedInterestType() === 'jobs'"
+                [attr.aria-pressed]="selectedInterestType() === 'jobs'" (click)="selectedInterestType.set('jobs')">
+                Jobs <span>{{ registeredJobs().length }}</span>
+              </button>
+            </div>
+          </div>
+          @if (selectedInterestType() === 'campaigns') {
+            @if (registeredCampaigns().length) {
+              <ul>
+                @for (campaign of registeredCampaigns(); track campaign.id) {
+                  <li>
+                    <div class="registered-item">
+                      <strong>{{ campaign.title }}</strong>
+                      <span>{{ campaign.companyName }} · {{ campaign.category }}</span>
+                    </div>
+                    <button type="button" class="withdraw-button" (click)="withdrawCampaignInterest(campaign.id)">Withdraw</button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="interest-empty">No campaign registrations yet. Explore open campaigns to find a good fit.</p>
+            }
+          } @else {
+            @if (registeredJobs().length) {
+              <ul>
+                @for (job of registeredJobs(); track job.id) {
+                  <li>
+                    <div class="registered-item">
+                      <strong>{{ job.title }}</strong>
+                      <span>{{ job.companyName }} · {{ job.category }} · Due {{ job.interestDeadline }}</span>
+                    </div>
+                    <button type="button" class="withdraw-button" (click)="withdrawJobInterest(job.id)">Withdraw</button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="interest-empty">No job registrations yet. Explore open jobs to find your next opportunity.</p>
+            }
+          }
         </article>
 
         <article class="panel-card wide">
@@ -141,14 +194,100 @@ import { RouterLink } from '@angular/router';
       .panel-card li strong {
         color: #e2ecff;
       }
+      .registered-heading,
+      .interest-toggle,
+      .registered-opportunities li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      .registered-heading {
+        margin-bottom: 1rem;
+      }
+      .registered-heading p,
+      .interest-empty {
+        margin: 0.4rem 0 0;
+        color: #9fb0d4;
+        font-size: 0.8rem;
+      }
+      .interest-toggle {
+        flex: 0 0 auto;
+        gap: 0.25rem;
+        padding: 0.25rem;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 999px;
+      }
+      .interest-toggle button,
+      .withdraw-button {
+        border: 0;
+        border-radius: 999px;
+        padding: 0.55rem 0.8rem;
+        background: transparent;
+        color: #9fb0d4;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.72rem;
+      }
+      .interest-toggle button.active {
+        background: rgba(124, 58, 237, 0.24);
+        color: #fff;
+      }
+      .interest-toggle button span {
+        margin-left: 0.25rem;
+        opacity: 0.75;
+      }
+      .registered-opportunities ul {
+        gap: 0.55rem;
+      }
+      .registered-opportunities li {
+        align-items: center;
+      }
+      .registered-item {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      .registered-item span {
+        color: #9fb0d4;
+        font-size: 0.76rem;
+      }
+      .withdraw-button {
+        flex: 0 0 auto;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+      }
+      .withdraw-button:hover {
+        border-color: rgba(248, 113, 113, 0.6);
+        color: #fecaca;
+      }
+      @media (max-width: 620px) {
+        .registered-heading {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
     `
   ]
 })
 export class CreatorPortalComponent {
+  private readonly workspace = inject(MarketplaceWorkspaceService);
+  readonly selectedInterestType = signal<'campaigns' | 'jobs'>('campaigns');
+  readonly registeredCampaigns = computed(() => this.workspace.getRegisteredCampaigns());
+  readonly registeredJobs = computed(() => this.workspace.getRegisteredJobs());
+
   readonly stats = signal([
     { label: 'Interested brands', value: '18' },
     { label: 'Media kit views', value: '3.4K' },
     { label: 'Avg. response', value: '4.8%' },
     { label: 'Payout ready', value: '$8.4K' }
   ]);
+
+  withdrawCampaignInterest(campaignId: string): void {
+    this.workspace.toggleCampaignInterest(campaignId);
+  }
+
+  withdrawJobInterest(jobId: string): void {
+    this.workspace.toggleJobInterest(jobId);
+  }
 }
