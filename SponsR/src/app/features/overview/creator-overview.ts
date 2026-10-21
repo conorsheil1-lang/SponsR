@@ -138,7 +138,13 @@ export class CreatorOverviewComponent {
   protected readonly notifications = creatorNotifications;
   protected readonly proposals = creatorProposals;
   protected readonly deadlines = creatorDeadlines;
-  protected readonly campaigns = creatorCampaigns;
+  protected readonly campaigns = creatorCampaigns.filter((campaign) =>
+    creatorProposals.some((proposal) =>
+      proposal.status === 'Accepted' &&
+      proposal.campaign === campaign.name &&
+      proposal.brand === campaign.brand
+    )
+  );
   protected readonly activeCampaignCount = this.campaigns.filter((campaign) => campaign.status !== 'Shortlisted').length;
   protected readonly openProposalCount = this.proposals.filter((proposal) => proposal.status !== 'Accepted').length;
   protected readonly shortlistedCount = this.proposals.filter((proposal) => proposal.status === 'Shortlisted').length;

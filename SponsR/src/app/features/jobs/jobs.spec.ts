@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { jobOpportunities } from '../../core/job-marketplace-data';
+import { creatorProposals } from '../../core/creator-workspace-data';
 import { SessionService } from '../../core/session.service';
 import { JobsComponent } from './jobs';
 
@@ -8,7 +8,7 @@ describe('JobsComponent', () => {
     sessionStorage.clear();
   });
 
-  it('lets creators register interest in campaigns and open jobs', async () => {
+  it('shows creators only jobs with accepted proposals', async () => {
     await TestBed.configureTestingModule({ imports: [JobsComponent] }).compileComponents();
     TestBed.inject(SessionService).signIn({
       type: 'creator',
@@ -18,18 +18,14 @@ describe('JobsComponent', () => {
 
     const fixture = TestBed.createComponent(JobsComponent);
     fixture.detectChanges();
-    const campaignInterestButton = fixture.nativeElement.querySelector('.campaign-opportunity-card .job-interest-button') as HTMLButtonElement;
-    const jobInterestButton = fixture.nativeElement.querySelector('.job-list .job-interest-button') as HTMLButtonElement;
-
-    campaignInterestButton.click();
-    jobInterestButton.click();
-    fixture.detectChanges();
-
-    expect(campaignInterestButton.textContent).toContain('Interest registered');
-    expect(jobInterestButton.textContent).toContain('Interest registered');
+    expect(fixture.nativeElement.textContent).toContain('Accepted jobs');
+    expect(fixture.nativeElement.textContent).toContain('A home that feels like you');
+    expect(fixture.nativeElement.textContent).not.toContain('Make room for a reset');
+    expect(fixture.nativeElement.textContent).not.toContain('Register interest');
+    expect(fixture.nativeElement.querySelector('.accepted-job-card')).toBeTruthy();
   });
 
-  it('keeps job interest open when all creator capacity is assigned', async () => {
+  it('shows an empty state when the creator has no accepted proposals', async () => {
     await TestBed.configureTestingModule({ imports: [JobsComponent] }).compileComponents();
     TestBed.inject(SessionService).signIn({
       type: 'creator',
@@ -37,21 +33,21 @@ describe('JobsComponent', () => {
       email: 'creator@sponsr.com'
     });
 
-    const job = jobOpportunities[0];
-    const previousCapacity = job.creatorCapacity;
-    job.creatorCapacity = job.assignedCreatorIds.length;
+    const acceptedProposal = creatorProposals.find((proposal) => proposal.status === 'Accepted');
+    if (!acceptedProposal) {
+      throw new Error('Expected mock accepted proposal.');
+    }
+    const previousStatus = acceptedProposal.status;
+    acceptedProposal.status = 'In review';
 
     try {
       const fixture = TestBed.createComponent(JobsComponent);
       fixture.detectChanges();
-      const jobCard = fixture.nativeElement.querySelector('.job-list article') as HTMLElement;
-      const assignedCapacity = jobCard.querySelector('.capacity-pill') as HTMLElement;
-      const interestButton = jobCard.querySelector('.job-interest-button') as HTMLButtonElement;
 
-      expect(assignedCapacity.textContent).toContain('1 / 1 creators assigned');
-      expect(interestButton.disabled).toBe(false);
+      expect(fixture.nativeElement.textContent).toContain('No accepted jobs yet');
+      expect(fixture.nativeElement.querySelector('.accepted-job-card')).toBeNull();
     } finally {
-      job.creatorCapacity = previousCapacity;
+      acceptedProposal.status = previousStatus;
     }
   });
 

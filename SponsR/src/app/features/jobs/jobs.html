@@ -2,30 +2,31 @@
   <header class="workspace-page-heading">
     <div>
       <p class="eyebrow">{{ isCompany ? 'COMPANY WORKSPACE' : 'CREATOR WORKSPACE' }}</p>
-      <h2>{{ isCompany ? 'Jobs' : 'Find your next job' }}</h2>
+      <h2>Jobs</h2>
       <p>
         {{ isCompany
           ? 'Manage openings, review interested creators, and build your shortlist.'
-          : 'Explore individual opportunities, or register interest in a campaign.' }}
+          : 'Track jobs you have accepted proposals for. Explore new opportunities in Discover.' }}
       </p>
     </div>
     @if (isCompany) {
       <button class="page-count page-action" type="button" (click)="createJob()">Create job <span aria-hidden="true">＋</span></button>
     } @else {
-      <span class="page-count">{{ availableJobs().length }} accepting interest</span>
+      <span class="page-count">{{ acceptedCreatorJobs().length }} accepted jobs</span>
     }
   </header>
 
+  @if (isCompany) {
   <section class="jobs-section">
     <div class="jobs-section-heading">
       <div>
         <p class="eyebrow">CAMPAIGN UMBRELLAS</p>
         <h3>Campaigns</h3>
-        <p>{{ isCompany ? 'See capacity and campaign-level interest.' : 'Register interest in a campaign to be considered across its related work.' }}</p>
+        <p>See capacity and campaign-level interest.</p>
       </div>
     </div>
     <div class="campaign-opportunity-grid">
-      @for (campaign of isCompany ? companyCampaigns() : campaigns(); track campaign.id) {
+      @for (campaign of companyCampaigns(); track campaign.id) {
         <article class="job-card campaign-opportunity-card">
           <div class="job-card-topline">
             <span class="job-category">Campaign</span>
@@ -37,24 +38,14 @@
             <span>{{ getCampaignInterestCount(campaign) }} interested</span>
             <span>{{ getCampaignJobCount(campaign.id) }} related jobs</span>
           </div>
-          @if (isCompany) {
-            <button type="button" class="job-detail-button" (click)="showCampaign(campaign)">View campaign</button>
-          }
-          @if (!isCompany) {
-            <button
-              type="button"
-              class="job-interest-button"
-              [class.registered]="isInterestedInCampaign(campaign.id)"
-              (click)="toggleCampaignInterest(campaign.id)"
-            >
-              {{ isInterestedInCampaign(campaign.id) ? 'Interest registered ✓' : 'Register campaign interest' }}
-            </button>
-          }
+          <button type="button" class="job-detail-button" (click)="showCampaign(campaign)">View campaign</button>
         </article>
       }
     </div>
   </section>
+  }
 
+  @if (isCompany) {
   <section class="jobs-section">
     <div class="jobs-section-heading">
       <div>
@@ -65,7 +56,7 @@
     </div>
 
     <div class="job-list">
-      @for (job of isCompany ? companyJobs() : availableJobs(); track job.id) {
+      @for (job of companyJobs(); track job.id) {
         <article class="job-card">
           <div class="job-main">
             <div class="job-card-topline">
@@ -109,27 +100,6 @@
                 <p class="no-interested-creators">No creator interest yet.</p>
               }
             </div>
-          } @else {
-            <div class="creator-job-action">
-              <span class="interest-deadline-copy">
-                {{ isInterestOpen(job)
-                  ? 'Interest closes ' + formatDate(job.interestDeadline)
-                  : 'Interest registration closed' }}
-              </span>
-              <button
-                type="button"
-                class="job-interest-button"
-                [class.registered]="isInterestedInJob(job.id)"
-                [disabled]="!isInterestOpen(job)"
-                (click)="toggleJobInterest(job.id)"
-              >
-                {{ !isInterestOpen(job)
-                  ? 'Closed'
-                  : isInterestedInJob(job.id)
-                    ? 'Interest registered ✓'
-                    : 'Register interest' }}
-              </button>
-            </div>
           }
         </article>
       } @empty {
@@ -137,4 +107,37 @@
       }
     </div>
   </section>
+  } @else {
+    <section class="jobs-section accepted-jobs-section">
+      <div class="jobs-section-heading">
+        <div>
+          <p class="eyebrow">CONFIRMED PARTNERSHIPS</p>
+          <h3>Accepted jobs</h3>
+          <p>Jobs with proposals you have accepted. Browse new opportunities from Discover.</p>
+        </div>
+      </div>
+      <div class="job-list">
+        @for (accepted of acceptedCreatorJobs(); track accepted.job.id) {
+          <article class="job-card accepted-job-card">
+            <div class="job-main">
+              <div class="job-card-topline">
+                <span class="job-category">{{ accepted.job.category }}</span>
+                <span class="capacity-pill">Proposal accepted</span>
+              </div>
+              <h4>{{ accepted.job.title }}</h4>
+              <p class="job-company">{{ accepted.job.companyName }} @if (accepted.job.campaignTitle) { <span>· {{ accepted.job.campaignTitle }}</span> }</p>
+              <p class="job-description">{{ accepted.job.description }}</p>
+              <div class="job-details">
+                <span><small>AGREED FEE</small><strong>{{ accepted.proposal.amount }}</strong></span>
+                <span><small>DELIVERY DUE</small><strong>{{ formatDate(accepted.job.deliveryDeadline) }}</strong></span>
+              </div>
+              <button type="button" class="job-detail-button" (click)="showAcceptedJob(accepted.proposal, accepted.job)">View accepted job</button>
+            </div>
+          </article>
+        } @empty {
+          <p class="workspace-empty">No accepted jobs yet. Find opportunities in Discover and track proposals in Proposals.</p>
+        }
+      </div>
+    </section>
+  }
 </section>

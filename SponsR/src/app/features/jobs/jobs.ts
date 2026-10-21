@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { type CampaignOpportunity, type JobOpportunity } from '../../core/job-marketplace-data';
+import { creatorProposals } from '../../core/creator-workspace-data';
 import { DialogService } from '../../core/dialog.service';
 import { mockCreatorAccounts } from '../../core/marketplace-mock-data';
 import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
@@ -15,34 +16,33 @@ export class JobsComponent {
   private readonly dialogs = inject(DialogService);
   private readonly workspace = inject(MarketplaceWorkspaceService);
   protected readonly isCompany = this.session.currentUser()?.type === 'company';
-  protected readonly campaigns = this.workspace.campaigns;
   protected readonly jobs = this.workspace.jobs;
   protected readonly companyCampaigns = computed(() =>
-    this.campaigns().filter((campaign) => campaign.companyName === this.session.currentUser()?.name)
+    this.workspace.campaigns().filter((campaign) => campaign.companyName === this.session.currentUser()?.name)
   );
   protected readonly companyJobs = computed(() =>
     this.jobs().filter((job) => job.companyName === this.session.currentUser()?.name)
   );
+  protected readonly acceptedCreatorJobs = computed(() =>
+    creatorProposals
+      .filter((proposal) => proposal.status === 'Accepted')
+      .flatMap((proposal) => {
+        const job = this.jobs().find((candidate) =>
+          candidate.title === proposal.campaign && candidate.companyName === proposal.brand
+        );
+        return job ? [{ proposal, job }] : [];
+      })
+  );
   protected readonly creatorAccounts = mockCreatorAccounts;
-  protected readonly registeredJobIds = this.workspace.registeredJobIds;
-  protected readonly registeredCampaignIds = this.workspace.registeredCampaignIds;
 
-  protected readonly availableJobs = computed(() => this.jobs().filter((job) => this.hasInterestOpen(job)));
-
-  protected isInterestedInJob(jobId: string): boolean {
-    return this.registeredJobIds().includes(jobId);
-  }
-
-  protected isInterestedInCampaign(campaignId: string): boolean {
-    return this.registeredCampaignIds().includes(campaignId);
-  }
-
-  protected toggleJobInterest(jobId: string): void {
-    this.workspace.toggleJobInterest(jobId);
-  }
-
-  protected toggleCampaignInterest(campaignId: string): void {
-    this.workspace.toggleCampaignInterest(campaignId);
+  protected showAcceptedJob(proposal: (typeof creatorProposals)[number], job: JobOpportunity): void {
+    this.dialogs.openDetails(job.title, job.description, [
+      { label: 'Company', value: job.companyName },
+      { label: 'Proposal status', value: proposal.status },
+      { label: 'Agreed amount', value: proposal.amount },
+      { label: 'Delivery deadline', value: this.formatDate(job.deliveryDeadline) },
+      { label: 'Campaign', value: job.campaignTitle ?? 'Standalone job' }
+    ], 'ACCEPTED JOB');
   }
 
   protected toggleShortlist(jobId: string, creatorId: string): void {
@@ -123,9 +123,6 @@ export class JobsComponent {
 
   protected getCampaignInterestCount(campaign: CampaignOpportunity): number {
     const campaignInterestIds = new Set(campaign.interestedCreatorIds);
-    if (this.registeredCampaignIds().includes(campaign.id)) {
-      campaignInterestIds.add('current-creator');
-    }
     this.jobs()
       .filter((job) => job.campaignId === campaign.id)
       .forEach((job) => job.interestedCreatorIds.forEach((creatorId) => campaignInterestIds.add(creatorId)));
@@ -134,10 +131,6 @@ export class JobsComponent {
 
   protected getCampaignJobCount(campaignId: string): number {
     return this.jobs().filter((job) => job.campaignId === campaignId).length;
-  }
-
-  protected isInterestOpen(job: JobOpportunity): boolean {
-    return this.hasInterestOpen(job);
   }
 
   protected formatBudget(min: number, max: number): string {
@@ -149,7 +142,4 @@ export class JobsComponent {
     return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(`${date}T12:00:00`));
   }
 
-  private hasInterestOpen(job: JobOpportunity): boolean {
-    return new Date(`${job.interestDeadline}T23:59:59`).getTime() >= Date.now();
-  }
 }

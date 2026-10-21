@@ -26,20 +26,6 @@ export interface NewJobInput {
 export class MarketplaceWorkspaceService {
   readonly campaigns = signal<CampaignOpportunity[]>(campaignOpportunities.map((campaign) => ({ ...campaign })));
   readonly jobs = signal<JobOpportunity[]>(jobOpportunities.map((job) => ({ ...job })));
-  readonly registeredJobIds = signal<string[]>([]);
-  readonly registeredCampaignIds = signal<string[]>([]);
-
-  toggleJobInterest(jobId: string): void {
-    this.registeredJobIds.update((ids) =>
-      ids.includes(jobId) ? ids.filter((id) => id !== jobId) : [...ids, jobId]
-    );
-  }
-
-  toggleCampaignInterest(campaignId: string): void {
-    this.registeredCampaignIds.update((ids) =>
-      ids.includes(campaignId) ? ids.filter((id) => id !== campaignId) : [...ids, campaignId]
-    );
-  }
 
   addCampaign(input: NewCampaignInput): void {
     const campaign: CampaignOpportunity = {
