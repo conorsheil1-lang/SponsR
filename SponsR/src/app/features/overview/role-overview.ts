@@ -1,17 +1,17 @@
 import { Component, inject } from '@angular/core';
 import { SessionService } from '../../core/session.service';
 import { CreatorOverviewComponent } from './creator-overview';
-import { OverviewComponent } from './overview';
+import { CompanyOverviewComponent } from './company-overview';
 
 @Component({
   selector: 'app-role-overview',
   standalone: true,
-  imports: [CreatorOverviewComponent, OverviewComponent],
+  imports: [CreatorOverviewComponent, CompanyOverviewComponent],
   template: `
     @if (session.currentUser()?.type === 'creator') {
       <app-creator-overview />
     } @else {
-      <app-overview />
+      <app-company-overview />
     }
   `
 })

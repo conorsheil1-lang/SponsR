@@ -2,6 +2,7 @@
 @import './app/features/discovery/discovery.css';
 @import './app/features/overview/creator-overview.css';
 @import './app/features/jobs/jobs.css';
+@import './app/shared/dialog-host.css';
 
 html, body {
   margin: 0;

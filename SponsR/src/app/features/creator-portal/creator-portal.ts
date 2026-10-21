@@ -1,8 +1,10 @@
 import { Component, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-creator-portal',
   standalone: true,
+  imports: [RouterLink],
   template: `
     <section class="portal-page">
       <div class="portal-banner">
@@ -10,7 +12,7 @@ import { Component, signal } from '@angular/core';
           <p class="eyebrow">Creator portal</p>
           <h2>Grow your creator brand and track campaign interest</h2>
         </div>
-        <button class="primary-button" type="button">New proposal</button>
+        <a class="primary-button" routerLink="/discovery">Find campaigns</a>
       </div>
 
       <div class="stats-grid">

@@ -1,4 +1,5 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { DialogService } from '../../core/dialog.service';
 
 @Component({
   selector: 'app-company-portal',
@@ -10,7 +11,10 @@ import { Component, signal } from '@angular/core';
           <p class="eyebrow">Company portal</p>
           <h2>Find creators, launch campaign briefs, and review proposals</h2>
         </div>
-        <button class="primary-button" type="button">Create brief</button>
+        <div class="portal-actions">
+          <button class="primary-button" type="button" (click)="createJob()">Create job</button>
+          <button class="secondary-button" type="button" (click)="createCampaign()">Create campaign</button>
+        </div>
       </div>
 
       <div class="stats-grid">
@@ -73,6 +77,11 @@ import { Component, signal } from '@angular/core';
         border-radius: 22px;
         padding: 1.2rem 1.3rem;
       }
+      .portal-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+      }
       .eyebrow {
         margin: 0 0 0.35rem;
         text-transform: uppercase;
@@ -88,6 +97,14 @@ import { Component, signal } from '@angular/core';
         border-radius: 999px;
         background: linear-gradient(135deg, #7c3aed, #22d3ee);
         color: white;
+        padding: 0.8rem 1rem;
+        cursor: pointer;
+      }
+      .secondary-button {
+        border: 1px solid #dfe7d8;
+        border-radius: 999px;
+        background: #fff;
+        color: #405240;
         padding: 0.8rem 1rem;
         cursor: pointer;
       }
@@ -143,10 +160,19 @@ import { Component, signal } from '@angular/core';
   ]
 })
 export class CompanyPortalComponent {
+  private readonly dialogs = inject(DialogService);
   readonly stats = signal([
     { label: 'Campaigns', value: '14' },
     { label: 'Creators shortlisted', value: '27' },
     { label: 'Escrow funded', value: '$84K' },
     { label: 'Approval rate', value: '92%' }
   ]);
+
+  createJob(): void {
+    this.dialogs.openCreateJob();
+  }
+
+  createCampaign(): void {
+    this.dialogs.openCreateCampaign();
+  }
 }

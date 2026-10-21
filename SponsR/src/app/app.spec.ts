@@ -98,6 +98,46 @@ describe('App', () => {
     expect(compiled.textContent).toContain('Campaigns');
   });
 
+  it('shows company-relevant overview metrics and dashboard sections', async () => {
+    const fixture = TestBed.createComponent(App);
+    const session = TestBed.inject(SessionService);
+    const router = TestBed.inject(Router);
+    session.signIn({ type: 'company', name: 'Northstar Labs', email: 'company@sponsr.com' });
+    await router.navigateByUrl('/overview');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('app-company-overview')).toBeTruthy();
+    expect(compiled.textContent).toContain('Interested creators');
+    expect(compiled.textContent).toContain('Shortlisted creators');
+    expect(compiled.textContent).toContain('Proposal activity');
+    expect(compiled.textContent).toContain('Creators for you');
+  });
+
+  it('opens the company shortlist and proposal lists in dialogs', async () => {
+    const fixture = TestBed.createComponent(App);
+    const session = TestBed.inject(SessionService);
+    const router = TestBed.inject(Router);
+    session.signIn({ type: 'company', name: 'Northstar Labs', email: 'company@sponsr.com' });
+    await router.navigateByUrl('/overview');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const panels = Array.from(fixture.nativeElement.querySelectorAll('.dashboard-panel')) as HTMLElement[];
+    const shortlistPanel = panels.find((panel) => panel.textContent?.includes('YOUR SHORTLIST'));
+    shortlistPanel?.querySelector('button')?.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.app-dialog h2')?.textContent).toContain('Shortlisted creators');
+
+    fixture.nativeElement.querySelector('.dialog-close')?.click();
+    fixture.detectChanges();
+    const proposalPanel = panels.find((panel) => panel.textContent?.includes('NEEDS YOUR ATTENTION'));
+    proposalPanel?.querySelector('button')?.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.app-dialog h2')?.textContent).toContain('Proposal activity');
+  });
+
   it('shows company navigation only for a signed-in company', async () => {
     const fixture = TestBed.createComponent(App);
     const session = TestBed.inject(SessionService);

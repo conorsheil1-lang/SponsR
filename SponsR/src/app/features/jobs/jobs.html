@@ -10,7 +10,7 @@
       </p>
     </div>
     @if (isCompany) {
-      <span class="page-count">{{ jobs().length }} open jobs</span>
+      <button class="page-count page-action" type="button" (click)="createJob()">Create job <span aria-hidden="true">＋</span></button>
     } @else {
       <span class="page-count">{{ availableJobs().length }} accepting interest</span>
     }
@@ -25,7 +25,7 @@
       </div>
     </div>
     <div class="campaign-opportunity-grid">
-      @for (campaign of campaigns(); track campaign.id) {
+      @for (campaign of isCompany ? companyCampaigns() : campaigns(); track campaign.id) {
         <article class="job-card campaign-opportunity-card">
           <div class="job-card-topline">
             <span class="job-category">Campaign</span>
@@ -37,6 +37,9 @@
             <span>{{ getCampaignInterestCount(campaign) }} interested</span>
             <span>{{ getCampaignJobCount(campaign.id) }} related jobs</span>
           </div>
+          @if (isCompany) {
+            <button type="button" class="job-detail-button" (click)="showCampaign(campaign)">View campaign</button>
+          }
           @if (!isCompany) {
             <button
               type="button"
@@ -62,7 +65,7 @@
     </div>
 
     <div class="job-list">
-      @for (job of isCompany ? jobs() : availableJobs(); track job.id) {
+      @for (job of isCompany ? companyJobs() : availableJobs(); track job.id) {
         <article class="job-card">
           <div class="job-main">
             <div class="job-card-topline">
@@ -77,6 +80,7 @@
               <span><small>INTEREST BY</small><strong>{{ formatDate(job.interestDeadline) }}</strong></span>
               <span><small>DELIVERY DUE</small><strong>{{ formatDate(job.deliveryDeadline) }}</strong></span>
             </div>
+            <button type="button" class="job-detail-button" (click)="showJob(job)">View job details</button>
           </div>
 
           @if (isCompany) {
@@ -89,7 +93,7 @@
                 <div class="interested-creator-row">
                   <span class="creator-initials">{{ getInitials(creator.name) }}</span>
                   <span class="interested-creator-info">
-                    <strong>{{ creator.name }}</strong>
+                    <button type="button" class="creator-name-action" (click)="showCreator(creator.id)">{{ creator.name }}</button>
                     <small>{{ creator.niche }} · {{ formatAudience(creator.audienceSize) }} audience</small>
                   </span>
                   <button

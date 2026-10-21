@@ -1,5 +1,6 @@
 export interface CampaignOpportunity {
   id: string;
+  companyName: string;
   title: string;
   description: string;
   creatorCapacity: number;
@@ -28,6 +29,7 @@ export interface JobOpportunity {
 export const campaignOpportunities: CampaignOpportunity[] = [
   {
     id: 'campaign-slower-mornings',
+    companyName: 'Morrow',
     title: 'The slower mornings series',
     description: 'A collection of creator-led stories celebrating the small rituals that make mornings feel better.',
     creatorCapacity: 8,
@@ -36,19 +38,38 @@ export const campaignOpportunities: CampaignOpportunity[] = [
   },
   {
     id: 'campaign-outside-more',
+    companyName: 'Trailhead Supply',
     title: 'Outside, more often',
     description: 'Inspire more people to find a nearby trail, park, or fresh-air escape.',
     creatorCapacity: 6,
     assignedCreatorIds: ['creator-jules-lee'],
     interestedCreatorIds: ['creator-eli-williams', 'creator-amara-jones', 'creator-finn-murphy']
+  },
+  {
+    id: 'campaign-goodfolk-rituals',
+    companyName: 'Goodfolk Coffee',
+    title: 'Good mornings, made together',
+    description: 'Creator-led stories for people who make space for a good cup and a slower start.',
+    creatorCapacity: 5,
+    assignedCreatorIds: [],
+    interestedCreatorIds: ['creator-lena-park', 'creator-aria-morgan']
+  },
+  {
+    id: 'campaign-northstar-next',
+    companyName: 'Northstar Labs',
+    title: 'Tools for what’s next',
+    description: 'Show how useful technology can make room for the ideas and projects ahead.',
+    creatorCapacity: 3,
+    assignedCreatorIds: ['creator-noah-bennett'],
+    interestedCreatorIds: ['creator-theo-brooks', 'creator-marcus-reed']
   }
 ];
 
 export const jobOpportunities: JobOpportunity[] = [
   {
     id: 'job-morrow-reset',
-    campaignId: 'campaign-slower-mornings',
-    campaignTitle: 'The slower mornings series',
+    campaignId: 'campaign-goodfolk-rituals',
+    campaignTitle: 'Good mornings, made together',
     companyName: 'Morrow',
     title: 'Make room for a reset',
     category: 'Wellness',
@@ -98,8 +119,8 @@ export const jobOpportunities: JobOpportunity[] = [
   },
   {
     id: 'job-northstar-tools',
-    campaignId: null,
-    campaignTitle: null,
+    campaignId: 'campaign-northstar-next',
+    campaignTitle: 'Tools for what’s next',
     companyName: 'Northstar Labs',
     title: 'Tools for what’s next',
     category: 'Technology',
@@ -111,7 +132,7 @@ export const jobOpportunities: JobOpportunity[] = [
     creatorCapacity: 2,
     assignedCreatorIds: ['creator-noah-bennett'],
     interestedCreatorIds: ['creator-theo-brooks', 'creator-marcus-reed'],
-    shortlistedCreatorIds: []
+    shortlistedCreatorIds: ['creator-theo-brooks']
   },
   {
     id: 'job-mint-home',

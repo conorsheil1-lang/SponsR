@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { creatorCampaigns, creatorDeadlines, creatorNotifications, creatorProposals } from '../../core/creator-workspace-data';
+import { DialogService } from '../../core/dialog.service';
 import { SessionService } from '../../core/session.service';
 
 @Component({
@@ -69,7 +70,7 @@ import { SessionService } from '../../core/session.service';
               <p class="eyebrow">WHAT’S NEXT</p>
               <h3>Upcoming deadlines</h3>
             </div>
-            <a routerLink="/deadlines">View all</a>
+            <button class="dashboard-view-action" type="button" (click)="showAllDeadlines()">View all</button>
           </div>
           <ul class="dashboard-list">
             @for (deadline of deadlines.slice(0, 3); track deadline.id) {
@@ -90,7 +91,7 @@ import { SessionService } from '../../core/session.service';
               <p class="eyebrow">YOUR PITCHES</p>
               <h3>Recent proposals</h3>
             </div>
-            <a routerLink="/proposals">View all</a>
+            <button class="dashboard-view-action" type="button" (click)="showAllProposals()">View all</button>
           </div>
           <ul class="dashboard-list proposal-list">
             @for (proposal of proposals.slice(0, 3); track proposal.id) {
@@ -100,6 +101,7 @@ import { SessionService } from '../../core/session.service';
                   <span>{{ proposal.brand }} · {{ proposal.amount }}</span>
                 </div>
                 <span class="proposal-status" [class]="proposal.status.toLowerCase().replace(' ', '-')">{{ proposal.status }}</span>
+                <button class="row-detail-action" type="button" (click)="showProposal(proposal)">View</button>
               </li>
             }
           </ul>
@@ -111,7 +113,7 @@ import { SessionService } from '../../core/session.service';
               <p class="eyebrow">WORK IN MOTION</p>
               <h3>Campaigns</h3>
             </div>
-            <a routerLink="/campaigns">View all</a>
+            <button class="dashboard-view-action" type="button" (click)="showAllCampaigns()">View all</button>
           </div>
           <ul class="dashboard-list campaign-list">
             @for (campaign of campaigns; track campaign.id) {
@@ -132,6 +134,7 @@ import { SessionService } from '../../core/session.service';
 })
 export class CreatorOverviewComponent {
   private readonly session = inject(SessionService);
+  private readonly dialogs = inject(DialogService);
   protected readonly notifications = creatorNotifications;
   protected readonly proposals = creatorProposals;
   protected readonly deadlines = creatorDeadlines;
@@ -143,5 +146,53 @@ export class CreatorOverviewComponent {
 
   protected firstName(): string {
     return this.session.currentUser()?.name.split(' ')[0] ?? 'creator';
+  }
+
+  protected showAllDeadlines(): void {
+    this.dialogs.openList(
+      'Upcoming deadlines',
+      'Deadlines for your active creator partnerships.',
+      this.deadlines.map((deadline) => ({
+        title: deadline.task,
+        subtitle: deadline.campaign,
+        meta: `${deadline.dueDate} · ${deadline.priority}`
+      })),
+      'WHAT’S NEXT'
+    );
+  }
+
+  protected showAllProposals(): void {
+    this.dialogs.openList(
+      'Your proposals',
+      'Track the status of every proposal you have sent.',
+      this.proposals.map((proposal) => ({
+        title: proposal.campaign,
+        subtitle: `${proposal.brand} · ${proposal.status}`,
+        meta: proposal.amount
+      })),
+      'YOUR PITCHES'
+    );
+  }
+
+  protected showAllCampaigns(): void {
+    this.dialogs.openList(
+      'Your campaigns',
+      'Campaigns and creator partnerships currently in motion.',
+      this.campaigns.map((campaign) => ({
+        title: campaign.name,
+        subtitle: `${campaign.brand} · ${campaign.status}`,
+        meta: campaign.nextStep
+      })),
+      'WORK IN MOTION'
+    );
+  }
+
+  protected showProposal(proposal: (typeof creatorProposals)[number]): void {
+    this.dialogs.openDetails(proposal.campaign, 'Review the proposal details and current status.', [
+      { label: 'Brand', value: proposal.brand },
+      { label: 'Status', value: proposal.status },
+      { label: 'Amount', value: proposal.amount },
+      { label: 'Submitted', value: proposal.submitted }
+    ], 'PROPOSAL');
   }
 }

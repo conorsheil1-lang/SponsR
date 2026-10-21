@@ -3,20 +3,60 @@
     <div>
       <p class="eyebrow">THE SPONSR MARKETPLACE</p>
       <h2>Find your next <span>great match.</span></h2>
-      <p class="intro-copy">Fresh creators, exciting briefs, and brands building something good.</p>
+      <p class="intro-copy">
+        {{ isCompany()
+          ? 'Discover creators whose communities and content can bring your next campaign to life.'
+          : 'Find open collaborations and brands building thoughtful creator partnerships.' }}
+      </p>
     </div>
     <label class="search-box">
       <span aria-hidden="true">⌕</span>
       <input
         type="search"
-        aria-label="Search creators, campaigns, and brands"
-        placeholder="Search the marketplace"
+        [attr.aria-label]="isCompany() ? 'Search creators' : 'Search campaigns and brands'"
+        [placeholder]="isCompany() ? 'Search creators' : 'Search campaigns and brands'"
         [value]="searchQuery()"
         (input)="updateQuery($event)"
       />
     </label>
   </header>
 
+  @if (isCompany()) {
+  <section class="discovery-section" aria-labelledby="for-you-creators-heading">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">MATCHED TO YOUR NEXT BRIEF</p>
+        <h3 id="for-you-creators-heading">Creators for you</h3>
+        <p class="section-description">Creators with standout audience engagement across the marketplace.</p>
+      </div>
+      <div class="carousel-controls">
+        <button type="button" aria-label="Scroll creators for you left" (click)="scrollCarousel(forYouCarousel, -1)">←</button>
+        <button type="button" aria-label="Scroll creators for you right" (click)="scrollCarousel(forYouCarousel, 1)">→</button>
+      </div>
+    </div>
+    <div class="carousel" #forYouCarousel>
+      @for (creator of creatorsForYou(); track creator.id) {
+        <article class="discovery-card creator-card">
+          <div class="profile-row">
+            <div [class]="'profile-avatar ' + creator.avatarTone" aria-hidden="true">{{ getInitials(creator.name) }}</div>
+            <div class="profile-name"><h4>{{ creator.name }} @if (creator.verified) { <span class="verified" aria-label="Verified">✓</span> }</h4><span>{{ creator.handle }}</span></div>
+          </div>
+          <span class="niche-tag">{{ creator.niche }}</span>
+          <p class="card-description">{{ creator.bio }}</p>
+          <div class="card-stats">
+            <div><strong>{{ formatAudience(creator.audienceSize) }}</strong><span>audience</span></div>
+            <div><strong>{{ creator.engagementRate }}%</strong><span>engagement</span></div>
+          </div>
+          <button type="button" class="discovery-card-action" (click)="showCreator(creator)">View creator</button>
+        </article>
+      } @empty {
+        <p class="empty-state">No creators match that search. Try a different name, niche, or channel.</p>
+      }
+    </div>
+  </section>
+  }
+
+  @if (isCompany()) {
   <section class="discovery-section" aria-labelledby="hot-creators-heading">
     <div class="section-heading">
       <div>
@@ -57,13 +97,16 @@
             <div><strong>{{ creator.engagementRate }}%</strong><span>engagement</span></div>
             <div><strong>{{ formatRate(creator.typicalRate) }}</strong><span>typical rate</span></div>
           </div>
+          <button type="button" class="discovery-card-action" (click)="showCreator(creator)">View creator</button>
         </article>
       } @empty {
         <p class="empty-state">No creators match that search. Try a different name, niche, or channel.</p>
       }
     </div>
   </section>
+  }
 
+  @if (!isCompany()) {
   <section class="discovery-section" aria-labelledby="hot-campaigns-heading">
     <div class="section-heading">
       <div>
@@ -96,13 +139,16 @@
             <div><span>CREATOR BUDGET</span><strong>{{ formatBudget(campaign.budgetMin, campaign.budgetMax) }}</strong></div>
             <span class="applicant-count">{{ campaign.applicants }} interested</span>
           </div>
+          <button type="button" class="discovery-card-action" (click)="showCampaign(campaign)">View campaign</button>
         </article>
       } @empty {
         <p class="empty-state">No campaigns match that search. Try another brand or category.</p>
       }
     </div>
   </section>
+  }
 
+  @if (!isCompany()) {
   <section class="discovery-section" aria-labelledby="popular-brands-heading">
     <div class="section-heading">
       <div>
@@ -131,10 +177,12 @@
             <div><strong>{{ brand.activeCampaigns }}</strong><span>open campaigns</span></div>
             <div><strong>{{ brand.creatorPartners }}</strong><span>creator partners</span></div>
           </div>
+          <button type="button" class="discovery-card-action" (click)="showCompany(brand)">View brand</button>
         </article>
       } @empty {
         <p class="empty-state">No brands match that search. Try a different name or category.</p>
       }
     </div>
   </section>
+  }
 </section>

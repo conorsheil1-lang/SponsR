@@ -68,7 +68,8 @@ describe('JobsComponent', () => {
     const shortlistButton = fixture.nativeElement.querySelector('.interested-creator-row .shortlist-button') as HTMLButtonElement;
 
     expect(fixture.nativeElement.textContent).toContain('Interested creators');
-    expect(fixture.nativeElement.textContent).toContain('Aria Morgan');
+    expect(fixture.nativeElement.textContent).toContain('Marcus Reed');
+    expect(fixture.nativeElement.textContent).toContain('Theo Brooks');
 
     shortlistButton.click();
     fixture.detectChanges();

@@ -129,6 +129,48 @@
   white-space: nowrap;
 }
 
+.dashboard-view-action,
+.row-detail-action {
+  border: 0;
+  background: none;
+  color: #557842;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.65rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.row-detail-action {
+  font-size: 0.58rem;
+}
+
+.proposal-view-button {
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #dfe7d8;
+  border-radius: 999px;
+  background: #f7f9f4;
+  color: #557842;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.company-creator-avatar {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  flex: 0 0 27px;
+  place-items: center;
+  border-radius: 50%;
+  background: #e8efdf;
+  color: #557442;
+  font-size: 0.52rem;
+  font-weight: 700;
+}
+
 .notification-count {
   display: inline-grid;
   width: 19px;

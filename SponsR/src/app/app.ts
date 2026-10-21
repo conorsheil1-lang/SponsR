@@ -2,10 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { SessionService } from './core/session.service';
+import { DialogHostComponent } from './shared/dialog-host';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, DialogHostComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

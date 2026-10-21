@@ -24,6 +24,8 @@
   </div>
 </header>
 
+<app-dialog-host />
+
 @if (isPublicPage() || !session.currentUser()) {
   <router-outlet></router-outlet>
 } @else {

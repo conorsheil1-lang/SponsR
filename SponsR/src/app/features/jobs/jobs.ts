@@ -1,6 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { campaignOpportunities, jobOpportunities, type CampaignOpportunity, type JobOpportunity } from '../../core/job-marketplace-data';
+import { Component, computed, inject } from '@angular/core';
+import { type CampaignOpportunity, type JobOpportunity } from '../../core/job-marketplace-data';
+import { DialogService } from '../../core/dialog.service';
 import { mockCreatorAccounts } from '../../core/marketplace-mock-data';
+import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
 import { SessionService } from '../../core/session.service';
 
 @Component({
@@ -10,12 +12,20 @@ import { SessionService } from '../../core/session.service';
 })
 export class JobsComponent {
   private readonly session = inject(SessionService);
+  private readonly dialogs = inject(DialogService);
+  private readonly workspace = inject(MarketplaceWorkspaceService);
   protected readonly isCompany = this.session.currentUser()?.type === 'company';
-  protected readonly campaigns = signal<CampaignOpportunity[]>(campaignOpportunities);
-  protected readonly jobs = signal<JobOpportunity[]>(jobOpportunities);
+  protected readonly campaigns = this.workspace.campaigns;
+  protected readonly jobs = this.workspace.jobs;
+  protected readonly companyCampaigns = computed(() =>
+    this.campaigns().filter((campaign) => campaign.companyName === this.session.currentUser()?.name)
+  );
+  protected readonly companyJobs = computed(() =>
+    this.jobs().filter((job) => job.companyName === this.session.currentUser()?.name)
+  );
   protected readonly creatorAccounts = mockCreatorAccounts;
-  protected readonly registeredJobIds = signal<string[]>([]);
-  protected readonly registeredCampaignIds = signal<string[]>([]);
+  protected readonly registeredJobIds = this.workspace.registeredJobIds;
+  protected readonly registeredCampaignIds = this.workspace.registeredCampaignIds;
 
   protected readonly availableJobs = computed(() => this.jobs().filter((job) => this.hasInterestOpen(job)));
 
@@ -28,15 +38,11 @@ export class JobsComponent {
   }
 
   protected toggleJobInterest(jobId: string): void {
-    this.registeredJobIds.update((ids) =>
-      ids.includes(jobId) ? ids.filter((id) => id !== jobId) : [...ids, jobId]
-    );
+    this.workspace.toggleJobInterest(jobId);
   }
 
   protected toggleCampaignInterest(campaignId: string): void {
-    this.registeredCampaignIds.update((ids) =>
-      ids.includes(campaignId) ? ids.filter((id) => id !== campaignId) : [...ids, campaignId]
-    );
+    this.workspace.toggleCampaignInterest(campaignId);
   }
 
   protected toggleShortlist(jobId: string, creatorId: string): void {
@@ -51,6 +57,42 @@ export class JobsComponent {
         return { ...job, shortlistedCreatorIds };
       })
     );
+  }
+
+  protected createJob(): void {
+    this.dialogs.openCreateJob();
+  }
+
+  protected showCampaign(campaign: CampaignOpportunity): void {
+    this.dialogs.openDetails(campaign.title, campaign.description, [
+      { label: 'Creator capacity', value: `${this.getCampaignAssignedCount(campaign)} / ${campaign.creatorCapacity} assigned` },
+      { label: 'Interested creators', value: `${this.getCampaignInterestCount(campaign)}` },
+      { label: 'Related jobs', value: `${this.getCampaignJobCount(campaign.id)}` }
+    ], 'CAMPAIGN DETAILS');
+  }
+
+  protected showCreator(creatorId: string): void {
+    const creator = this.creatorAccounts.find((candidate) => candidate.id === creatorId);
+    if (!creator) {
+      return;
+    }
+    this.dialogs.openDetails(creator.name, creator.bio, [
+      { label: 'Niche', value: creator.niche },
+      { label: 'Audience', value: this.formatAudience(creator.audienceSize) },
+      { label: 'Engagement', value: `${creator.engagementRate}%` },
+      { label: 'Channels', value: creator.channels.join(', ') }
+    ], 'CREATOR PROFILE');
+  }
+
+  protected showJob(job: JobOpportunity): void {
+    this.dialogs.openDetails(job.title, job.description, [
+      { label: 'Company', value: job.companyName },
+      { label: 'Campaign', value: job.campaignTitle ?? 'Standalone job' },
+      { label: 'Budget', value: this.formatBudget(job.budgetMin, job.budgetMax) },
+      { label: 'Interest deadline', value: this.formatDate(job.interestDeadline) },
+      { label: 'Delivery deadline', value: this.formatDate(job.deliveryDeadline) },
+      { label: 'Creator capacity', value: `${job.assignedCreatorIds.length} / ${job.creatorCapacity} assigned` }
+    ], 'JOB DETAILS');
   }
 
   protected getInterestedCreators(job: JobOpportunity) {
@@ -81,6 +123,9 @@ export class JobsComponent {
 
   protected getCampaignInterestCount(campaign: CampaignOpportunity): number {
     const campaignInterestIds = new Set(campaign.interestedCreatorIds);
+    if (this.registeredCampaignIds().includes(campaign.id)) {
+      campaignInterestIds.add('current-creator');
+    }
     this.jobs()
       .filter((job) => job.campaignId === campaign.id)
       .forEach((job) => job.interestedCreatorIds.forEach((creatorId) => campaignInterestIds.add(creatorId)));
