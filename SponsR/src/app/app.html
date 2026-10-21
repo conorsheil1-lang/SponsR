@@ -32,11 +32,7 @@
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand-wrap">
-        <div class="brand-mark">S</div>
-        <div>
-          <p class="brand-label">{{ session.currentUser()?.type === 'creator' ? 'Creator workspace' : 'Company workspace' }}</p>
-          <h1>SponsR</h1>
-        </div>
+        <p class="brand-label">{{ session.currentUser()?.type === 'creator' ? 'Creator workspace' : 'Company workspace' }}</p>
       </div>
 
       <nav class="nav">
