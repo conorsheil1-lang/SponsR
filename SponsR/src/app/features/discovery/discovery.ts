@@ -35,7 +35,15 @@ export class DiscoveryComponent {
   readonly creators = signal<CreatorAccount[]>(mockCreatorAccounts);
   private readonly creatorDirectory = computed(() => this.creators().map((creator) =>
     creator.id === this.creatorProfile.profile().id
-      ? { ...creator, contentTags: this.creatorProfile.profile().contentTags }
+      ? {
+          ...creator,
+          name: this.creatorProfile.profile().name,
+          handle: this.creatorProfile.profile().handle,
+          bio: this.creatorProfile.profile().bio,
+          avatarUrl: this.creatorProfile.profile().avatarUrl,
+          channels: this.creatorProfile.profile().channels,
+          contentTags: this.creatorProfile.profile().contentTags
+        }
       : creator
   ));
   readonly campaigns = signal<MarketplaceCampaign[]>(mockMarketplaceCampaigns);

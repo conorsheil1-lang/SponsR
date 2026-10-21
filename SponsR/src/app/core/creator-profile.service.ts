@@ -18,6 +18,20 @@ export class CreatorProfileService {
     socialLinks: mockCreatorUser.profile.socialLinks.map((link) => ({ ...link }))
   });
 
+  updatePublicProfile(details: { name: string; handle: string; bio: string }): void {
+    const name = details.name.trim();
+    const handle = details.handle.trim();
+    const bio = details.bio.trim();
+    if (!name || !handle) {
+      throw new Error('Enter both your name and handle.');
+    }
+    this.profile.update((profile) => ({ ...profile, name, handle, bio }));
+  }
+
+  updateAvatar(avatarUrl: string): void {
+    this.profile.update((profile) => ({ ...profile, avatarUrl }));
+  }
+
   addContentTag(value: string): void {
     const tag = value.trim().toLocaleLowerCase();
     if (!tag) {

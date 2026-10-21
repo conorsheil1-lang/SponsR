@@ -108,9 +108,23 @@ describe('DiscoveryComponent', () => {
     ]);
 
     component.creatorTagFilter.set('');
-    TestBed.inject(CreatorProfileService).addContentTag('slow living');
+    const creatorProfile = TestBed.inject(CreatorProfileService);
+    creatorProfile.addContentTag('slow living');
     component.creatorTagFilter.set('slow living');
     expect(component.allCreators().map((creator) => creator.id)).toEqual(['creator-maya-chen']);
+
+    creatorProfile.updatePublicProfile({
+      name: 'Maya Creator',
+      handle: '@mayacreator',
+      bio: 'Updated creator bio.'
+    });
+    creatorProfile.updateAvatar('data:image/png;base64,cGhvdG8=');
+    fixture.detectChanges();
+    const mayaCard = Array.from(fixture.nativeElement.querySelectorAll('.listing-card')) as HTMLElement[];
+    const profileCard = mayaCard.find((card) => card.textContent?.includes('Maya Creator'));
+    expect(profileCard?.textContent).toContain('@mayacreator');
+    expect(profileCard?.textContent).toContain('Updated creator bio.');
+    expect(profileCard?.querySelector('.profile-avatar img')?.getAttribute('src')).toBe('data:image/png;base64,cGhvdG8=');
   });
 
   it('filters all campaigns and jobs by tag, brand, budget, and deadline', () => {

@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { DialogService } from '../../core/dialog.service';
 import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
 import { CreatorProfileService } from '../../core/creator-profile.service';
@@ -75,6 +76,48 @@ describe('CreatorPortalComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No brands saved yet');
     expect(workspace.isInterestedInBrand('brand-morrow')).toBe(false);
+  });
+
+  it('edits creator name, handle, bio, and profile photo in the Me card', () => {
+    const fixture = TestBed.createComponent(CreatorPortalComponent);
+    fixture.detectChanges();
+    const meCard = fixture.nativeElement.querySelector('.me-card') as HTMLElement;
+    expect(meCard.querySelector('h3')?.textContent).toBe('Me');
+
+    const nameInput = meCard.querySelector('[name="creatorName"]') as HTMLInputElement;
+    nameInput.value = 'Maya C.';
+    nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+    const handleInput = meCard.querySelector('[name="creatorHandle"]') as HTMLInputElement;
+    handleInput.value = '@mayacreates';
+    handleInput.dispatchEvent(new Event('input', { bubbles: true }));
+    const bioInput = meCard.querySelector('[name="creatorBio"]') as HTMLTextAreaElement;
+    bioInput.value = 'Recipes and home inspiration.';
+    bioInput.dispatchEvent(new Event('input', { bubbles: true }));
+    (meCard.querySelector('button[type="submit"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const profile = TestBed.inject(CreatorProfileService).profile;
+    expect(profile().name).toBe('Maya C.');
+    expect(profile().handle).toBe('@mayacreates');
+    expect(profile().bio).toBe('Recipes and home inspiration.');
+    expect(meCard.textContent).toContain('Profile saved.');
+
+    const avatarInput = meCard.querySelector('[type="file"]') as HTMLInputElement;
+    Object.defineProperty(avatarInput, 'files', {
+      value: [new File(['mock image'], 'profile.png', { type: 'image/png' })]
+    });
+    class MockFileReader extends FileReader {
+      override readAsDataURL(_blob: Blob): void {
+        Object.defineProperty(this, 'result', { value: 'data:image/png;base64,bW9jayBpbWFnZQ==' });
+        this.onload?.(new ProgressEvent('load') as ProgressEvent<FileReader>);
+      }
+    }
+    vi.stubGlobal('FileReader', MockFileReader);
+    avatarInput.dispatchEvent(new Event('change', { bubbles: true }));
+    vi.unstubAllGlobals();
+    fixture.detectChanges();
+    expect(profile().avatarUrl).toMatch(/^data:image\/png;base64,/);
+    expect(meCard.querySelector('.creator-avatar-image img')).toBeTruthy();
   });
 
   it('opens campaign matches in a dialog and displays linked social profiles', () => {

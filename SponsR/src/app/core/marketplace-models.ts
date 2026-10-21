@@ -6,6 +6,7 @@ export interface CreatorAccount {
   niche: string;
   contentTags: string[];
   bio: string;
+  avatarUrl?: string;
   channels: string[];
   audienceSize: number;
   engagementRate: number;

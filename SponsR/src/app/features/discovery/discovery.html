@@ -38,7 +38,9 @@
       @for (creator of creatorsForYou(); track creator.id) {
         <article class="discovery-card creator-card">
           <div class="profile-row">
-            <div [class]="'profile-avatar ' + creator.avatarTone" aria-hidden="true">{{ getInitials(creator.name) }}</div>
+            <div [class]="'profile-avatar ' + creator.avatarTone">
+              @if (creator.avatarUrl) { <img [src]="creator.avatarUrl" alt="" /> } @else { <span aria-hidden="true">{{ getInitials(creator.name) }}</span> }
+            </div>
             <div class="profile-name"><h4>{{ creator.name }} @if (creator.verified) { <span class="verified" aria-label="Verified">✓</span> }</h4><span>{{ creator.handle }}</span></div>
           </div>
           <span class="niche-tag">{{ creator.niche }}</span>
@@ -79,7 +81,7 @@
           </div>
           <div class="profile-row">
             <div [class]="'profile-avatar ' + creator.avatarTone" aria-hidden="true">
-              {{ getInitials(creator.name) }}
+              @if (creator.avatarUrl) { <img [src]="creator.avatarUrl" alt="" /> } @else { {{ getInitials(creator.name) }} }
             </div>
             <div class="profile-name">
               <h4>{{ creator.name }} @if (creator.verified) { <span class="verified" aria-label="Verified">✓</span> }</h4>
@@ -156,7 +158,9 @@
       @for (creator of allCreators(); track creator.id) {
         <article class="discovery-card listing-card creator-card">
           <div class="profile-row">
-            <div [class]="'profile-avatar ' + creator.avatarTone" aria-hidden="true">{{ getInitials(creator.name) }}</div>
+            <div [class]="'profile-avatar ' + creator.avatarTone">
+              @if (creator.avatarUrl) { <img [src]="creator.avatarUrl" alt="" /> } @else { <span aria-hidden="true">{{ getInitials(creator.name) }}</span> }
+            </div>
             <div class="profile-name"><h4>{{ creator.name }} @if (creator.verified) { <span class="verified" aria-label="Verified">✓</span> }</h4><span>{{ creator.handle }}</span></div>
           </div>
           <span class="niche-tag">{{ creator.niche }}</span>

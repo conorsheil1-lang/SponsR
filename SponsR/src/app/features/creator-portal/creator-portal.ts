@@ -40,6 +40,33 @@ import { SessionService } from '../../core/session.service';
 
       <div class="content-grid">
         <h3 class="section-heading">My Content</h3>
+        <article class="panel-card me-card">
+          <div class="panel-heading"><h3>Me</h3></div>
+          <div class="me-card-layout">
+            <label class="creator-avatar-picker" for="creator-avatar-upload">
+              <span class="creator-avatar-image">
+                @if (profile().avatarUrl) {
+                  <img [src]="profile().avatarUrl" alt="" />
+                } @else {
+                  <span aria-hidden="true">{{ getInitials(profile().name) }}</span>
+                }
+              </span>
+              <span class="creator-avatar-overlay">Change photo</span>
+              <input id="creator-avatar-upload" type="file" accept="image/*" (change)="selectAvatar($event)"
+                aria-label="Change profile photo" />
+            </label>
+            <form class="me-profile-form" (ngSubmit)="saveCreatorDetails()">
+              <label>Name<input name="creatorName" [value]="nameDraft" (input)="updateNameDraft($event)" required /></label>
+              <label>Handle<input name="creatorHandle" [value]="handleDraft" (input)="updateHandleDraft($event)" required /></label>
+              <label>Bio<textarea name="creatorBio" [value]="bioDraft" (input)="updateBioDraft($event)" rows="3"></textarea></label>
+              <button type="submit" class="show-more-button">Save profile</button>
+              @if (profileSaveMessage()) { <span class="profile-save-message" role="status">{{ profileSaveMessage() }}</span> }
+            </form>
+          </div>
+          @if (profileSaveError()) { <p class="profile-error" role="alert">{{ profileSaveError() }}</p> }
+          @if (avatarError()) { <p class="profile-error" role="alert">{{ avatarError() }}</p> }
+        </article>
+
         <article class="panel-card">
           <div class="panel-heading">
             <h3>Profile & social links</h3>
@@ -421,12 +448,19 @@ import { SessionService } from '../../core/session.service';
   ]
 })
 export class CreatorPortalComponent {
+  private static readonly maxAvatarSize = 5 * 1024 * 1024;
   private readonly dialogs = inject(DialogService);
   private readonly workspace = inject(MarketplaceWorkspaceService);
   private readonly creatorProfile = inject(CreatorProfileService);
   private readonly session = inject(SessionService);
   protected readonly showBanner = signal(!this.isBannerDismissed());
   protected readonly profile = this.creatorProfile.profile;
+  protected nameDraft = this.profile().name;
+  protected handleDraft = this.profile().handle;
+  protected bioDraft = this.profile().bio;
+  protected readonly profileSaveMessage = signal('');
+  protected readonly profileSaveError = signal('');
+  protected readonly avatarError = signal('');
   protected readonly suggestedTags = ['lifestyle', 'living', 'tech', 'wellness', 'food', 'travel', 'fashion', 'gaming', 'beauty', 'fitness'];
   protected readonly platforms = ['Instagram', 'TikTok', 'YouTube', 'Twitch', 'Pinterest', 'Podcast', 'Newsletter', 'Other'];
   protected readonly availablePlatforms = computed(() =>
@@ -498,6 +532,73 @@ export class CreatorPortalComponent {
 
   removeContentTag(tag: string): void {
     this.creatorProfile.removeContentTag(tag);
+  }
+
+  getInitials(name: string): string {
+    return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toLocaleUpperCase();
+  }
+
+  updateNameDraft(event: Event): void {
+    this.nameDraft = (event.target as HTMLInputElement).value;
+    this.profileSaveMessage.set('');
+  }
+
+  updateHandleDraft(event: Event): void {
+    this.handleDraft = (event.target as HTMLInputElement).value;
+    this.profileSaveMessage.set('');
+  }
+
+  updateBioDraft(event: Event): void {
+    this.bioDraft = (event.target as HTMLTextAreaElement).value;
+    this.profileSaveMessage.set('');
+  }
+
+  saveCreatorDetails(): void {
+    this.profileSaveMessage.set('');
+    this.profileSaveError.set('');
+    try {
+      this.creatorProfile.updatePublicProfile({
+        name: this.nameDraft,
+        handle: this.handleDraft,
+        bio: this.bioDraft
+      });
+      this.profileSaveMessage.set('Profile saved.');
+    } catch (error) {
+      if (!(error instanceof Error)) {
+        throw error;
+      }
+      this.profileSaveError.set(error.message);
+    }
+  }
+
+  selectAvatar(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    this.avatarError.set('');
+    if (!file) {
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      this.avatarError.set('Choose an image file for your profile photo.');
+      input.value = '';
+      return;
+    }
+    if (file.size > CreatorPortalComponent.maxAvatarSize) {
+      this.avatarError.set('Choose an image smaller than 5 MB.');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        this.avatarError.set('The selected image could not be loaded.');
+        return;
+      }
+      this.creatorProfile.updateAvatar(reader.result);
+    };
+    reader.onerror = () => this.avatarError.set('The selected image could not be read. Please try another image.');
+    reader.readAsDataURL(file);
   }
 
   addSocialLink(): void {
