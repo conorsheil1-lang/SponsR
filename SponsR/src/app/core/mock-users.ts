@@ -15,6 +15,7 @@ export interface CreatorRateCardItem {
   platform: string;
   rate: number;
   currency: 'USD';
+  durationMinutes?: number;
 }
 
 export interface CreatorSocialLink {

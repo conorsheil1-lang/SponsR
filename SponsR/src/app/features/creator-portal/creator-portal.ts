@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CreatorProfileService } from '../../core/creator-profile.service';
@@ -40,86 +40,24 @@ import { SessionService } from '../../core/session.service';
 
       <div class="content-grid">
         <h3 class="section-heading">My Content</h3>
-        <article class="panel-card me-card">
-          <div class="panel-heading"><h3>Me</h3></div>
-          <div class="me-card-layout">
-            <label class="creator-avatar-picker" for="creator-avatar-upload">
-              <span class="creator-avatar-image">
-                @if (profile().avatarUrl) {
-                  <img [src]="profile().avatarUrl" alt="" />
-                } @else {
-                  <span aria-hidden="true">{{ getInitials(profile().name) }}</span>
-                }
-              </span>
-              <span class="creator-avatar-overlay">Change photo</span>
-              <input id="creator-avatar-upload" type="file" accept="image/*" (change)="selectAvatar($event)"
-                aria-label="Change profile photo" />
-            </label>
-            <form class="me-profile-form" (ngSubmit)="saveCreatorDetails()">
-              <label>Name<input name="creatorName" [value]="nameDraft" (input)="updateNameDraft($event)" required /></label>
-              <label>Handle<input name="creatorHandle" [value]="handleDraft" (input)="updateHandleDraft($event)" required /></label>
-              <label>Bio<textarea name="creatorBio" [value]="bioDraft" (input)="updateBioDraft($event)" rows="3"></textarea></label>
-              <button type="submit" class="show-more-button">Save profile</button>
-              @if (profileSaveMessage()) { <span class="profile-save-message" role="status">{{ profileSaveMessage() }}</span> }
-            </form>
-          </div>
-          @if (profileSaveError()) { <p class="profile-error" role="alert">{{ profileSaveError() }}</p> }
-          @if (avatarError()) { <p class="profile-error" role="alert">{{ avatarError() }}</p> }
-        </article>
+        <button type="button" class="content-launch-card" (click)="openContentDialog('me')" aria-haspopup="dialog">
+          <span class="content-launch-heading">My Profile <span aria-hidden="true">↗</span></span>
+          <span class="content-launch-summary">{{ profile().name }} · {{ profile().handle }}</span>
+        </button>
+        <button type="button" class="content-launch-card" (click)="openContentDialog('social')" aria-haspopup="dialog">
+          <span class="content-launch-heading">Profile & social links <span aria-hidden="true">↗</span></span>
+          <span class="content-launch-summary">{{ profile().socialLinks.length }} platforms linked</span>
+        </button>
+        <button type="button" class="content-launch-card" (click)="openContentDialog('tags')" aria-haspopup="dialog">
+          <span class="content-launch-heading">Content tags <span aria-hidden="true">↗</span></span>
+          <span class="content-launch-summary">{{ profile().contentTags.length }} tags · Help brands find your content</span>
+        </button>
+        <button type="button" class="content-launch-card" (click)="openContentDialog('rates')" aria-haspopup="dialog">
+          <span class="content-launch-heading">Rates <span aria-hidden="true">↗</span></span>
+          <span class="content-launch-summary">{{ profile().rateCard.length }} content types priced</span>
+        </button>
 
-        <article class="panel-card">
-          <div class="panel-heading">
-            <h3>Profile & social links</h3>
-            <span class="profile-completion">{{ profile().socialLinks.length }} linked</span>
-          </div>
-          <ul>
-            @for (link of profile().socialLinks; track link.platform) {
-              <li class="social-profile-row">
-                <a [href]="link.url" target="_blank" rel="noopener noreferrer"><strong>{{ link.platform }}</strong><span>{{ link.handle }}</span></a>
-                <button type="button" class="remove-profile-item" [attr.aria-label]="'Remove ' + link.platform + ' link'" (click)="removeSocialLink(link.platform)">Remove</button>
-              </li>
-            }
-          </ul>
-          <form class="profile-editor-form" (ngSubmit)="addSocialLink()">
-            <label>Platform
-              <select name="socialPlatform" [value]="socialPlatform" (change)="updateSocialPlatform($event)">
-                @for (platform of availablePlatforms(); track platform) { <option [value]="platform">{{ platform }}</option> }
-              </select>
-            </label>
-            <label>Handle<input name="socialHandle" [value]="socialHandle" (input)="updateSocialHandle($event)" placeholder="@yourhandle" required /></label>
-            <label>Profile URL<input name="socialUrl" type="url" [value]="socialUrl" (input)="updateSocialUrl($event)" placeholder="https://…" required /></label>
-            @if (socialPlatform === 'Other') {
-              <label>Platform name<input name="customSocialPlatform" [value]="customSocialPlatform" (input)="updateCustomSocialPlatform($event)" placeholder="e.g. Substack" required /></label>
-            }
-            <button type="submit" class="show-more-button">Link platform <span aria-hidden="true">＋</span></button>
-          </form>
-          @if (profileError()) { <p class="profile-error" role="alert">{{ profileError() }}</p> }
-        </article>
-
-        <article class="panel-card content-tags-card">
-          <div class="panel-heading">
-            <div><h3>Content tags</h3><p>Help brands find creators by content style and topic.</p></div>
-            <span class="profile-completion">{{ profile().contentTags.length }} tags</span>
-          </div>
-          <div class="creator-content-tags">
-            @for (tag of profile().contentTags; track tag) {
-              <span class="creator-content-tag">{{ tag }}<button type="button" [attr.aria-label]="'Remove ' + tag + ' tag'" (click)="removeContentTag(tag)">×</button></span>
-            } @empty {
-              <p class="empty-profile-copy">Add a few tags so companies can discover your content.</p>
-            }
-          </div>
-          <div class="tag-suggestions" aria-label="Suggested content tags">
-            <span>Suggested</span>
-            @for (tag of suggestedTags; track tag) {
-              <button type="button" [disabled]="profile().contentTags.includes(tag)" (click)="addTag(tag)">{{ tag }} <span aria-hidden="true">＋</span></button>
-            }
-          </div>
-          <form class="add-tag-form" (ngSubmit)="addTag(tagInput)">
-            <label for="custom-content-tag">Create a tag</label>
-            <div><input id="custom-content-tag" name="customContentTag" [value]="tagInput" (input)="updateTagInput($event)" placeholder="e.g. slow living" /><button type="submit">Add tag</button></div>
-          </form>
-        </article>
-
+        <h3 class="section-heading interests-section-heading">My Interests</h3>
         <article class="panel-card wide registered-opportunities">
           <div class="registered-heading">
             <div>
@@ -200,18 +138,128 @@ import { SessionService } from '../../core/session.service';
           }
         </article>
 
-        <article class="panel-card wide">
-          <div class="panel-heading">
-            <h3>Campaigns matching your profile</h3>
-            <button type="button" class="show-more-button" (click)="viewCampaignMatches()">View all</button>
-          </div>
-          <ul>
-            @for (match of matchingCampaigns().slice(0, 3); track match.name) {
-              <li><strong>{{ match.name }}</strong><span>{{ match.meta }}</span></li>
-            }
-          </ul>
-        </article>
       </div>
+
+      @if (activeContentDialog(); as dialog) {
+        <div class="content-dialog-backdrop" (click)="closeContentDialog()">
+          <section class="content-dialog" role="dialog" aria-modal="true" [attr.aria-label]="contentDialogTitle()"
+            (click)="$event.stopPropagation()">
+            <button type="button" class="dialog-close-button" aria-label="Close dialog" (click)="closeContentDialog()">×</button>
+            @if (dialog === 'me') {
+              <p class="eyebrow">MY CONTENT</p>
+              <h2>My Profile</h2>
+              <div class="me-card-layout">
+                <label class="creator-avatar-picker" for="creator-avatar-upload">
+                  <span class="creator-avatar-image">
+                    @if (profile().avatarUrl) { <img [src]="profile().avatarUrl" alt="" /> }
+                    @else { <span aria-hidden="true">{{ getInitials(profile().name) }}</span> }
+                  </span>
+                  <span class="creator-avatar-overlay">Change photo</span>
+                  <input id="creator-avatar-upload" type="file" accept="image/*" (change)="selectAvatar($event)" aria-label="Change profile photo" />
+                </label>
+                <form class="me-profile-form" (ngSubmit)="saveCreatorDetails()">
+                  <label>Name<input name="creatorName" [value]="nameDraft" (input)="updateNameDraft($event)" required /></label>
+                  <label>Handle<input name="creatorHandle" [value]="handleDraft" (input)="updateHandleDraft($event)" required /></label>
+                  <label>Bio<textarea name="creatorBio" [value]="bioDraft" (input)="updateBioDraft($event)" rows="3"></textarea></label>
+                  <button type="submit" class="show-more-button">Save profile</button>
+                  @if (profileSaveMessage()) { <span class="profile-save-message" role="status">{{ profileSaveMessage() }}</span> }
+                </form>
+              </div>
+              @if (profileSaveError()) { <p class="profile-error" role="alert">{{ profileSaveError() }}</p> }
+              @if (avatarError()) { <p class="profile-error" role="alert">{{ avatarError() }}</p> }
+            } @else if (dialog === 'social') {
+              <p class="eyebrow">MY CONTENT</p>
+              <h2>Profile & social links</h2>
+              <ul>
+                @for (link of profile().socialLinks; track link.platform) {
+                  <li class="social-profile-row">
+                    <a [href]="link.url" target="_blank" rel="noopener noreferrer"><strong>{{ link.platform }}</strong><span>{{ link.handle }}</span></a>
+                    <button type="button" class="remove-profile-item" [attr.aria-label]="'Remove ' + link.platform + ' link'" (click)="removeSocialLink(link.platform)">Remove</button>
+                  </li>
+                }
+              </ul>
+              <form class="profile-editor-form" (ngSubmit)="addSocialLink()">
+                <label>Platform
+                  <select name="socialPlatform" [value]="socialPlatform" (change)="updateSocialPlatform($event)">
+                    @for (platform of availablePlatforms(); track platform) { <option [value]="platform">{{ platform }}</option> }
+                  </select>
+                </label>
+                <label>Handle<input name="socialHandle" [value]="socialHandle" (input)="updateSocialHandle($event)" placeholder="@yourhandle" required /></label>
+                <label>Profile URL<input name="socialUrl" type="url" [value]="socialUrl" (input)="updateSocialUrl($event)" placeholder="https://…" required /></label>
+                @if (socialPlatform === 'Other') {
+                  <label>Platform name<input name="customSocialPlatform" [value]="customSocialPlatform" (input)="updateCustomSocialPlatform($event)" placeholder="e.g. Substack" required /></label>
+                }
+                <button type="submit" class="show-more-button">Link platform <span aria-hidden="true">＋</span></button>
+              </form>
+              @if (profileError()) { <p class="profile-error" role="alert">{{ profileError() }}</p> }
+            } @else if (dialog === 'tags') {
+              <p class="eyebrow">MY CONTENT</p>
+              <h2>Content tags</h2>
+              <p class="dialog-description">Help brands find you by the topics and styles you create.</p>
+              <div class="creator-content-tags">
+                @for (tag of profile().contentTags; track tag) {
+                  <span class="creator-content-tag">{{ tag }}<button type="button" [attr.aria-label]="'Remove ' + tag + ' tag'" (click)="removeContentTag(tag)">×</button></span>
+                } @empty {
+                  <p class="empty-profile-copy">Add a few tags so companies can discover your content.</p>
+                }
+              </div>
+              <div class="tag-suggestions" aria-label="Suggested content tags">
+                <span>Suggested</span>
+                @for (tag of suggestedTags; track tag) {
+                  <button type="button" [disabled]="profile().contentTags.includes(tag)" (click)="addTag(tag)">{{ tag }} <span aria-hidden="true">＋</span></button>
+                }
+              </div>
+              <form class="add-tag-form" (ngSubmit)="addTag(tagInput)">
+                <label for="custom-content-tag">Create a tag</label>
+                <div><input id="custom-content-tag" name="customContentTag" [value]="tagInput" (input)="updateTagInput($event)" placeholder="e.g. slow living" /><button type="submit">Add tag</button></div>
+              </form>
+            } @else {
+              <p class="eyebrow">MY CONTENT</p>
+              <h2>Rates</h2>
+              <p class="dialog-description">Set a starting price for your content and platforms.</p>
+              <ul class="rate-card-list">
+                @for (item of profile().rateCard; track $index) {
+                  <li class="rate-card-item">
+                    <div class="registered-item">
+                      <strong>{{ item.deliverable }}@if (item.durationMinutes) { · {{ item.durationMinutes }} min }</strong>
+                      <span>{{ item.platform }}</span>
+                    </div>
+                    <strong class="rate-price">{{ formatRate(item.rate) }}</strong>
+                    <button type="button" class="remove-profile-item" [attr.aria-label]="'Remove ' + item.deliverable + ' rate'" (click)="removeRateCardItem($index)">Remove</button>
+                  </li>
+                }
+              </ul>
+              <form class="rate-editor-form" (ngSubmit)="addRateCardItem()">
+                <label>Content type
+                  <select name="rateType" [value]="rateType" (change)="updateRateType($event)">
+                    @for (type of rateTypes; track type) { <option [value]="type">{{ type }}</option> }
+                  </select>
+                </label>
+                @if (rateType === 'Video' || rateType === 'Live stream') {
+                  <label>Duration (minutes)
+                    <input name="rateDuration" type="number" min="1" step="1" [value]="rateDuration" (input)="updateRateDuration($event)" required />
+                  </label>
+                }
+                @if (rateType === 'Other') {
+                  <label>Content type
+                    <input name="customRateType" [value]="customRateType" (input)="updateCustomRateType($event)" placeholder="e.g. Newsletter feature" required />
+                  </label>
+                }
+                <label>Platform
+                  <select name="ratePlatform" [value]="ratePlatform" (change)="updateRatePlatform($event)">
+                    @for (platform of ratePlatforms(); track platform) { <option [value]="platform">{{ platform }}</option> }
+                  </select>
+                </label>
+                <label>Price (USD)
+                  <input name="ratePrice" type="number" min="0.01" step="0.01" [value]="ratePrice" (input)="updateRatePrice($event)" required />
+                </label>
+                <button type="submit" class="show-more-button">Add rate</button>
+              </form>
+              @if (rateError()) { <p class="profile-error" role="alert">{{ rateError() }}</p> }
+            }
+          </section>
+        </div>
+      }
     </section>
   `,
   styles: [
@@ -454,6 +502,7 @@ export class CreatorPortalComponent {
   private readonly creatorProfile = inject(CreatorProfileService);
   private readonly session = inject(SessionService);
   protected readonly showBanner = signal(!this.isBannerDismissed());
+  protected readonly activeContentDialog = signal<'me' | 'social' | 'tags' | 'rates' | null>(null);
   protected readonly profile = this.creatorProfile.profile;
   protected nameDraft = this.profile().name;
   protected handleDraft = this.profile().handle;
@@ -463,9 +512,14 @@ export class CreatorPortalComponent {
   protected readonly avatarError = signal('');
   protected readonly suggestedTags = ['lifestyle', 'living', 'tech', 'wellness', 'food', 'travel', 'fashion', 'gaming', 'beauty', 'fitness'];
   protected readonly platforms = ['Instagram', 'TikTok', 'YouTube', 'Twitch', 'Pinterest', 'Podcast', 'Newsletter', 'Other'];
+  protected readonly rateTypes = ['Video', 'Live stream', 'Story frames', 'Photo', 'Product review', 'Blog post', 'Other'];
   protected readonly availablePlatforms = computed(() =>
     this.platforms.filter((platform) => !this.profile().socialLinks.some((link) => link.platform === platform))
   );
+  protected readonly ratePlatforms = computed(() => [...new Set([
+    ...this.profile().channels,
+    ...this.profile().rateCard.map((item) => item.platform)
+  ])]);
   protected tagInput = '';
   protected socialPlatform = this.platforms.find((platform) =>
     !this.profile().socialLinks.some((link) => link.platform === platform)
@@ -473,15 +527,14 @@ export class CreatorPortalComponent {
   protected customSocialPlatform = '';
   protected socialHandle = '';
   protected socialUrl = '';
+  protected rateType = 'Video';
+  protected customRateType = '';
+  protected rateDuration = '';
+  protected ratePlatform = this.profile().channels[0] ?? 'Instagram';
+  protected ratePrice = '';
   protected readonly profileError = signal('');
+  protected readonly rateError = signal('');
   readonly selectedInterestType = signal<'campaigns' | 'jobs'>('campaigns');
-  readonly matchingCampaigns = signal([
-    { name: 'Northstar Labs', meta: 'Beauty creator · $12.5K' },
-    { name: 'Velora Health', meta: 'Wellness brand · $7.9K' },
-    { name: 'SparkPilot', meta: 'UGC product launch · $9.2K' },
-    { name: 'Morrow', meta: 'Wellness stories · $4.2K' },
-    { name: 'Trailhead Supply', meta: 'Outdoor creator series · $6.8K' }
-  ]);
   readonly registeredCampaigns = computed(() => this.workspace.getRegisteredCampaigns());
   readonly registeredJobs = computed(() => this.workspace.getRegisteredJobs());
   readonly registeredBrands = computed(() => this.workspace.getRegisteredBrands());
@@ -492,6 +545,37 @@ export class CreatorPortalComponent {
     { label: 'Avg. response', value: '4.8%' },
     { label: 'Payout ready', value: '$8.4K' }
   ]);
+
+  openContentDialog(dialog: 'me' | 'social' | 'tags' | 'rates'): void {
+    this.profileError.set('');
+    this.profileSaveError.set('');
+    this.profileSaveMessage.set('');
+    this.avatarError.set('');
+    this.rateError.set('');
+    this.nameDraft = this.profile().name;
+    this.handleDraft = this.profile().handle;
+    this.bioDraft = this.profile().bio;
+    this.activeContentDialog.set(dialog);
+  }
+
+  closeContentDialog(): void {
+    this.activeContentDialog.set(null);
+  }
+
+  contentDialogTitle(): string {
+    const dialog = this.activeContentDialog();
+    return dialog === 'me' ? 'Edit creator profile'
+      : dialog === 'social' ? 'Edit social links'
+        : dialog === 'tags' ? 'Edit content tags'
+          : 'Edit rates';
+  }
+
+  @HostListener('document:keydown.escape')
+  closeContentDialogOnEscape(): void {
+    if (this.activeContentDialog()) {
+      this.closeContentDialog();
+    }
+  }
 
   withdrawCampaignInterest(campaignId: string): void {
     this.workspace.toggleCampaignInterest(campaignId);
@@ -528,6 +612,62 @@ export class CreatorPortalComponent {
 
   updateCustomSocialPlatform(event: Event): void {
     this.customSocialPlatform = (event.target as HTMLInputElement).value;
+  }
+
+  updateRateType(event: Event): void {
+    this.rateType = (event.target as HTMLSelectElement).value;
+    this.rateError.set('');
+  }
+
+  updateRateDuration(event: Event): void {
+    this.rateDuration = (event.target as HTMLInputElement).value;
+  }
+
+  updateRatePlatform(event: Event): void {
+    this.ratePlatform = (event.target as HTMLSelectElement).value;
+  }
+
+  updateRatePrice(event: Event): void {
+    this.ratePrice = (event.target as HTMLInputElement).value;
+  }
+
+  updateCustomRateType(event: Event): void {
+    this.customRateType = (event.target as HTMLInputElement).value;
+  }
+
+  addRateCardItem(): void {
+    this.rateError.set('');
+    const rate = Number(this.ratePrice);
+    const durationMinutes = this.rateDuration ? Number(this.rateDuration) : undefined;
+    try {
+      this.creatorProfile.addRateCardItem({
+        deliverable: this.rateType === 'Other' ? this.customRateType : this.rateType,
+        platform: this.ratePlatform,
+        rate,
+        currency: 'USD',
+        ...(durationMinutes !== undefined ? { durationMinutes } : {})
+      });
+      this.rateDuration = '';
+      this.ratePrice = '';
+      this.customRateType = '';
+    } catch (error) {
+      if (!(error instanceof Error)) {
+        throw error;
+      }
+      this.rateError.set(error.message);
+    }
+  }
+
+  removeRateCardItem(index: number): void {
+    this.creatorProfile.removeRateCardItem(index);
+  }
+
+  formatRate(rate: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 2
+    }).format(rate);
   }
 
   removeContentTag(tag: string): void {
@@ -638,15 +778,6 @@ export class CreatorPortalComponent {
     const user = this.session.currentUser();
     const userKey = user?.accountId ?? user?.email.toLocaleLowerCase() ?? 'guest';
     return `sponsr-creator-portal-banner:${encodeURIComponent(userKey)}`;
-  }
-
-  viewCampaignMatches(): void {
-    this.dialogs.openList(
-      'Campaigns matching your profile',
-      'Explore these partnership opportunities matched to your creator profile.',
-      this.matchingCampaigns().map((match) => ({ title: match.name, subtitle: match.meta })),
-      'RECOMMENDED CAMPAIGNS'
-    );
   }
 
   viewRegisteredCampaigns(): void {
