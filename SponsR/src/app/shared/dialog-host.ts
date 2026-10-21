@@ -81,6 +81,7 @@ import { SessionService } from '../core/session.service';
             <p class="dialog-description">Create a campaign to organize related jobs and set its creator capacity.</p>
             <form class="dialog-form" (ngSubmit)="createCampaign()">
               <label>Campaign name<input name="campaignTitle" [(ngModel)]="campaignDraft.title" required /></label>
+              <label>Category / tag<input name="campaignCategory" [(ngModel)]="campaignDraft.category" placeholder="e.g. Fitness, Technology, Wellness" required /></label>
               <label>Description<textarea name="campaignDescription" rows="4" [(ngModel)]="campaignDraft.description" required></textarea></label>
               <label>Creator capacity<input name="campaignCapacity" type="number" min="1" [(ngModel)]="campaignDraft.creatorCapacity" required /></label>
               <div class="dialog-actions">
@@ -99,7 +100,7 @@ export class DialogHostComponent {
   protected readonly workspace = inject(MarketplaceWorkspaceService);
   private readonly session = inject(SessionService);
   protected jobDraft = this.newJobDraft();
-  protected campaignDraft = { title: '', description: '', creatorCapacity: 5 };
+  protected campaignDraft = { title: '', category: '', description: '', creatorCapacity: 5 };
   protected readonly companyCampaigns = computed(() =>
     this.workspace.campaigns().filter((campaign) => campaign.companyName === this.session.currentUser()?.name)
   );
@@ -110,7 +111,7 @@ export class DialogHostComponent {
       if (kind === 'create-job') {
         this.jobDraft = this.newJobDraft();
       } else if (kind === 'create-campaign') {
-        this.campaignDraft = { title: '', description: '', creatorCapacity: 5 };
+        this.campaignDraft = { title: '', category: '', description: '', creatorCapacity: 5 };
       }
     });
   }
@@ -141,6 +142,7 @@ export class DialogHostComponent {
     this.workspace.addCampaign({
       companyName: this.session.currentUser()?.name ?? 'Your company',
       title: this.campaignDraft.title.trim(),
+      category: this.campaignDraft.category.trim(),
       description: this.campaignDraft.description.trim(),
       creatorCapacity: Number(this.campaignDraft.creatorCapacity)
     });

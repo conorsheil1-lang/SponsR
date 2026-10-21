@@ -2,6 +2,7 @@ export interface CampaignOpportunity {
   id: string;
   companyName: string;
   title: string;
+  category: string;
   description: string;
   creatorCapacity: number;
   assignedCreatorIds: string[];
@@ -31,6 +32,7 @@ export const campaignOpportunities: CampaignOpportunity[] = [
     id: 'campaign-slower-mornings',
     companyName: 'Morrow',
     title: 'The slower mornings series',
+    category: 'Wellness',
     description: 'A collection of creator-led stories celebrating the small rituals that make mornings feel better.',
     creatorCapacity: 8,
     assignedCreatorIds: ['creator-lena-park', 'creator-aria-morgan'],
@@ -40,6 +42,7 @@ export const campaignOpportunities: CampaignOpportunity[] = [
     id: 'campaign-outside-more',
     companyName: 'Trailhead Supply',
     title: 'Outside, more often',
+    category: 'Outdoors',
     description: 'Inspire more people to find a nearby trail, park, or fresh-air escape.',
     creatorCapacity: 6,
     assignedCreatorIds: ['creator-jules-lee'],
@@ -49,6 +52,7 @@ export const campaignOpportunities: CampaignOpportunity[] = [
     id: 'campaign-goodfolk-rituals',
     companyName: 'Goodfolk Coffee',
     title: 'Good mornings, made together',
+    category: 'Food & drink',
     description: 'Creator-led stories for people who make space for a good cup and a slower start.',
     creatorCapacity: 5,
     assignedCreatorIds: [],
@@ -58,10 +62,21 @@ export const campaignOpportunities: CampaignOpportunity[] = [
     id: 'campaign-northstar-next',
     companyName: 'Northstar Labs',
     title: 'Tools for what’s next',
+    category: 'Technology',
     description: 'Show how useful technology can make room for the ideas and projects ahead.',
     creatorCapacity: 3,
     assignedCreatorIds: ['creator-noah-bennett'],
     interestedCreatorIds: ['creator-theo-brooks', 'creator-marcus-reed']
+  },
+  {
+    id: 'campaign-velora-movement',
+    companyName: 'Velora Health',
+    title: 'Find your kind of movement',
+    category: 'Fitness',
+    description: 'Creator-led stories that make movement feel welcoming, joyful, and doable.',
+    creatorCapacity: 4,
+    assignedCreatorIds: [],
+    interestedCreatorIds: ['creator-amara-jones']
   }
 ];
 
@@ -149,6 +164,23 @@ export const jobOpportunities: JobOpportunity[] = [
     creatorCapacity: 3,
     assignedCreatorIds: [],
     interestedCreatorIds: ['creator-maya-patel', 'creator-aria-morgan'],
+    shortlistedCreatorIds: []
+  },
+  {
+    id: 'job-velora-movement',
+    campaignId: 'campaign-velora-movement',
+    campaignTitle: 'Find your kind of movement',
+    companyName: 'Velora Health',
+    title: 'Movement that meets you where you are',
+    category: 'Fitness',
+    description: 'Create an encouraging story about movement that fits your real life.',
+    budgetMin: 1500,
+    budgetMax: 4500,
+    interestDeadline: '2026-11-10',
+    deliveryDeadline: '2026-12-05',
+    creatorCapacity: 3,
+    assignedCreatorIds: [],
+    interestedCreatorIds: ['creator-amara-jones'],
     shortlistedCreatorIds: []
   }
 ];

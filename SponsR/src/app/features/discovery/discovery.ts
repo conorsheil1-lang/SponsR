@@ -2,7 +2,23 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { mockCompanyAccounts, mockCreatorAccounts, mockMarketplaceCampaigns } from '../../core/marketplace-mock-data';
 import type { CompanyAccount, CreatorAccount, MarketplaceCampaign } from '../../core/marketplace-models';
 import { DialogService } from '../../core/dialog.service';
+import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.service';
+import type { JobOpportunity } from '../../core/job-marketplace-data';
 import { SessionService } from '../../core/session.service';
+
+interface DiscoveryCampaign {
+  id: string;
+  brandName: string;
+  title: string;
+  category: string;
+  description: string;
+  budgetMin: number;
+  budgetMax: number;
+  applicants: number;
+  status: string;
+  trendingScore: number;
+  avatarTone: string;
+}
 
 @Component({
   selector: 'app-discovery',
@@ -12,10 +28,23 @@ import { SessionService } from '../../core/session.service';
 export class DiscoveryComponent {
   private readonly session = inject(SessionService);
   private readonly dialogs = inject(DialogService);
+  private readonly workspace = inject(MarketplaceWorkspaceService);
   readonly searchQuery = signal('');
   readonly creators = signal<CreatorAccount[]>(mockCreatorAccounts);
   readonly campaigns = signal<MarketplaceCampaign[]>(mockMarketplaceCampaigns);
   readonly companies = signal<CompanyAccount[]>(mockCompanyAccounts);
+  readonly creatorNicheFilter = signal('');
+  readonly creatorPlatformFilter = signal('');
+  readonly creatorAudienceFilter = signal('');
+  readonly creatorEngagementFilter = signal('');
+  readonly creatorRateFilter = signal('');
+  readonly campaignCategoryFilter = signal('');
+  readonly campaignBrandFilter = signal('');
+  readonly campaignStatusFilter = signal('');
+  readonly jobCategoryFilter = signal('');
+  readonly jobBrandFilter = signal('');
+  readonly jobBudgetFilter = signal('');
+  readonly jobDeadlineFilter = signal('');
 
   readonly hotCreators = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
@@ -43,6 +72,93 @@ export class DiscoveryComponent {
 
   readonly isCompany = computed(() => this.session.currentUser()?.type === 'company');
 
+  readonly creatorNiches = computed(() => this.unique(this.creators().map((creator) => creator.niche)));
+  readonly creatorPlatforms = computed(() => this.unique(this.creators().flatMap((creator) => creator.channels)));
+  readonly campaignBrands = computed(() => this.unique(this.campaignListings().map((campaign) => campaign.brandName)));
+  readonly jobBrands = computed(() => this.unique(this.availableJobs().map((job) => job.companyName)));
+  readonly campaignCategories = computed(() => this.unique(this.campaignListings().map((campaign) => campaign.category)));
+  readonly jobCategories = computed(() => this.unique(this.availableJobs().map((job) => job.category)));
+
+  readonly allCreators = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    return this.creators()
+      .filter((creator) => {
+        const audience = this.creatorAudienceFilter();
+        const engagement = Number(this.creatorEngagementFilter());
+        const maxRate = Number(this.creatorRateFilter());
+        return (!query || this.creatorSearchText(creator).includes(query))
+          && (!this.creatorNicheFilter() || creator.niche === this.creatorNicheFilter())
+          && (!this.creatorPlatformFilter() || creator.channels.includes(this.creatorPlatformFilter()))
+          && (!audience || (audience === 'under-100k' ? creator.audienceSize < 100_000
+            : audience === '100k-500k' ? creator.audienceSize >= 100_000 && creator.audienceSize < 500_000
+              : creator.audienceSize >= 500_000))
+          && (!engagement || creator.engagementRate >= engagement)
+          && (!maxRate || creator.typicalRate <= maxRate);
+      })
+      .slice()
+      .sort((a, b) => b.trendingScore - a.trendingScore || a.name.localeCompare(b.name));
+  });
+
+  readonly campaignListings = computed<DiscoveryCampaign[]>(() => {
+    const currentUserCampaigns: DiscoveryCampaign[] = this.workspace.campaigns()
+      .filter((campaign) => !mockMarketplaceCampaigns.some(
+        (existing) => existing.title === campaign.title && existing.brandName === campaign.companyName
+      ))
+      .map((campaign) => ({
+        id: campaign.id,
+        brandName: campaign.companyName,
+        title: campaign.title,
+        category: campaign.category,
+        description: campaign.description,
+        budgetMin: 0,
+        budgetMax: 0,
+        applicants: campaign.interestedCreatorIds.length,
+        status: 'Open',
+        trendingScore: 0,
+        avatarTone: 'sage'
+      }));
+    return [...mockMarketplaceCampaigns, ...currentUserCampaigns];
+  });
+
+  readonly allCampaigns = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    return this.campaignListings()
+      .filter((campaign) =>
+        (!query || this.campaignSearchText(campaign).includes(query))
+        && (!this.campaignCategoryFilter() || campaign.category === this.campaignCategoryFilter())
+        && (!this.campaignBrandFilter() || campaign.brandName === this.campaignBrandFilter())
+        && (!this.campaignStatusFilter() || campaign.status === this.campaignStatusFilter())
+      )
+      .slice()
+      .sort((a, b) => b.trendingScore - a.trendingScore || a.title.localeCompare(b.title));
+  });
+
+  readonly availableJobs = computed(() => this.workspace.jobs().filter((job) =>
+    new Date(`${job.interestDeadline}T23:59:59`).getTime() >= Date.now()
+  ));
+
+  readonly allJobs = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    return this.availableJobs()
+      .filter((job) => {
+        const budgetFilter = this.jobBudgetFilter();
+        const deadlineDays = Number(this.jobDeadlineFilter());
+        const daysRemaining = Math.ceil(
+          (new Date(`${job.interestDeadline}T23:59:59`).getTime() - Date.now()) / 86_400_000
+        );
+        const searchText = `${job.title} ${job.companyName} ${job.category} ${job.description} ${job.campaignTitle ?? ''}`.toLowerCase();
+        return (!query || searchText.includes(query))
+          && (!this.jobCategoryFilter() || job.category === this.jobCategoryFilter())
+          && (!this.jobBrandFilter() || job.companyName === this.jobBrandFilter())
+          && (!budgetFilter || (budgetFilter === 'under-2k' ? job.budgetMin < 2_000
+            : budgetFilter === '2k-5k' ? job.budgetMax >= 2_000 && job.budgetMin <= 5_000
+              : job.budgetMax > 5_000))
+          && (!deadlineDays || daysRemaining <= deadlineDays);
+      })
+      .slice()
+      .sort((a, b) => a.interestDeadline.localeCompare(b.interestDeadline));
+  });
+
   readonly creatorsForYou = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
     return this.creators()
@@ -56,6 +172,28 @@ export class DiscoveryComponent {
     if (target instanceof HTMLInputElement) {
       this.searchQuery.set(target.value);
     }
+  }
+
+  updateFilter(event: Event, filter: 'creatorNiche' | 'creatorPlatform' | 'creatorAudience' | 'creatorEngagement' | 'creatorRate' | 'campaignCategory' | 'campaignBrand' | 'campaignStatus' | 'jobCategory' | 'jobBrand' | 'jobBudget' | 'jobDeadline'): void {
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) {
+      return;
+    }
+    const filters = {
+      creatorNiche: this.creatorNicheFilter,
+      creatorPlatform: this.creatorPlatformFilter,
+      creatorAudience: this.creatorAudienceFilter,
+      creatorEngagement: this.creatorEngagementFilter,
+      creatorRate: this.creatorRateFilter,
+      campaignCategory: this.campaignCategoryFilter,
+      campaignBrand: this.campaignBrandFilter,
+      campaignStatus: this.campaignStatusFilter,
+      jobCategory: this.jobCategoryFilter,
+      jobBrand: this.jobBrandFilter,
+      jobBudget: this.jobBudgetFilter,
+      jobDeadline: this.jobDeadlineFilter
+    };
+    filters[filter].set(target.value);
   }
 
   scrollCarousel(carousel: HTMLElement, direction: -1 | 1): void {
@@ -91,13 +229,24 @@ export class DiscoveryComponent {
     ], 'CREATOR PROFILE');
   }
 
-  showCampaign(campaign: MarketplaceCampaign): void {
+  showCampaign(campaign: DiscoveryCampaign): void {
     this.dialogs.openDetails(campaign.title, campaign.description, [
       { label: 'Brand', value: campaign.brandName },
       { label: 'Category', value: campaign.category },
-      { label: 'Budget', value: this.formatBudget(campaign.budgetMin, campaign.budgetMax) },
+      { label: 'Budget', value: campaign.budgetMax ? this.formatBudget(campaign.budgetMin, campaign.budgetMax) : 'Set per related job' },
       { label: 'Status', value: campaign.status }
     ], 'OPEN CAMPAIGN');
+  }
+
+  showJob(job: JobOpportunity): void {
+    this.dialogs.openDetails(job.title, job.description, [
+      { label: 'Company', value: job.companyName },
+      { label: 'Campaign', value: job.campaignTitle ?? 'Standalone job' },
+      { label: 'Category', value: job.category },
+      { label: 'Budget', value: this.formatBudget(job.budgetMin, job.budgetMax) },
+      { label: 'Interest deadline', value: this.formatDate(job.interestDeadline) },
+      { label: 'Delivery deadline', value: this.formatDate(job.deliveryDeadline) }
+    ], 'OPEN JOB');
   }
 
   showCompany(company: CompanyAccount): void {
@@ -113,11 +262,20 @@ export class DiscoveryComponent {
     return `${creator.name} ${creator.handle} ${creator.niche} ${creator.bio} ${creator.channels.join(' ')}`.toLowerCase();
   }
 
-  private campaignSearchText(campaign: MarketplaceCampaign): string {
+  private campaignSearchText(campaign: DiscoveryCampaign | MarketplaceCampaign): string {
     return `${campaign.title} ${campaign.brandName} ${campaign.category} ${campaign.description}`.toLowerCase();
   }
 
   private companySearchText(company: CompanyAccount): string {
     return `${company.name} ${company.handle} ${company.category} ${company.description}`.toLowerCase();
+  }
+
+  private unique(values: string[]): string[] {
+    return [...new Set(values)].sort((a, b) => a.localeCompare(b));
+  }
+
+  formatDate(date: string): string {
+    return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' })
+      .format(new Date(`${date}T12:00:00`));
   }
 }

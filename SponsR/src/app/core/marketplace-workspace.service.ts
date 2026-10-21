@@ -4,6 +4,7 @@ import { campaignOpportunities, jobOpportunities, type CampaignOpportunity, type
 export interface NewCampaignInput {
   companyName: string;
   title: string;
+  category: string;
   description: string;
   creatorCapacity: number;
 }
@@ -45,6 +46,7 @@ export class MarketplaceWorkspaceService {
       id: `campaign-${Date.now()}`,
       companyName: input.companyName,
       title: input.title,
+      category: input.category,
       description: input.description,
       creatorCapacity: input.creatorCapacity,
       assignedCreatorIds: [],

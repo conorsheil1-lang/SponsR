@@ -104,6 +104,70 @@
       }
     </div>
   </section>
+
+  <section class="discovery-section all-listings-section" aria-labelledby="all-creators-heading">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">EXPLORE THE MARKETPLACE</p>
+        <h3 id="all-creators-heading">All creators</h3>
+        <p class="section-description">Filter creator profiles by niche, channel, audience size, engagement, and typical rate.</p>
+      </div>
+      <span class="result-count">{{ allCreators().length }} creators</span>
+    </div>
+    <div class="listing-filters" aria-label="Filter creators">
+      <label>Tag / niche
+        <select aria-label="Filter creators by niche" [value]="creatorNicheFilter()" (change)="updateFilter($event, 'creatorNiche')">
+          <option value="">All tags</option>
+          @for (niche of creatorNiches(); track niche) { <option [value]="niche">{{ niche }}</option> }
+        </select>
+      </label>
+      <label>Platform
+        <select aria-label="Filter creators by platform" [value]="creatorPlatformFilter()" (change)="updateFilter($event, 'creatorPlatform')">
+          <option value="">Any platform</option>
+          @for (platform of creatorPlatforms(); track platform) { <option [value]="platform">{{ platform }}</option> }
+        </select>
+      </label>
+      <label>Audience
+        <select aria-label="Filter creators by audience size" [value]="creatorAudienceFilter()" (change)="updateFilter($event, 'creatorAudience')">
+          <option value="">Any size</option>
+          <option value="under-100k">Under 100K</option>
+          <option value="100k-500k">100K–500K</option>
+          <option value="over-500k">500K+</option>
+        </select>
+      </label>
+      <label>Engagement
+        <select aria-label="Minimum creator engagement" [value]="creatorEngagementFilter()" (change)="updateFilter($event, 'creatorEngagement')">
+          <option value="">Any rate</option><option value="5">5%+</option><option value="8">8%+</option><option value="10">10%+</option>
+        </select>
+      </label>
+      <label>Typical rate
+        <select aria-label="Maximum creator typical rate" [value]="creatorRateFilter()" (change)="updateFilter($event, 'creatorRate')">
+          <option value="">Any rate</option><option value="2000">Up to $2,000</option><option value="4000">Up to $4,000</option><option value="6000">Up to $6,000</option>
+        </select>
+      </label>
+    </div>
+    <div class="listing-grid">
+      @for (creator of allCreators(); track creator.id) {
+        <article class="discovery-card listing-card creator-card">
+          <div class="profile-row">
+            <div [class]="'profile-avatar ' + creator.avatarTone" aria-hidden="true">{{ getInitials(creator.name) }}</div>
+            <div class="profile-name"><h4>{{ creator.name }} @if (creator.verified) { <span class="verified" aria-label="Verified">✓</span> }</h4><span>{{ creator.handle }}</span></div>
+          </div>
+          <span class="niche-tag">{{ creator.niche }}</span>
+          <p class="card-description">{{ creator.bio }}</p>
+          <div class="channel-tags">@for (channel of creator.channels; track channel) { <span>{{ channel }}</span> }</div>
+          <div class="card-stats">
+            <div><strong>{{ formatAudience(creator.audienceSize) }}</strong><span>audience</span></div>
+            <div><strong>{{ creator.engagementRate }}%</strong><span>engagement</span></div>
+            <div><strong>{{ formatRate(creator.typicalRate) }}</strong><span>typical rate</span></div>
+          </div>
+          <button type="button" class="discovery-card-action" (click)="showCreator(creator)">View creator</button>
+        </article>
+      } @empty {
+        <p class="empty-state">No creators match these filters. Try widening your search.</p>
+      }
+    </div>
+  </section>
   }
 
   @if (!isCompany()) {
@@ -181,6 +245,104 @@
         </article>
       } @empty {
         <p class="empty-state">No brands match that search. Try a different name or category.</p>
+      }
+    </div>
+  </section>
+
+  <section class="discovery-section all-listings-section" aria-labelledby="all-campaigns-heading">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">OPEN PARTNERSHIPS</p>
+        <h3 id="all-campaigns-heading">All campaigns</h3>
+        <p class="section-description">Browse available brand campaigns and filter by tag, brand, or status.</p>
+      </div>
+      <span class="result-count">{{ allCampaigns().length }} campaigns</span>
+    </div>
+    <div class="listing-filters" aria-label="Filter campaigns">
+      <label>Tag / category
+        <select aria-label="Filter campaigns by category" [value]="campaignCategoryFilter()" (change)="updateFilter($event, 'campaignCategory')">
+          <option value="">All tags</option>
+          @for (category of campaignCategories(); track category) { <option [value]="category">{{ category }}</option> }
+        </select>
+      </label>
+      <label>Brand
+        <select aria-label="Filter campaigns by brand" [value]="campaignBrandFilter()" (change)="updateFilter($event, 'campaignBrand')">
+          <option value="">All brands</option>
+          @for (brand of campaignBrands(); track brand) { <option [value]="brand">{{ brand }}</option> }
+        </select>
+      </label>
+      <label>Status
+        <select aria-label="Filter campaigns by status" [value]="campaignStatusFilter()" (change)="updateFilter($event, 'campaignStatus')">
+          <option value="">Any status</option><option value="Open">Open</option><option value="New">New</option><option value="Closing soon">Closing soon</option>
+        </select>
+      </label>
+    </div>
+    <div class="listing-grid">
+      @for (campaign of allCampaigns(); track campaign.id) {
+        <article class="discovery-card listing-card campaign-card">
+          <div [class]="'campaign-art ' + campaign.avatarTone"><span>{{ campaign.brandName }}</span><strong>{{ campaign.category }}</strong><i aria-hidden="true">✳</i></div>
+          <div class="card-topline"><span class="niche-tag">{{ campaign.status }}</span><span class="trend-tag">{{ campaign.applicants }} interested</span></div>
+          <h4>{{ campaign.title }}</h4>
+          <p class="brand-byline">A brief from <strong>{{ campaign.brandName }}</strong></p>
+          <p class="card-description">{{ campaign.description }}</p>
+          @if (campaign.budgetMax) {
+            <div class="campaign-footer"><div><span>CREATOR BUDGET</span><strong>{{ formatBudget(campaign.budgetMin, campaign.budgetMax) }}</strong></div></div>
+          } @else {
+            <div class="campaign-footer"><div><span>CAMPAIGN BUDGET</span><strong>Set per related job</strong></div></div>
+          }
+          <button type="button" class="discovery-card-action" (click)="showCampaign(campaign)">View campaign</button>
+        </article>
+      } @empty {
+        <p class="empty-state">No campaigns match these filters. Try a different tag or brand.</p>
+      }
+    </div>
+  </section>
+
+  <section class="discovery-section all-listings-section" aria-labelledby="all-jobs-heading">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">INDIVIDUAL OPPORTUNITIES</p>
+        <h3 id="all-jobs-heading">All jobs</h3>
+        <p class="section-description">Find specific creator assignments by tag, brand, budget, and interest deadline.</p>
+      </div>
+      <span class="result-count">{{ allJobs().length }} jobs</span>
+    </div>
+    <div class="listing-filters" aria-label="Filter jobs">
+      <label>Tag / category
+        <select aria-label="Filter jobs by category" [value]="jobCategoryFilter()" (change)="updateFilter($event, 'jobCategory')">
+          <option value="">All tags</option>
+          @for (category of jobCategories(); track category) { <option [value]="category">{{ category }}</option> }
+        </select>
+      </label>
+      <label>Brand
+        <select aria-label="Filter jobs by brand" [value]="jobBrandFilter()" (change)="updateFilter($event, 'jobBrand')">
+          <option value="">All brands</option>
+          @for (brand of jobBrands(); track brand) { <option [value]="brand">{{ brand }}</option> }
+        </select>
+      </label>
+      <label>Budget range
+        <select aria-label="Filter jobs by budget" [value]="jobBudgetFilter()" (change)="updateFilter($event, 'jobBudget')">
+          <option value="">Any budget</option><option value="under-2k">Under $2,000</option><option value="2k-5k">$2,000–$5,000</option><option value="over-5k">Over $5,000</option>
+        </select>
+      </label>
+      <label>Interest deadline
+        <select aria-label="Filter jobs by deadline" [value]="jobDeadlineFilter()" (change)="updateFilter($event, 'jobDeadline')">
+          <option value="">Any time</option><option value="7">Within 7 days</option><option value="14">Within 14 days</option>
+        </select>
+      </label>
+    </div>
+    <div class="listing-grid">
+      @for (job of allJobs(); track job.id) {
+        <article class="discovery-card listing-card job-listing-card">
+          <div class="card-topline"><span class="niche-tag">{{ job.category }}</span><span class="trend-tag">{{ formatDate(job.interestDeadline) }}</span></div>
+          <h4>{{ job.title }}</h4>
+          <p class="brand-byline">{{ job.companyName }} @if (job.campaignTitle) { <span>· {{ job.campaignTitle }}</span> }</p>
+          <p class="card-description">{{ job.description }}</p>
+          <div class="campaign-footer"><div><span>BUDGET</span><strong>{{ formatBudget(job.budgetMin, job.budgetMax) }}</strong></div></div>
+          <button type="button" class="discovery-card-action" (click)="showJob(job)">View job</button>
+        </article>
+      } @empty {
+        <p class="empty-state">No jobs match these filters. Try widening your search.</p>
       }
     </div>
   </section>

@@ -81,6 +81,81 @@
   min-width: 0;
 }
 
+.all-listings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding-top: 0.25rem;
+}
+
+.result-count {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.65rem;
+  border-radius: 999px;
+  background: #edf3e4;
+  color: #607a4d;
+  font-size: 0.62rem;
+  font-weight: 650;
+}
+
+.listing-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.65rem;
+  padding: 0.8rem;
+  border: 1px solid #e6e9e1;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.listing-filters label {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+  color: #758075;
+  font-size: 0.58rem;
+  font-weight: 650;
+}
+
+.listing-filters select {
+  width: 100%;
+  min-height: 36px;
+  padding: 0.4rem 1.6rem 0.4rem 0.55rem;
+  border: 1px solid #e1e6dc;
+  border-radius: 8px;
+  background: #fff;
+  color: #38473b;
+  font: inherit;
+  font-size: 0.63rem;
+}
+
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 220px));
+  gap: 0.75rem;
+}
+
+.discovery-card.listing-card {
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  min-height: 235px;
+  flex: initial;
+}
+
+.listing-card .profile-row {
+  margin: 0.15rem 0 0.55rem;
+}
+
+.listing-card .campaign-footer {
+  width: 100%;
+}
+
+.job-listing-card .brand-byline {
+  margin-top: 0.35rem;
+}
+
 .section-heading {
   margin-bottom: 0.7rem;
 }
@@ -495,5 +570,11 @@
     min-width: 72%;
     max-width: 72%;
     flex-basis: 72%;
+  }
+}
+
+@media (max-width: 460px) {
+  .listing-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

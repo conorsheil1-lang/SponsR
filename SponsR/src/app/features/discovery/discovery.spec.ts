@@ -65,4 +65,68 @@ describe('DiscoveryComponent', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Hot creators');
     expect(fixture.nativeElement.textContent).not.toContain('Creators for you');
   });
+
+  it('filters all creators by niche, platform, audience, engagement, and rate', () => {
+    TestBed.inject(SessionService).signIn({ type: 'company', name: 'Northstar Labs', email: 'company@sponsr.com' });
+    const fixture = TestBed.createComponent(DiscoveryComponent);
+    const component = fixture.componentInstance;
+
+    component.creatorNicheFilter.set('Technology');
+    expect(component.allCreators().length).toBeGreaterThan(0);
+    expect(component.allCreators().every((creator) => creator.niche === 'Technology')).toBe(true);
+
+    component.creatorNicheFilter.set('');
+    component.creatorPlatformFilter.set('Twitch');
+    expect(component.allCreators().map((creator) => creator.name)).toEqual(['Eli Williams']);
+
+    component.creatorPlatformFilter.set('');
+    component.creatorAudienceFilter.set('over-500k');
+    expect(component.allCreators().every((creator) => creator.audienceSize >= 500_000)).toBe(true);
+
+    component.creatorAudienceFilter.set('');
+    component.creatorEngagementFilter.set('10');
+    expect(component.allCreators().every((creator) => creator.engagementRate >= 10)).toBe(true);
+
+    component.creatorEngagementFilter.set('');
+    component.creatorRateFilter.set('2000');
+    expect(component.allCreators().every((creator) => creator.typicalRate <= 2_000)).toBe(true);
+  });
+
+  it('filters all campaigns and jobs by tag, brand, budget, and deadline', () => {
+    TestBed.inject(SessionService).signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
+    const fixture = TestBed.createComponent(DiscoveryComponent);
+    const component = fixture.componentInstance;
+
+    expect(component.campaignCategories()).toContain('Fitness');
+    expect(component.jobCategories()).toContain('Fitness');
+    expect(component.jobCategories()).toContain('Technology');
+    expect(component.jobCategories()).toContain('Wellness');
+
+    component.campaignCategoryFilter.set('Fitness');
+    expect(component.allCampaigns().length).toBeGreaterThan(0);
+    expect(component.allCampaigns().every((campaign) => campaign.category === 'Fitness')).toBe(true);
+
+    component.campaignCategoryFilter.set('');
+    component.campaignBrandFilter.set('Velora Health');
+    expect(component.allCampaigns().every((campaign) => campaign.brandName === 'Velora Health')).toBe(true);
+
+    component.campaignBrandFilter.set('');
+    component.jobCategoryFilter.set('Fitness');
+    expect(component.allJobs().length).toBeGreaterThan(0);
+    expect(component.allJobs().every((job) => job.category === 'Fitness')).toBe(true);
+
+    component.jobCategoryFilter.set('');
+    component.jobBrandFilter.set('Velora Health');
+    expect(component.allJobs().every((job) => job.companyName === 'Velora Health')).toBe(true);
+
+    component.jobBrandFilter.set('');
+    component.jobBudgetFilter.set('under-2k');
+    expect(component.allJobs().every((job) => job.budgetMin < 2_000)).toBe(true);
+
+    component.jobBudgetFilter.set('');
+    component.jobDeadlineFilter.set('14');
+    expect(component.allJobs().every((job) =>
+      new Date(`${job.interestDeadline}T23:59:59`).getTime() - Date.now() <= 14 * 86_400_000
+    )).toBe(true);
+  });
 });

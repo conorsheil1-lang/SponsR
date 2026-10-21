@@ -34,6 +34,7 @@ describe('DialogHostComponent', () => {
     workspace.addCampaign({
       companyName: 'Northstar Labs',
       title: 'Spring creator series',
+      category: 'Technology',
       description: 'A seasonal creator partnership.',
       creatorCapacity: 5
     });
