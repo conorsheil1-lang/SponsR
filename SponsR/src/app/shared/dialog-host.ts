@@ -1,6 +1,7 @@
 import { Component, computed, effect, HostListener, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DialogService } from '../core/dialog.service';
+import { creatorProposals, type CreatorProposal } from '../core/creator-workspace-data';
 import { MarketplaceWorkspaceService } from '../core/marketplace-workspace.service';
 import { SessionService } from '../core/session.service';
 
@@ -14,9 +15,10 @@ import { SessionService } from '../core/session.service';
         <section
           class="app-dialog"
           [class.opportunity-dialog]="dialog.kind === 'opportunity'"
+          [class.proposal-detail-dialog]="dialog.kind === 'proposal'"
           role="dialog"
           aria-modal="true"
-          [attr.aria-label]="dialog.kind === 'create-job' ? 'Create job' : dialog.kind === 'create-campaign' ? 'Create campaign' : dialog.title"
+          [attr.aria-label]="dialog.kind === 'create-job' ? 'Create job' : dialog.kind === 'create-campaign' ? 'Create campaign' : dialog.kind === 'proposal' ? dialog.proposal.campaign : dialog.title"
           (click)="$event.stopPropagation()"
         >
           <button class="dialog-close" type="button" aria-label="Close dialog" (click)="dialogs.close()">×</button>
@@ -30,6 +32,45 @@ import { SessionService } from '../core/session.service';
                 <div><dt>{{ detail.label }}</dt><dd>{{ detail.value }}</dd></div>
               }
             </dl>
+          } @else if (dialog.kind === 'proposal') {
+            <div class="proposal-dialog-hero">
+              <p class="eyebrow">PROPOSAL DETAILS</p>
+              <div class="proposal-dialog-heading">
+                <div>
+                  <span class="proposal-brand-label">{{ dialog.proposal.brand }}</span>
+                  <h2>{{ dialog.proposal.campaign }}</h2>
+                </div>
+                <span class="proposal-dialog-status" [class]="dialog.proposal.status.toLowerCase().replace(' ', '-')">
+                  {{ dialog.proposal.status }}
+                </span>
+              </div>
+              <p class="proposal-dialog-submitted">Submitted {{ dialog.proposal.submitted }}</p>
+              <div class="proposal-offer">
+                <span>PROPOSED PAYMENT</span>
+                <strong>{{ dialog.proposal.amount }}</strong>
+              </div>
+            </div>
+            <section class="proposal-dialog-section">
+              <h3>What’s included</h3>
+              <dl class="proposal-dialog-details">
+                <div><dt>Deliverables</dt><dd>{{ dialog.proposal.deliverables }}</dd></div>
+                <div><dt>Platforms</dt><dd>{{ dialog.proposal.platform }}</dd></div>
+                <div><dt>Timeline</dt><dd>{{ dialog.proposal.timeline }}</dd></div>
+                <div><dt>Usage rights</dt><dd>{{ dialog.proposal.usageRights }}</dd></div>
+              </dl>
+            </section>
+            <section class="proposal-dialog-brief">
+              <h3>Brief from {{ dialog.proposal.brand }}</h3>
+              <p>{{ dialog.proposal.brief }}</p>
+            </section>
+            @if (dialog.proposal.status !== 'Accepted' && dialog.proposal.status !== 'Declined') {
+              <div class="proposal-dialog-actions">
+                <button type="button" class="proposal-decline-button"
+                  (click)="requestProposalDecision(dialog.proposal, 'Decline')">Decline</button>
+                <button type="button" class="proposal-accept-button"
+                  (click)="requestProposalDecision(dialog.proposal, 'Accept')">Accept proposal</button>
+              </div>
+            }
           } @else if (dialog.kind === 'opportunity') {
             <div class="opportunity-hero">
               <p class="eyebrow">{{ dialog.opportunityType }} opportunity</p>
@@ -139,6 +180,25 @@ import { SessionService } from '../core/session.service';
         </section>
       </div>
     }
+    @if (dialogs.proposalConfirmation(); as confirmation) {
+      <div class="proposal-confirm-backdrop" (click)="dialogs.cancelProposalDecision()">
+        <section class="proposal-confirm-dialog" role="alertdialog" aria-modal="true"
+          [attr.aria-label]="confirmation.decision + ' proposal confirmation'"
+          (click)="$event.stopPropagation()">
+          <span class="confirmation-mark" [class.decline]="confirmation.decision === 'Decline'">
+            {{ confirmation.decision === 'Accept' ? '✓' : '!' }}
+          </span>
+          <p class="eyebrow">CONFIRM YOUR DECISION</p>
+          <h2>{{ confirmation.title }}</h2>
+          <p>{{ confirmation.description }}</p>
+          <div class="dialog-actions">
+            <button type="button" class="dialog-secondary" (click)="dialogs.cancelProposalDecision()">Go back</button>
+            <button type="button" class="dialog-primary" [class.confirm-decline]="confirmation.decision === 'Decline'"
+              (click)="dialogs.applyProposalDecision()">{{ confirmation.confirmLabel }}</button>
+          </div>
+        </section>
+      </div>
+    }
   `
 })
 export class DialogHostComponent {
@@ -164,7 +224,30 @@ export class DialogHostComponent {
 
   @HostListener('document:keydown.escape')
   closeOnEscape(): void {
-    this.dialogs.close();
+    if (this.dialogs.proposalConfirmation()) {
+      this.dialogs.cancelProposalDecision();
+    } else {
+      this.dialogs.close();
+    }
+  }
+
+  protected requestProposalDecision(proposal: CreatorProposal, decision: 'Accept' | 'Decline'): void {
+    const nextStatus = decision === 'Accept' ? 'Accepted' : 'Declined';
+    this.dialogs.confirmProposalDecision({
+      decision,
+      title: `${decision} this proposal?`,
+      description: decision === 'Accept'
+        ? `You’re agreeing to ${proposal.amount} for “${proposal.campaign}” with ${proposal.brand}. This decision will update the proposal status.`
+        : `You’re declining “${proposal.campaign}” from ${proposal.brand}. The proposal will be marked declined.`,
+      confirmLabel: decision === 'Accept' ? 'Confirm acceptance' : 'Confirm decline',
+      onConfirm: () => {
+        const storedProposal = creatorProposals.find((candidate) => candidate.id === proposal.id);
+        if (!storedProposal) {
+          throw new Error(`Proposal ${proposal.id} was not found.`);
+        }
+        storedProposal.status = nextStatus;
+      }
+    });
   }
 
   protected createJob(): void {

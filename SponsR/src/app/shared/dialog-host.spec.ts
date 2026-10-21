@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { DialogService } from '../core/dialog.service';
+import { creatorProposals } from '../core/creator-workspace-data';
 import { MarketplaceWorkspaceService } from '../core/marketplace-workspace.service';
 import { SessionService } from '../core/session.service';
 import { DialogHostComponent } from './dialog-host';
@@ -102,5 +103,48 @@ describe('DialogHostComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Delivery deadline');
     expect(fixture.nativeElement.textContent).not.toContain('Jobs in this campaign');
+  });
+
+  it('requires confirmation before accepting or declining a proposal', () => {
+    const dialogs = TestBed.inject(DialogService);
+    const proposal = creatorProposals.find((candidate) => candidate.id === 'proposal-morrow-reset');
+    if (!proposal) {
+      throw new Error('Expected mock proposal.');
+    }
+    const originalStatus = proposal.status;
+    const fixture = TestBed.createComponent(DialogHostComponent);
+
+    dialogs.openProposal(proposal);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Deliverables');
+    expect(fixture.nativeElement.textContent).toContain('Usage rights');
+    expect(fixture.nativeElement.querySelector('.proposal-confirm-dialog')).toBeNull();
+
+    (fixture.nativeElement.querySelector('.proposal-accept-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.proposal-detail-dialog')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.proposal-confirm-dialog')).toBeTruthy();
+    expect(proposal.status).toBe(originalStatus);
+
+    (fixture.nativeElement.querySelector('.proposal-confirm-dialog .dialog-primary') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(proposal.status).toBe('Accepted');
+    expect(dialogs.activeDialog()).toBeNull();
+    expect(dialogs.proposalConfirmation()).toBeNull();
+
+    proposal.status = originalStatus;
+    dialogs.openProposal(proposal);
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.proposal-decline-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Decline this proposal?');
+    (fixture.nativeElement.querySelector('.proposal-confirm-dialog .dialog-secondary') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(proposal.status).toBe(originalStatus);
+    expect(fixture.nativeElement.querySelector('.proposal-detail-dialog')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.proposal-confirm-dialog')).toBeNull();
+
+    dialogs.close();
+    proposal.status = originalStatus;
   });
 });

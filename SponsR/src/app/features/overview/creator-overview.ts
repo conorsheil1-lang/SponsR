@@ -194,11 +194,6 @@ export class CreatorOverviewComponent {
   }
 
   protected showProposal(proposal: (typeof creatorProposals)[number]): void {
-    this.dialogs.openDetails(proposal.campaign, 'Review the proposal details and current status.', [
-      { label: 'Brand', value: proposal.brand },
-      { label: 'Status', value: proposal.status },
-      { label: 'Amount', value: proposal.amount },
-      { label: 'Submitted', value: proposal.submitted }
-    ], 'PROPOSAL');
+    this.dialogs.openProposal(proposal);
   }
 }

@@ -28,6 +28,226 @@
   overflow: hidden auto;
 }
 
+.app-dialog.proposal-detail-dialog {
+  width: min(100%, 700px);
+  padding: 0;
+  overflow: hidden auto;
+}
+
+.proposal-dialog-hero {
+  padding: 2rem 2rem 1.5rem;
+  background:
+    radial-gradient(ellipse at 90% 0%, rgba(190, 207, 164, 0.34), transparent 36%),
+    linear-gradient(135deg, #eef3e5 0%, #f8f8f0 64%, #f2eee2 100%);
+}
+
+.app-dialog.proposal-detail-dialog .proposal-dialog-hero .eyebrow {
+  color: #64794e;
+}
+
+.proposal-dialog-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.proposal-brand-label {
+  color: #64794e;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.app-dialog.proposal-detail-dialog h2 {
+  margin-top: 0.35rem;
+  color: #1d3325;
+  font-size: clamp(1.55rem, 5vw, 2rem);
+}
+
+.proposal-dialog-status {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: #e3edd8;
+  color: #496b37;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.proposal-dialog-status.needs-update {
+  background: #f7eed9;
+  color: #8a6a2d;
+}
+
+.proposal-dialog-status.declined {
+  background: #f6e6e2;
+  color: #9c493c;
+}
+
+.proposal-dialog-submitted {
+  margin: 0.4rem 0 0;
+  color: #788572;
+  font-size: 0.76rem;
+}
+
+.proposal-offer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 1.35rem;
+}
+
+.proposal-offer span {
+  color: #788572;
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+}
+
+.proposal-offer strong {
+  color: #2e5736;
+  font-size: 1.5rem;
+  letter-spacing: -0.04em;
+}
+
+.proposal-dialog-section {
+  padding: 1.35rem 2rem;
+}
+
+.app-dialog.proposal-detail-dialog h3 {
+  margin: 0 0 0.85rem;
+  color: #344535;
+  font-size: 0.95rem;
+}
+
+.proposal-dialog-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.proposal-dialog-details > div {
+  padding: 0.8rem;
+  border: 1px solid #e9ede4;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.proposal-dialog-details dt {
+  color: #879184;
+  font-size: 0.68rem;
+}
+
+.proposal-dialog-details dd {
+  margin: 0.3rem 0 0;
+  color: #354937;
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.proposal-dialog-brief {
+  padding: 1.2rem 2rem;
+  border-top: 1px solid #edf0e9;
+  background: #fbfcf8;
+}
+
+.proposal-dialog-brief p {
+  margin: 0;
+  color: #687568;
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.proposal-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 1.1rem 2rem 1.5rem;
+}
+
+.proposal-dialog-actions button {
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.proposal-decline-button {
+  border: 1px solid #e7d5d0;
+  background: #fff;
+  color: #8a4b41;
+}
+
+.proposal-accept-button {
+  border: 1px solid #193b2a;
+  background: #193b2a;
+  color: #fff;
+}
+
+.proposal-confirm-backdrop {
+  position: fixed;
+  z-index: 1010;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(17, 28, 21, 0.35);
+  backdrop-filter: blur(3px);
+}
+
+.proposal-confirm-dialog {
+  width: min(100%, 430px);
+  padding: 1.7rem;
+  border: 1px solid #e3e8dd;
+  border-radius: 20px;
+  background: #fffefa;
+  box-shadow: 0 24px 80px rgba(24, 38, 28, 0.28);
+}
+
+.confirmation-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  background: #edf3e4;
+  color: #496b37;
+  font-size: 1.1rem;
+  font-weight: 750;
+}
+
+.confirmation-mark.decline {
+  background: #f6e6e2;
+  color: #9c493c;
+}
+
+.proposal-confirm-dialog h2 {
+  margin-bottom: 0.55rem;
+}
+
+.proposal-confirm-dialog > p:not(.eyebrow) {
+  margin: 0;
+  color: #687568;
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.proposal-confirm-dialog .dialog-actions {
+  margin-top: 1.25rem;
+}
+
+.proposal-confirm-dialog .dialog-primary.confirm-decline {
+  border-color: #9c493c;
+  background: #9c493c;
+}
+
 .opportunity-hero {
   padding: 2rem 2rem 1.5rem;
   background:
@@ -367,6 +587,31 @@
 
   .app-dialog.opportunity-dialog {
     max-height: 94vh;
+  }
+
+  .app-dialog.proposal-detail-dialog {
+    max-height: 94vh;
+  }
+
+  .proposal-dialog-hero {
+    padding: 1.6rem 1.25rem 1.25rem;
+  }
+
+  .proposal-dialog-heading {
+    flex-direction: column;
+  }
+
+  .proposal-dialog-section,
+  .proposal-dialog-brief {
+    padding: 1.1rem 1.25rem;
+  }
+
+  .proposal-dialog-details {
+    grid-template-columns: 1fr;
+  }
+
+  .proposal-dialog-actions {
+    padding: 1rem 1.25rem 1.25rem;
   }
 
   .opportunity-hero {
