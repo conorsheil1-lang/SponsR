@@ -1,19 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { mockCompanyUser, mockCreatorUser, mockUsers } from '../../core/mock-users';
 import { AccountType, SessionService } from '../../core/session.service';
-
-type MockUser = {
-  email: string;
-  password: string;
-  type: AccountType;
-  name: string;
-};
-
-const MOCK_USERS: MockUser[] = [
-  { email: 'creator@sponsr.com', password: 'password', type: 'creator', name: 'Maya Chen' },
-  { email: 'company@sponsr.com', password: 'password', type: 'company', name: 'Northstar Labs' }
-];
 
 @Component({
   selector: 'app-login',
@@ -71,8 +60,8 @@ const MOCK_USERS: MockUser[] = [
 
         <div class="demo-box">
           <strong>Demo accounts</strong>
-          <span>Creator: creator@sponsr.com / password</span>
-          <span>Company: company@sponsr.com / password</span>
+          <span>{{ mockCreatorUser.profile.name }} · Creator: {{ mockCreatorUser.profile.email }} / {{ mockCreatorUser.password }}</span>
+          <span>{{ mockCompanyUser.profile.name }} · Company: {{ mockCompanyUser.profile.email }} / {{ mockCompanyUser.password }}</span>
         </div>
 
         <p class="helper-text">
@@ -242,6 +231,8 @@ const MOCK_USERS: MockUser[] = [
   ]
 })
 export class LoginComponent {
+  protected readonly mockCreatorUser = mockCreatorUser;
+  protected readonly mockCompanyUser = mockCompanyUser;
   readonly selectedType = signal<AccountType>('creator');
   readonly emailInput = signal('');
   readonly passwordInput = signal('');
@@ -250,9 +241,9 @@ export class LoginComponent {
   constructor(private readonly router: Router, private readonly session: SessionService) {}
 
   continueToPortal(): void {
-    const matchedUser = MOCK_USERS.find(
+    const matchedUser = mockUsers.find(
       (user) =>
-        user.email.toLowerCase() === this.emailInput().trim().toLowerCase() &&
+        user.profile.email.toLowerCase() === this.emailInput().trim().toLowerCase() &&
         user.password === this.passwordInput() &&
         user.type === this.selectedType()
     );
@@ -265,8 +256,9 @@ export class LoginComponent {
     this.errorMessage.set('');
     this.session.signIn({
       type: matchedUser.type,
-      name: matchedUser.name,
-      email: matchedUser.email
+      accountId: matchedUser.profile.id,
+      name: matchedUser.profile.name,
+      email: matchedUser.profile.email
     });
     this.router.navigateByUrl('/overview');
   }

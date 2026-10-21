@@ -3,6 +3,7 @@ import { Injectable, signal } from '@angular/core';
 export type AccountType = 'creator' | 'company';
 
 export interface SignedInUser {
+  accountId?: string;
   type: AccountType;
   name: string;
   email: string;
@@ -40,9 +41,16 @@ export class SessionService {
         'name' in parsed &&
         typeof parsed.name === 'string' &&
         'email' in parsed &&
-        typeof parsed.email === 'string'
+        typeof parsed.email === 'string' &&
+        (!('accountId' in parsed) || typeof parsed.accountId === 'string')
       ) {
-        return { type: parsed.type, name: parsed.name, email: parsed.email };
+        const accountId = 'accountId' in parsed ? parsed.accountId : undefined;
+        return {
+          ...(typeof accountId === 'string' ? { accountId } : {}),
+          type: parsed.type,
+          name: parsed.name,
+          email: parsed.email
+        };
       }
     } catch {
       sessionStorage.removeItem(SESSION_STORAGE_KEY);
