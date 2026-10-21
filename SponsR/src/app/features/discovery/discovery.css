@@ -514,7 +514,7 @@
 }
 
 .brand-card {
-  min-height: 215px;
+  min-height: 265px;
 }
 
 .brand-card-top {
@@ -544,6 +544,10 @@
   margin-top: auto;
 }
 
+.brand-card-actions {
+  margin-top: 0.7rem;
+}
+
 .empty-state {
   grid-column: 1 / -1;
   margin: 0;
@@ -555,16 +559,23 @@
 }
 
 .discovery-card-action {
-  min-height: 38px;
-  padding: 0.45rem 0.6rem;
-  border: 1px solid #e3e9dd;
-  border-radius: 9px;
-  background: #fff;
-  color: #557842;
+  width: 100%;
+  min-height: 42px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #dfe6d8;
+  border-radius: 10px;
+  background: #f8faf5;
+  color: #405a37;
   cursor: pointer;
   font: inherit;
-  font-size: 0.7rem;
+  font-size: 0.74rem;
   font-weight: 700;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.discovery-card-action:hover {
+  border-color: #c8d7bc;
+  background: #eef3e8;
 }
 
 .opportunity-card-actions {
@@ -576,6 +587,7 @@
 }
 
 .interest-toggle-button {
+  width: 100%;
   min-width: 0;
   min-height: 42px;
   padding: 0.55rem 0.75rem;

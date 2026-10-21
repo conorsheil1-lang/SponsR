@@ -183,6 +183,25 @@ describe('DiscoveryComponent', () => {
     expect(fixture.nativeElement.querySelector('.interest-toggle-button')).toBeNull();
   });
 
+  it('lets creators register interest in brands and withdraw it', () => {
+    TestBed.inject(SessionService).signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
+    const fixture = TestBed.createComponent(DiscoveryComponent);
+    fixture.detectChanges();
+
+    const brandCard = fixture.nativeElement.querySelector('.brand-card') as HTMLElement;
+    const brandButton = brandCard.querySelector('.interest-toggle-button') as HTMLButtonElement;
+    expect(brandButton.textContent).toContain('Register interest');
+
+    brandButton.click();
+    fixture.detectChanges();
+    expect(brandButton.textContent).toContain('Interested');
+    expect(fixture.componentInstance.isRegisteredForBrand(fixture.componentInstance.popularCompanies()[0].id)).toBe(true);
+
+    brandButton.click();
+    fixture.detectChanges();
+    expect(brandButton.textContent).toContain('Register interest');
+  });
+
   it('opens detailed campaign and job dialogs from opportunity cards', () => {
     TestBed.inject(SessionService).signIn({ type: 'creator', name: 'Maya Chen', email: 'creator@sponsr.com' });
     const fixture = TestBed.createComponent(DiscoveryComponent);

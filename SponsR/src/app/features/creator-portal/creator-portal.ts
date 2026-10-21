@@ -96,13 +96,29 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
           }
         </article>
 
-        <article class="panel-card wide">
-          <h3>Brand interest</h3>
-          <ul>
-            <li><strong>Horizon Studio</strong><span>Interested in lifestyle collab</span></li>
-            <li><strong>Velo Commerce</strong><span>Requested creator kit</span></li>
-            <li><strong>Mint & Moss</strong><span>Invited to campaign shortlist</span></li>
-          </ul>
+        <article class="panel-card wide registered-opportunities">
+          <div class="registered-heading">
+            <div>
+              <h3>Brands you’re interested in</h3>
+              <p>Keep track of brands you’d like to work with.</p>
+            </div>
+            <span class="brand-interest-count">{{ registeredBrands().length }} saved</span>
+          </div>
+          @if (registeredBrands().length) {
+            <ul>
+              @for (brand of registeredBrands(); track brand.id) {
+                <li>
+                  <div class="registered-item">
+                    <strong>{{ brand.name }}</strong>
+                    <span>{{ brand.category }} · {{ brand.activeCampaigns }} open campaigns</span>
+                  </div>
+                  <button type="button" class="withdraw-button" (click)="withdrawBrandInterest(brand.id)">Withdraw</button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="interest-empty">No brands saved yet. Explore popular brands to let them know you’re interested.</p>
+          }
         </article>
       </div>
     </section>
@@ -237,6 +253,15 @@ import { MarketplaceWorkspaceService } from '../../core/marketplace-workspace.se
         margin-left: 0.25rem;
         opacity: 0.75;
       }
+      .brand-interest-count {
+        flex: 0 0 auto;
+        padding: 0.45rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(124, 58, 237, 0.16);
+        color: #c4b5fd;
+        font-size: 0.72rem;
+        font-weight: 650;
+      }
       .registered-opportunities ul {
         gap: 0.55rem;
       }
@@ -275,6 +300,7 @@ export class CreatorPortalComponent {
   readonly selectedInterestType = signal<'campaigns' | 'jobs'>('campaigns');
   readonly registeredCampaigns = computed(() => this.workspace.getRegisteredCampaigns());
   readonly registeredJobs = computed(() => this.workspace.getRegisteredJobs());
+  readonly registeredBrands = computed(() => this.workspace.getRegisteredBrands());
 
   readonly stats = signal([
     { label: 'Interested brands', value: '18' },
@@ -289,5 +315,9 @@ export class CreatorPortalComponent {
 
   withdrawJobInterest(jobId: string): void {
     this.workspace.toggleJobInterest(jobId);
+  }
+
+  withdrawBrandInterest(brandId: string): void {
+    this.workspace.toggleBrandInterest(brandId);
   }
 }

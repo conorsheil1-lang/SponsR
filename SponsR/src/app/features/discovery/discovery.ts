@@ -320,6 +320,14 @@ export class DiscoveryComponent {
     ], 'BRAND PROFILE');
   }
 
+  isRegisteredForBrand(brandId: string): boolean {
+    return this.workspace.isInterestedInBrand(brandId);
+  }
+
+  toggleBrandInterest(brandId: string): void {
+    this.workspace.toggleBrandInterest(brandId);
+  }
+
   private creatorSearchText(creator: CreatorAccount): string {
     return `${creator.name} ${creator.handle} ${creator.niche} ${creator.bio} ${creator.channels.join(' ')}`.toLowerCase();
   }

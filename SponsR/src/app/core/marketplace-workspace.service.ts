@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
-import { mockMarketplaceCampaigns } from './marketplace-mock-data';
+import { mockCompanyAccounts, mockMarketplaceCampaigns } from './marketplace-mock-data';
+import type { CompanyAccount } from './marketplace-models';
 import { campaignOpportunities, jobOpportunities, type CampaignOpportunity, type JobOpportunity } from './job-marketplace-data';
 
 export interface NewCampaignInput {
@@ -29,6 +30,7 @@ export class MarketplaceWorkspaceService {
   readonly jobs = signal<JobOpportunity[]>(jobOpportunities.map((job) => ({ ...job })));
   readonly registeredCampaignIds = signal<string[]>([]);
   readonly registeredJobIds = signal<string[]>([]);
+  readonly registeredBrandIds = signal<string[]>([]);
 
   isInterestedInCampaign(campaignId: string): boolean {
     return this.registeredCampaignIds().includes(campaignId);
@@ -36,6 +38,10 @@ export class MarketplaceWorkspaceService {
 
   isInterestedInJob(jobId: string): boolean {
     return this.registeredJobIds().includes(jobId);
+  }
+
+  isInterestedInBrand(brandId: string): boolean {
+    return this.registeredBrandIds().includes(brandId);
   }
 
   toggleCampaignInterest(campaignId: string): void {
@@ -48,6 +54,17 @@ export class MarketplaceWorkspaceService {
     this.registeredJobIds.update((ids) =>
       ids.includes(jobId) ? ids.filter((id) => id !== jobId) : [...ids, jobId]
     );
+  }
+
+  toggleBrandInterest(brandId: string): void {
+    this.registeredBrandIds.update((ids) =>
+      ids.includes(brandId) ? ids.filter((id) => id !== brandId) : [...ids, brandId]
+    );
+  }
+
+  getRegisteredBrands(): CompanyAccount[] {
+    const registeredIds = new Set(this.registeredBrandIds());
+    return mockCompanyAccounts.filter((brand) => registeredIds.has(brand.id));
   }
 
   getRegisteredCampaigns(): Array<{ id: string; title: string; companyName: string; category: string }> {

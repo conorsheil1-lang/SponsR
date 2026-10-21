@@ -36,4 +36,22 @@ describe('CreatorPortalComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('No job registrations yet');
     expect(workspace.isInterestedInJob('job-morrow-reset')).toBe(false);
   });
+
+  it('shows registered brands and allows withdrawing brand interest', () => {
+    const workspace = TestBed.inject(MarketplaceWorkspaceService);
+    workspace.toggleBrandInterest('brand-morrow');
+
+    const fixture = TestBed.createComponent(CreatorPortalComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Brands you’re interested in');
+    expect(fixture.nativeElement.textContent).toContain('Morrow');
+    expect(fixture.nativeElement.textContent).toContain('Wellness · 8 open campaigns');
+
+    const withdrawButton = fixture.nativeElement.querySelector('.registered-opportunities:last-child .withdraw-button') as HTMLButtonElement;
+    withdrawButton.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('No brands saved yet');
+    expect(workspace.isInterestedInBrand('brand-morrow')).toBe(false);
+  });
 });

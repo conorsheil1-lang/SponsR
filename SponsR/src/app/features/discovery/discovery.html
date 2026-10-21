@@ -249,7 +249,19 @@
             <div><strong>{{ brand.activeCampaigns }}</strong><span>open campaigns</span></div>
             <div><strong>{{ brand.creatorPartners }}</strong><span>creator partners</span></div>
           </div>
-          <button type="button" class="discovery-card-action" (click)="showCompany(brand)">View brand</button>
+          @if (!isCompany()) {
+            <div class="opportunity-card-actions brand-card-actions">
+              <button
+                type="button"
+                class="interest-toggle-button"
+                [class.registered]="isRegisteredForBrand(brand.id)"
+                (click)="toggleBrandInterest(brand.id)"
+              >{{ isRegisteredForBrand(brand.id) ? 'Interested ✓' : 'Register interest' }}</button>
+              <button type="button" class="discovery-card-action" (click)="showCompany(brand)">View profile</button>
+            </div>
+          } @else {
+            <button type="button" class="discovery-card-action" (click)="showCompany(brand)">View profile</button>
+          }
         </article>
       } @empty {
         <p class="empty-state">No brands match that search. Try a different name or category.</p>
